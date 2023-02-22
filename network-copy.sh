@@ -30,9 +30,9 @@ AVAIL=$(getAvailMB)
 AVAIL_MB=${AVAIL//[!0-9]/}
 
 # Output available disk space if you'd like, comment out if not
-echo ${AVAIL}
+echo "$AVAIL"
 
-if [[ AVAIL_MB -lt $REQUIRED_DISK_AMOUNT ]]; then
+if [ $AVAIL_MB -lt $REQUIRED_DISK_AMOUNT ]; then
     echo "Insufficient disk space to copy recordings"
     exit
 fi
@@ -42,26 +42,27 @@ folderSync() {
     # $2 => Default size in MB of required available space to copy
 
     # Check if directory exists
-    if [[ -d "${1}" ]]; then
+    if [ -d "$1" ]; then
         # Get space available on local hard drive
         AVAIL=$(getAvailMB)
         AVAIL_MB=${AVAIL//[!0-9]/}
 
-        if [[ AVAIL_MB -lt $2 ]]; then
+        if [ $AVAIL_MB -lt $2 ]; then
             echo "Insufficient disk space to copy recordings from ${1}"
         else
             echo "Copying from ${1}"
-            FOLDER_SIZE=`du -sh "${1}" -BM`
+            FOLDER_SIZE=`du -sh "$1" -BM`
+            FOLDER_SIZE="${FOLDER_SIZE//$1}"
             FOLDER_SIZE_MB=${FOLDER_SIZE//[!0-9]/}
-            echo "Actual Folder Size in MB: ${FOLDER_SIZE_MB}"
-            if [[ AVAIL_MB -lt $FOLDER_SIZE_MB ]]; then
-                echo "Insufficient disk space to copy recordings from ${1}"
+            echo "Actual Folder Size in MB: $FOLDER_SIZE_MB"
+            if [ $AVAIL_MB -lt $FOLDER_SIZE_MB ]; then
+                echo "Insufficient disk space to copy recordings from $1"
             else
-                rsync -avzh --progress "${1}" "${RECORDING_PATH}"
+                rsync -avzh --progress "$1" "$RECORDING_PATH"
             fi
         fi
     else
-        echo "Directory ${1} currently not available"
+        echo "Directory $1 currently not available"
     fi
 }
 
@@ -78,12 +79,11 @@ COPY_FOLDER_REQ=2500
 
 # Mount Network Location
 # Mac users should be able to comment out if network location already mounted
-if [[ ! -d "${COPY_FOLDER_SRC}" ]]
-then
-    sudo mount -t drvfs "${MNT_SHARE_PATH}" $LOCAL_SHARE_PATH
+if [ ! -d "$COPY_FOLDER_SRC" ]; then
+    sudo mount -t drvfs "$MNT_SHARE_PATH" "$LOCAL_SHARE_PATH"
 fi
 
 # Call the folderSync() function, passing the folder location and default MB required to copy to your local hard drive
-folderSync COPY_FOLDER_SRC COPY_FOLDER_REQ
+folderSync "$COPY_FOLDER_SRC" "$COPY_FOLDER_REQ"
 
 # For additional folders to copy, repeat the call to folderSync() function with location and required disk space for each folder to copy
