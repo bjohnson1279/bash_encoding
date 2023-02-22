@@ -28,8 +28,7 @@ getDuration() {
     ffmpeg -i "${1}" 2>&1 | grep "Duration" | cut -d ' ' -f 4 | sed s/,// | sed s/00://
 }
 
-if [[ -d "${RECORDING_PATH}" ]]
-then
+if [ -d "${RECORDING_PATH}" ]; then
     cd "${RECORDING_PATH}" || continue
     file_count=`ls -A 2>/dev/null | wc -l`
     if [ $file_count != 0 ]
@@ -50,7 +49,7 @@ then
                     # Iterate through Season folders
                     for season in */; do
                         echo "${season}"
-                        if [[ -d "${season}" ]]; then
+                        if [ -d "${season}" ]; then
                             cd "${season}" || continue
                             
                             # Get number of .ts files found in Season directory
@@ -75,20 +74,35 @@ then
                                     new_file_full="${DESTINATION_PATH}${new_file}.mp4"
 
                                     # Validate existience of file
-                                    if [[ -f "${i}" ]]; then
+                                    if [ -f "${i}" ]; then
                                         # Skip if encoded file already exists, encode if not
-                                        if [[ ! -f "${new_file_full}" ]]; then
+                                        if [ ! -f "${new_file_full}" ]; then
                                             # Check for optional video filter
-                                            if [[ $VF != "" ]]; then
-                                                ffmpeg -i "${i}" -vf $VF -c:v $ENC_TYPE -c:a copy -preset $PRESET -crf $QUALITY "${new_file_full}"
+                                            if [ $VF != "" ]; then
+                                                ffmpeg -i "${i}" \
+                                                    -vf $VF \
+                                                    -c:v $ENC_TYPE -c:a copy \
+                                                    -pix_fmt yuv420p \
+                                                    -tune film \
+                                                    -movflags use_metadata_tags \
+                                                    -preset $PRESET \
+                                                    -crf $QUALITY \
+                                                    "${new_file_full}"
                                             else
-                                                ffmpeg -i "${i}" -c:v $ENC_TYPE -c:a copy -preset $PRESET -crf $QUALITY "${new_file_full}"
+                                                ffmpeg -i "${i}" \
+                                                    -c:v $ENC_TYPE -c:a copy \
+                                                    -pix_fmt yuv420p \
+                                                    -tune film \
+                                                    -movflags use_metadata_tags \
+                                                    -preset $PRESET \
+                                                    -crf $QUALITY \
+                                                    "${new_file_full}"
                                             fi
                                         fi
 
                                         # OPTIONAL: Delete source (ts) file when new file (mp4) is created, for space saving purposes
                                         # Set DEL_ORIG value to 0 above if you don't want this to happen
-                                        if [[ $DEL_ORIG == 1 ]]; then
+                                        if [ $DEL_ORIG == 1 ]; then
                                             dest_duration=$(getDuration "${new_file_full}")
                                             dest_duration="${dest_duration%.*}"
                                             echo "dest_duration: ${dest_duration}"
@@ -96,7 +110,7 @@ then
                                             echo "Source File Duration: ${src_duration}"
                                             echo "Destination File Duration: ${dest_duration}"
 
-                                            if [[ "${src_duration}" == "${dest_duration}" ]]; then
+                                            if [ "${src_duration}" == "${dest_duration}" ]; then
                                                 rm "${i}"
                                             fi
                                         fi
