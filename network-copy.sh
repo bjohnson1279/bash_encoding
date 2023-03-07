@@ -22,7 +22,7 @@ getAvailMB() {
 
 folderSize() {
     # $1 folder path
-    du -sh "${1}" -BM
+    du -sh "$1" -BM
 }
 
 # Getting available disk space
@@ -50,7 +50,7 @@ folderSync() {
         if [ $AVAIL_MB -lt $2 ]; then
             echo "Insufficient disk space to copy recordings from ${1}"
         else
-            echo "Copying from ${1}"
+            echo "Copying from $1"
             FOLDER_SIZE=`du -sh "$1" -BM`
             FOLDER_SIZE="${FOLDER_SIZE//$1}"
             FOLDER_SIZE_MB=${FOLDER_SIZE//[!0-9]/}
