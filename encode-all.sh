@@ -17,10 +17,10 @@ VF="yadif"
 # Speed of encoding process, default veryslow to preserve disk space
 PRESET="veryslow"
 
-# Quality level, default 22
-QUALITY=22
+# Quality level, default 21
+QUALITY=21
 
-# Delete original file after encoding is complete? Set to 1 for YES
+# Delete original file after encoding is complete? Set to 1 for YES.  Will verify time matches between two files before deleting.
 DEL_ORIG=1
 
 # Function to obtain length of video
@@ -151,14 +151,14 @@ if [ -d "$RECORDING_PATH" ]; then
 
                 # Get number of folders in directory (Seasons)
                 dir_file_count=$(ls -A 2>/dev/null | wc -l)
-                echo "$dir directory file count: $dir_file_count"
+                echo "$dir directory file count: ${dir_file_count}"
 
                 if [ $dir_file_count != 0 ]; then
                     # Iterate through Season folders
                     for season in */; do
-                        echo "$season"
-                        if [ -d "$season" ]; then
-                            cd "$season" || continue
+                        echo "${season}"
+                        if [ -d "${season}" ]; then
+                            cd "${season}" || continue
                             
                             # Get number of .ts files found in Season directory
                             ts_dir_file_count=`ls -A *.ts 2>/dev/null | wc -l`
@@ -166,7 +166,7 @@ if [ -d "$RECORDING_PATH" ]; then
 
                             if [ $ts_dir_file_count != 0 ]; then
                                 for i in *.ts; do
-                                    echo "$i"
+                                    echo "${i}"
                                     # Get video duration of encoding source
                                     src_duration=$(getDuration "${i}")
                                     src_duration="${src_duration%.*}"
@@ -179,8 +179,8 @@ if [ -d "$RECORDING_PATH" ]; then
                                     new_file=${new_file/E/ E}
                                     new_file=${new_file// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
                                     new_file=${new_file%.*}
-                                    echo "New File: $new_file"
-                                    new_file_full="$DESTINATION_PATH$new_file.mp4"
+                                    echo "New File: ${new_file}"
+                                    new_file_full="${DESTINATION_PATH}${new_file}.mp4"
 
                                     # Validate existience of file
                                     if [ -f "$i" ]; then
