@@ -1,0 +1,1 @@
+# Encode all .mov files in a directory 
