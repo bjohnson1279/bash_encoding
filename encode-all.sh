@@ -47,9 +47,9 @@ parseFilename() {
     # $1 => File Name
     FILE="${1%.ts}"
     
+    shopt -s extglob
     SHOW_NAME="$FILE \([0-9]*}"
     SHOW_NAME="${SHOW_NAME% S[0-9]*}"
-    shopt -s extglob
     SHOW_NAME="${SHOW_NAME##*( )}"
     SHOW_NAME="${SHOW_NAME%%*( )}"
     shopt -u extglob
@@ -171,6 +171,10 @@ if [ -d "$RECORDING_PATH" ]; then
                                     src_duration=$(getDuration "${i}")
                                     src_duration="${src_duration%.*}"
 
+                                    episode_data=$(parseFilename "${i}")
+                                    echo "Episode Data: ${episode_data}"
+                                    SHOW_NAME=$(echo "$episode_data" | jq -r '.show')
+
                                     # Apply pattern matching to remove extraneous data in file name
                                     # Removes year, dashes, and adds space between season and episode number
                                     shopt -s extglob
@@ -179,7 +183,12 @@ if [ -d "$RECORDING_PATH" ]; then
                                     new_file=${new_file/E/ E}
                                     new_file=${new_file// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
                                     new_file=${new_file%.*}
-                                    echo "New File: ${new_file}"
+
+                                    # Remove the second occurrence of the show name
+                                    new_file=$(echo "$new_file" | sed "s/$SHOW_NAME//2")
+                                    new_file=${new_file##*( )}
+                                    new_file=${new_file%%*( )}
+echo "New File: ${new_file}"
                                     new_file_full="${DESTINATION_PATH}${new_file}.mp4"
 
                                     # Validate existience of file
@@ -193,7 +202,7 @@ if [ -d "$RECORDING_PATH" ]; then
                                                     -c:v $ENC_TYPE -c:a copy \
                                                     -pix_fmt yuv420p \
                                                     -tune film \
-                                                    -movflags use_metadata_tags \
+                                                    -movflags faststart \
                                                     -preset $PRESET \
                                                     -crf $QUALITY \
                                                     "${new_file_full}"
@@ -202,7 +211,7 @@ if [ -d "$RECORDING_PATH" ]; then
                                                     -c:v $ENC_TYPE -c:a copy \
                                                     -pix_fmt yuv420p \
                                                     -tune film \
-                                                    -movflags use_metadata_tags \
+                                                    -movflags faststart \
                                                     -preset $PRESET \
                                                     -crf $QUALITY \
                                                     "${new_file_full}"
