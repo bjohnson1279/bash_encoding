@@ -66,10 +66,13 @@ folderSync() {
     fi
 }
 
+RECORDINGS_SRC="$LOCAL_SHARE_PATH/Recorded TV Shows"
+echo "Recordings Source: $RECORDINGS_SRC"
+
 # Enter mounted location of folder to copy
 # Example: If I am copying recordings of Seinfeld from a network location, enter the mounted location as follows
-# SEINFELD_SRC="/mnt/sambashare/Seinfeld (1989)"
-COPY_FOLDER_SRC=""
+# SEINFELD_SRC="$RECORDINGS_SRC/Seinfeld (1989)"
+COPY_FOLDER_SRC="$RECORDINGS_SRC/"
 
 # Enter amount of space in MB required to copy to local folder
 # Example: Enter the typical size of the network folder when recordings have just completed
