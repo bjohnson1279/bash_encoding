@@ -203,6 +203,7 @@ echo "New File: ${new_file}"
                                                     -pix_fmt yuv420p \
                                                     -tune film \
                                                     -movflags faststart \
+                                                    -metadata show="$SHOW_NAME" \
                                                     -preset $PRESET \
                                                     -crf $QUALITY \
                                                     "${new_file_full}"
@@ -212,6 +213,7 @@ echo "New File: ${new_file}"
                                                     -pix_fmt yuv420p \
                                                     -tune film \
                                                     -movflags faststart \
+                                                    -metadata show="$SHOW_NAME" \
                                                     -preset $PRESET \
                                                     -crf $QUALITY \
                                                     "${new_file_full}"
