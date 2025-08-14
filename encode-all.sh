@@ -1,253 +1,124 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
-clear 
-
-# Enter location of local folder where Plex recordings are stored
-RECORDING_PATH=""
-
-# Enter location where encode files will be stored
-DESTINATION_PATH=""
-
+# --- Configuration ---
+# Location of the local folder where Plex recordings are stored
+RECORDING_PATH="/path/to/recordings"
+# Location where encoded files will be stored
+DESTINATION_PATH="/path/to/encoded"
 # FFMPEG encoder to be used
 ENC_TYPE="libx264"
-
-# Video filters applied, default yadif for deinterlacing
+# Video filters applied, default is yadif for deinterlacing
 VF="yadif"
-
-# Speed of encoding process, default veryslow to preserve disk space
+# Speed of encoding process, default is veryslow for smaller file sizes
 PRESET="veryslow"
-
-# Quality level, default 21
+# Quality level, default is 21
 QUALITY=21
-
-# Delete original file after encoding is complete? Set to 1 for YES.  Will verify time matches between two files before deleting.
+# Delete original file after encoding? (1 for YES, 0 for NO)
 DEL_ORIG=1
 
-# Function to obtain length of video
-getDuration() {
-    ffmpeg -i "${1}" 2>&1 | grep "Duration" | cut -d ' ' -f 4 | sed s/,// | sed s/00://
+# --- Function Definitions ---
+
+# Checks for required command-line tools.
+check_dependencies() {
+    for cmd in ffmpeg ffprobe jq bc; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            echo "Error: Required command '$cmd' is not installed." >&2
+            exit 1
+        fi
+    done
 }
 
-# Extract Show Name From File Name
-parseShowTitle() {
-    # $1 => File Name
-    FILE="${1%.ts}"
-    
-    SHOW_NAME="$FILE \([0-9]*}"
-    SHOW_NAME="${SHOW_NAME% S[0-9]*}"
-    shopt -s extglob
-    SHOW_NAME="${SHOW_NAME##*( )}"
-    SHOW_NAME="${SHOW_NAME%%*( )}"
-    shopt -u extglob
-    echo "$SHOW_NAME"
+# Gets the duration of a video in seconds.
+# Uses ffprobe for more reliable and direct output.
+get_duration() {
+    ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$1"
 }
 
-# Extract Part of File Name Into JSON String To Use As Metadata
-parseFilename() {
-    # $1 => File Name
-    FILE="${1%.ts}"
-    
-    shopt -s extglob
-    SHOW_NAME="$FILE \([0-9]*}"
-    SHOW_NAME="${SHOW_NAME% S[0-9]*}"
-    SHOW_NAME="${SHOW_NAME##*( )}"
-    SHOW_NAME="${SHOW_NAME%%*( )}"
-    shopt -u extglob
-    # echo "Show Name: '$SHOW_NAME'"
-    
-    YEAR_PREMIERED=${FILE//${SHOW_NAME} /}
-    YEAR_PREMIERED=${YEAR_PREMIERED%\) *}
-    YEAR_PREMIERED=${YEAR_PREMIERED//[^0-9]}
-    YEAR_PREMIERED=${YEAR_PREMIERED:0:4}
-    # echo "Year Premiered: '$YEAR_PREMIERED'"
-    
-    DATE_TIME=""
-    DATE_TIME=${FILE//${SHOW_NAME} /}
-    DATE_TIME=${DATE_TIME//\${YEAR_PREMIERED\) /}
-    DATE_TIME=${DATE_TIME//- /}
-    DATE_TIME=${DATE_TIME%% [A-Z]*}
-    DATE_TIME=${DATE_TIME#^[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9] [0-9][0-9] [0-9][0-9] [0-9][0-9]}
-    shopt -s extglob
-    DATE_TIME=${DATE_TIME##*( )}
-    DATE_TIME=${DATE_TIME%%*( )}
-    shopt -u extglob
-    # echo "Date/Time: '$DATE_TIME'"
-    
-    DATE=""
-    DATE=${DATE_TIME// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
-    shopt -s extglob
-    DATE=${DATE##*( )}
-    DATE=${DATE%%*( )}
-    shopt -u extglob
-    # echo "Date: '$DATE'"
-    
-    NUM_DATE=${DATE//-/}
-    # echo "Num Date: $NUM_DATE"
-    
-    YEAR=${DATE:0:4}
-    # echo "Year: $YEAR"
-    
-    TIME=""
-    TIME=${DATE_TIME//$DATE/}
-    shopt -s extglob
-    TIME=${TIME##*( )}
-    TIME=${TIME%%*( )}
-    # echo "Time: '$TIME'"
-    
-    # Simply Remaining Data Extraction By Removing From $FILE variable
-    FILE=${FILE//${TIME}/}
-    FILE=${FILE//${YEAR_PREMIERED}\)/}
-    FILE=${FILE//\(stop*/}
-    FILE=${FILE//\(start*/}
-    
-    SEASON=${FILE//${SHOW_NAME} \(/}
-    SEASON=${FILE//${SHOW_NAME}/}
-    SEASON=${SEASON%E*}
-    SEASON=${SEASON//[^0-9]}
-    SEASON=${SEASON:0:4}
-    # echo "Season: $SEASON"
-    
-    EPISODE=${FILE//${SHOW_NAME}/}
-    EPISODE=${EPISODE//\(${YEAR_PREMIERED}\)/}
-    if [ $SEASON == $YEAR ]; then
-        EPISODE=${NUM_DATE//${SEASON}/}
-    else
-        EPISODE=${EPISODE//${TIME}/}
-        EPISODE=${EPISODE// S${SEASON}E/}
-        EPISODE=${EPISODE//[^0-9]}
-    fi
-    # echo "Episode: ${EPISODE}"
-    
-    EPISODE_TITLE=${FILE//${SHOW_NAME} /}
-    EPISODE_TITLE=${EPISODE_TITLE//\(${YEAR_PREMIERED}\)/}
-    EPISODE_TITLE=${EPISODE_TITLE// \- /}
-    EPISODE_TITLE=${EPISODE_TITLE//${TIME}/}
-    EPISODE_TITLE=${EPISODE_TITLE//S${SEASON}E${EPISODE}/}
-    EPISODE_TITLE=${EPISODE_TITLE%%${SHOW_NAME}}}
-    EPISODE_TITLE=${EPISODE_TITLE//\(stop*/}
-    EPISODE_TITLE=${EPISODE_TITLE//\(start*/}
-    EPISODE_TITLE=${EPISODE_TITLE//\([0-9]*/}
-    shopt -s extglob
-    EPISODE_TITLE=${EPISODE_TITLE##*( )}
-    EPISODE_TITLE=${EPISODE_TITLE%%*( )}
-    shopt -u extglob
-    # echo "Episode Title: '${EPISODE_TITLE}'"
-    
-    EPISODE_DATA=$(echo -n "{ \"show\": \"$SHOW_NAME\", \"season\": \"$SEASON\", \"episode\": \"$EPISODE\", \"title\": \"$EPISODE_TITLE\", \"premiered\": \"$YEAR_PREMIERED\", \"date\": \"$DATE\" }")
-    echo "$EPISODE_DATA"
-}
+# --- Main Script ---
 
-if [ -d "$RECORDING_PATH" ]; then
-    cd "$RECORDING_PATH" || continue
-    file_count=$(ls -A 2>/dev/null | wc -l)
-    if [ $file_count != 0 ]; then
-        # Iterate through all directories in folder containing your recordings
-        for dir in */; do
-            echo "${dir}"
+# Ensure dependencies are met before starting
+check_dependencies
 
-            # Validate directory exists, in case folder was deleted after list was obtained
-            if [ -d "${dir}" ]; then
-                cd "${dir}" || continue
-
-                # Get number of folders in directory (Seasons)
-                dir_file_count=$(ls -A 2>/dev/null | wc -l)
-                echo "$dir directory file count: ${dir_file_count}"
-
-                if [ $dir_file_count != 0 ]; then
-                    # Iterate through Season folders
-                    for season in */; do
-                        echo "${season}"
-                        if [ -d "${season}" ]; then
-                            cd "${season}" || continue
-                            
-                            # Get number of .ts files found in Season directory
-                            ts_dir_file_count=`ls -A *.ts 2>/dev/null | wc -l`
-                            echo "${season} ts file count: ${ts_dir_file_count}"
-
-                            if [ $ts_dir_file_count != 0 ]; then
-                                for i in *.ts; do
-                                    echo "${i}"
-                                    # Get video duration of encoding source
-                                    src_duration=$(getDuration "${i}")
-                                    src_duration="${src_duration%.*}"
-
-                                    episode_data=$(parseFilename "${i}")
-                                    echo "Episode Data: ${episode_data}"
-                                    SHOW_NAME=$(echo "$episode_data" | jq -r '.show')
-
-                                    # Apply pattern matching to remove extraneous data in file name
-                                    # Removes year, dashes, and adds space between season and episode number
-                                    shopt -s extglob
-                                    new_file=${i//\(*\) /}}
-                                    new_file=${new_file//- /}}
-                                   new_file=$(echo "$new_file" | sed 's/\([0-9]\)E/\1 E/g')
-                                    new_file=${new_file// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
-                                    new_file=${new_file%.*}
-
-                                    # Remove the second occurrence of the show name
-                                    new_file=$(echo "$new_file" | sed "s/$SHOW_NAME//2")
-                                    new_file=${new_file##*( )}
-                                    new_file=${new_file%%*( )}
-echo "New File: ${new_file}"
-                                    new_file_full="${DESTINATION_PATH}${new_file}.mp4"
-
-                                    # Validate existience of file
-                                    if [ -f "$i" ]; then
-                                        # Skip if encoded file already exists, encode if not
-                                        if [ ! -f "$new_file_full" ]; then
-                                            # Check for optional video filter
-                                            if [ $VF != "" ]; then
-                                                ffmpeg -i "$i" \
-                                                    -vf $VF \
-                                                    -c:v $ENC_TYPE -c:a copy \
-                                                    -pix_fmt yuv420p \
-                                                    -tune film \
-                                                    -movflags faststart \
-                                                    -metadata show="$SHOW_NAME" \
-                                                    -preset $PRESET \
-                                                    -crf $QUALITY \
-                                                    "${new_file_full}"
-                                            else
-                                                ffmpeg -i "${i}" \
-                                                    -c:v $ENC_TYPE -c:a copy \
-                                                    -pix_fmt yuv420p \
-                                                    -tune film \
-                                                    -movflags faststart \
-                                                    -metadata show="$SHOW_NAME" \
-                                                    -preset $PRESET \
-                                                    -crf $QUALITY \
-                                                    "${new_file_full}"
-                                            fi
-                                        fi
-
-                                        # OPTIONAL: Delete source (ts) file when new file (mp4) is created, for space saving purposes
-                                        # Set DEL_ORIG value to 0 above if you don't want this to happen
-                                        if [ $DEL_ORIG == 1 ]; then
-                                            dest_duration=$(getDuration "$new_file_full")
-                                            dest_duration="${dest_duration%.*}"
-                                            echo "dest_duration: $dest_duration"
-
-                                            echo "Source File Duration: $src_duration"
-                                            echo "Destination File Duration: $dest_duration"
-
-                                            if [ "$src_duration" == "$dest_duration" ]; then
-                                                rm "$i"
-                                            fi
-                                        fi
-                                    fi
-                                    shopt -u extglob
-                                done # END for loop for ts files in directory
-                            fi
-
-                            # Done with directory, go one up to move on to next
-                            cd ..
-                        fi
-                    done # END for loop for Season directories
-                fi
-
-                # Go back to recording path to move on to the next show
-                cd "$RECORDING_PATH"
-            fi
-        done # END for loop for all TV show directories
-    fi
+# Validate paths
+if [ ! -d "$RECORDING_PATH" ]; then
+    echo "Error: Recording path '$RECORDING_PATH' not found." >&2
+    exit 1
 fi
+if [ ! -d "$DESTINATION_PATH" ]; then
+    echo "Error: Destination path '$DESTINATION_PATH' not found." >&2
+    exit 1
+fi
+
+# Use find to locate all .ts files recursively, which is more robust
+# than nested loops and `cd`.
+find "$RECORDING_PATH" -type f -name "*.ts" | while read -r ts_file; do
+    echo "--------------------------------------------------"
+    echo "Processing file: $ts_file"
+
+    # Parse filename to get metadata
+    # The 'parse-filename.sh' script must be in the same directory or in the system's PATH
+    episode_data=$(sh parse-filename.sh "$ts_file")
+    if [ $? -ne 0 ]; then
+        echo "Warning: Could not parse metadata from '$ts_file'. Skipping."
+        continue
+    fi
+
+    show_name=$(echo "$episode_data" | jq -r '.show_name')
+    season=$(echo "$episode_data" | jq -r '.season')
+    episode=$(echo "$episode_data" | jq -r '.episode')
+    title=$(echo "$episode_data" | jq -r '.title')
+
+    # Create a clean, organized filename
+    new_filename=$(printf "%s - S%02dE%02d - %s.mp4" "$show_name" "$season" "$episode" "$title")
+    # Remove any invalid characters for filenames
+    new_filename=$(echo "$new_filename" | sed 's/[/\\?%*:|"<>]/_/g')
+    new_file_full="$DESTINATION_PATH/$new_filename"
+
+    echo "  Show: $show_name"
+    echo "  Season: $season, Episode: $episode"
+    echo "  Title: $title"
+    echo "  Output file: $new_file_full"
+
+    # Skip if the encoded file already exists
+    if [ -f "$new_file_full" ]; then
+        echo "Warning: Destination file '$new_file_full' already exists. Skipping."
+        continue
+    fi
+
+    # Construct ffmpeg command
+    ffmpeg_cmd="ffmpeg -i \"$ts_file\" -c:v $ENC_TYPE -c:a copy -pix_fmt yuv420p"
+    if [ -n "$VF" ]; then
+        ffmpeg_cmd="$ffmpeg_cmd -vf $VF"
+    fi
+    ffmpeg_cmd="$ffmpeg_cmd -preset $PRESET -crf $QUALITY"
+    ffmpeg_cmd="$ffmpeg_cmd -metadata show=\"$show_name\" -metadata season=\"$season\" -metadata episode=\"$episode\" -metadata title=\"$title\""
+    ffmpeg_cmd="$ffmpeg_cmd \"$new_file_full\""
+
+    # Execute the command
+    echo "Encoding..."
+    eval "$ffmpeg_cmd"
+
+    # Verify encoding and optionally delete original
+    if [ -f "$new_file_full" ]; then
+        src_duration=$(get_duration "$ts_file")
+        dest_duration=$(get_duration "$new_file_full")
+
+        # Compare durations (allowing for small floating point differences)
+        duration_diff=$(echo "$src_duration - $dest_duration" | bc | awk '{print ($1 > 0) ? $1 : -$1}')
+
+        if [ $(echo "$duration_diff < 1.0" | bc) -eq 1 ]; then
+            echo "Encoding successful. Durations match."
+            if [ "$DEL_ORIG" -eq 1 ]; then
+                echo "Deleting original file: $ts_file"
+                rm "$ts_file"
+            fi
+        else
+            echo "Warning: Duration mismatch. Source: ${src_duration}s, Dest: ${dest_duration}s. Original file kept."
+        fi
+    else
+        echo "Error: Encoding failed. Output file not found."
+    fi
+done
+
+echo "--------------------------------------------------"
+echo "All processing complete."
