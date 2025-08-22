@@ -16,6 +16,10 @@ QUALITY=21
 # Delete original file after encoding? (1 for YES, 0 for NO)
 DEL_ORIG=1
 
+# --- Script's own path ---
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+PARSE_SCRIPT_PATH="$SCRIPT_DIR/parse-filename.sh"
+
 # --- Function Definitions ---
 
 # Checks for required command-line tools.
@@ -28,6 +32,17 @@ check_dependencies() {
     done
 }
 
+# Sources the parsing function from the external script.
+source_parser() {
+    if [ ! -f "$PARSE_SCRIPT_PATH" ]; then
+        echo "Error: The parser script was not found at '$PARSE_SCRIPT_PATH'." >&2
+        exit 1
+    fi
+    # Source the script to make the parse_filename function available
+    # shellcheck source=./parse-filename.sh
+    source "$PARSE_SCRIPT_PATH"
+}
+
 # Gets the duration of a video in seconds.
 # Uses ffprobe for more reliable and direct output.
 get_duration() {
@@ -38,6 +53,7 @@ get_duration() {
 
 # Ensure dependencies are met before starting
 check_dependencies
+source_parser
 
 # Validate paths
 if [ ! -d "$RECORDING_PATH" ]; then
@@ -51,22 +67,22 @@ fi
 
 # Use find to locate all .ts files recursively, which is more robust
 # than nested loops and `cd`.
-find "$RECORDING_PATH" -type f -name "*.ts" | while read -r ts_file; do
+find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0' ts_file; do
     echo "--------------------------------------------------"
     echo "Processing file: $ts_file"
 
     # Parse filename to get metadata
-    # The 'parse-filename.sh' script must be in the same directory or in the system's PATH
-    episode_data=$(sh parse-filename.sh "$ts_file")
-    if [ $? -ne 0 ]; then
+    # This function is from the sourced parse-filename.sh script.
+    # It returns a status code and sets PARSED_* variables.
+    if ! parse_filename "$ts_file"; then
         echo "Warning: Could not parse metadata from '$ts_file'. Skipping."
         continue
     fi
 
-    show_name=$(echo "$episode_data" | jq -r '.show_name')
-    season=$(echo "$episode_data" | jq -r '.season')
-    episode=$(echo "$episode_data" | jq -r '.episode')
-    title=$(echo "$episode_data" | jq -r '.title')
+    show_name="$PARSED_SHOW_NAME"
+    season="$PARSED_SEASON_NUM"
+    episode="$PARSED_EPISODE_NUM"
+    title="$PARSED_EPISODE_TITLE"
 
     # Create a clean, organized filename
     new_filename=$(printf "%s - S%02dE%02d - %s.mp4" "$show_name" "$season" "$episode" "$title")
@@ -85,18 +101,43 @@ find "$RECORDING_PATH" -type f -name "*.ts" | while read -r ts_file; do
         continue
     fi
 
-    # Construct ffmpeg command
-    ffmpeg_cmd="ffmpeg -i \"$ts_file\" -c:v $ENC_TYPE -c:a copy -pix_fmt yuv420p"
-    if [ -n "$VF" ]; then
-        ffmpeg_cmd="$ffmpeg_cmd -vf $VF"
+    # --- Pre-flight check on the source file ---
+    echo "Verifying source file integrity with ffprobe..."
+    if ! ffprobe -v error "$ts_file" >/dev/null 2>&1; then
+        echo "Error: Source file '$ts_file' appears to be corrupt or unreadable by ffprobe. Skipping."
+        continue
     fi
-    ffmpeg_cmd="$ffmpeg_cmd -preset $PRESET -crf $QUALITY"
-    ffmpeg_cmd="$ffmpeg_cmd -metadata show=\"$show_name\" -metadata season=\"$season\" -metadata episode=\"$episode\" -metadata title=\"$title\""
-    ffmpeg_cmd="$ffmpeg_cmd \"$new_file_full\""
+
+
+    # Construct ffmpeg command using a bash array for safety and clarity
+    ffmpeg_args=(
+        -i "$ts_file"
+        -c:v "$ENC_TYPE" -c:a copy -pix_fmt yuv420p
+    )
+    if [ -n "$VF" ]; then
+        ffmpeg_args+=(-vf "$VF")
+    fi
+    ffmpeg_args+=(
+        -preset "$PRESET" -crf "$QUALITY"
+        -metadata "show=$show_name"
+        -metadata "season_number=$season"
+        -metadata "episode_sort=$episode"
+        -metadata "title=$title"
+    )
 
     # Execute the command
     echo "Encoding..."
-    eval "$ffmpeg_cmd"
+    # We redirect stderr (2) to stdout (1), then pipe it to `tee`.
+    # `tee` will print to the console and also write to the log file.
+    # We use `pipefail` to ensure the exit status of the `if` statement
+    # is from ffmpeg, not from tee.
+    set -o pipefail
+    if ! ffmpeg "${ffmpeg_args[@]}" "$new_file_full" 2>&1 | tee "${new_file_full}.log"; then
+        echo "Error: Encoding failed. See log for details: ${new_file_full}.log"
+        set +o pipefail # Unset pipefail
+        continue # Move to the next file
+    fi
+    set +o pipefail # Unset pipefail
 
     # Verify encoding and optionally delete original
     if [ -f "$new_file_full" ]; then
@@ -104,9 +145,9 @@ find "$RECORDING_PATH" -type f -name "*.ts" | while read -r ts_file; do
         dest_duration=$(get_duration "$new_file_full")
 
         # Compare durations (allowing for small floating point differences)
-        duration_diff=$(echo "$src_duration - $dest_duration" | bc | awk '{print ($1 > 0) ? $1 : -$1}')
+        duration_diff=$(echo "d = $src_duration - $dest_duration; if (d < 0) d = -d; d" | bc)
 
-        if [ $(echo "$duration_diff < 1.0" | bc) -eq 1 ]; then
+        if (( $(echo "$duration_diff < 1.0" | bc -l) )); then
             echo "Encoding successful. Durations match."
             if [ "$DEL_ORIG" -eq 1 ]; then
                 echo "Deleting original file: $ts_file"
@@ -116,7 +157,8 @@ find "$RECORDING_PATH" -type f -name "*.ts" | while read -r ts_file; do
             echo "Warning: Duration mismatch. Source: ${src_duration}s, Dest: ${dest_duration}s. Original file kept."
         fi
     else
-        echo "Error: Encoding failed. Output file not found."
+        # This case should now be caught by the ! ffmpeg ... check above, but we leave it as a safeguard.
+        echo "Error: Encoding failed. Output file not found. See log for details: ${new_file_full}.log"
     fi
 done
 
