@@ -133,7 +133,14 @@ parseFilename() {
     shopt -u extglob
     # echo "Episode Title: '${EPISODE_TITLE}'"
     
-    EPISODE_DATA=$(echo -n "{ \"show\": \"$SHOW_NAME\", \"season\": \"$SEASON\", \"episode\": \"$EPISODE\", \"title\": \"$EPISODE_TITLE\", \"premiered\": \"$YEAR_PREMIERED\", \"date\": \"$DATE\" }")
+    EPISODE_DATA=$(jq -c -n \
+        --arg show "$SHOW_NAME" \
+        --arg season "$SEASON" \
+        --arg episode "$EPISODE" \
+        --arg title "$EPISODE_TITLE" \
+        --arg premiered "$YEAR_PREMIERED" \
+        --arg date "$DATE" \
+        '{ show: $show, season: $season, episode: $episode, title: $title, premiered: $premiered, date: $date }')
     echo "$EPISODE_DATA"
 }
 
