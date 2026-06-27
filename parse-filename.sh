@@ -8,7 +8,8 @@ parse_filename() {
     local episode_title="" # We'll try to extract this too, if present
 
     # Remove file extension for easier parsing
-    local base_name=$(basename "$filename")
+    # Optimization: Use parameter expansion instead of $(basename "$filename")
+    local base_name="${filename##*/}"
     base_name="${base_name%.*}"
 
     echo "Parsing filename: $base_name"
@@ -21,12 +22,27 @@ parse_filename() {
         episode_title="${BASH_REMATCH[5]}" # This might be empty
 
         # Clean up show_name: replace dots/underscores with spaces, trim trailing spaces/hyphens
-        show_name=$(printf '%s\n' "$show_name" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//; s/( -)+$//')
+        # Optimization: Avoid sed and subshells by using built-in string replacements
+        show_name="${show_name//./ }"
+        show_name="${show_name//_/ }"
+        # Store original extglob state and enable it safely
+        local extglob_was_set=0
+        shopt -q extglob && extglob_was_set=1
+        shopt -s extglob
+        show_name="${show_name##+([[:space:]])}"
+        show_name="${show_name%%+([[:space:]])}"
+        show_name="${show_name%%+( -)}"
 
         # Clean up episode_title: replace dots/underscores with spaces, trim leading/trailing spaces
         if [[ -n "$episode_title" ]]; then
-            episode_title=$(printf '%s\n' "$episode_title" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//')
+            episode_title="${episode_title//./ }"
+            episode_title="${episode_title//_/ }"
+            episode_title="${episode_title##+([[:space:]])}"
+            episode_title="${episode_title%%+([[:space:]])}"
         fi
+
+        # Restore original extglob state
+        (( extglob_was_set == 0 )) && shopt -u extglob || true
 
     # Pattern 2: Show Name S01 E02 [Episode Title]
     elif [[ "$base_name" =~ ^(.*)[.\ -][Ss]([0-9]+)[[:space:]]*[Ee]([0-9]+)[[:space:]]*[-.]?[[:space:]]*(.*)$ ]]; then
@@ -35,11 +51,28 @@ parse_filename() {
         episode_num="${BASH_REMATCH[3]}"
         episode_title="${BASH_REMATCH[4]}"
 
-        show_name=$(echo "$show_name" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//; s/( -)+$//')
+        # Optimization: Avoid sed and subshells by using built-in string replacements
+        show_name="${show_name//./ }"
+        show_name="${show_name//_/ }"
+
+        # Store original extglob state and enable it safely
+        local extglob_was_set=0
+        shopt -q extglob && extglob_was_set=1
+        shopt -s extglob
+
+        show_name="${show_name##+([[:space:]])}"
+        show_name="${show_name%%+([[:space:]])}"
+        show_name="${show_name%%+( -)}"
 
         if [[ -n "$episode_title" ]]; then
-            episode_title=$(echo "$episode_title" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//')
+            episode_title="${episode_title//./ }"
+            episode_title="${episode_title//_/ }"
+            episode_title="${episode_title##+([[:space:]])}"
+            episode_title="${episode_title%%+([[:space:]])}"
         fi
+
+        # Restore original extglob state
+        (( extglob_was_set == 0 )) && shopt -u extglob || true
 
     # Add more patterns here if needed, or refine the current one
     # For simplicity, we'll focus on the SXXEXX pattern for now, as it's the most common and robust.
