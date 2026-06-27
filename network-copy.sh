@@ -57,11 +57,10 @@ get_folder_size_mb() {
 }
 
 # Getting available disk space
-AVAIL=$(get_avail_mb)
-AVAIL_MB=${AVAIL//[!0-9]/}
+AVAIL_MB=$(get_avail_mb)
 
 # Output available disk space if you'd like, comment out if not
-echo "$AVAIL"
+echo "$AVAIL_MB"
 
 if [ $AVAIL_MB -lt $REQUIRED_DISK_AMOUNT ]; then
     echo "Insufficient disk space to copy recordings"
@@ -75,8 +74,7 @@ folderSync() {
     # Check if directory exists
     if [ -d "$1" ]; then
         # Get space available on local hard drive
-        AVAIL=$(get_avail_mb)
-        AVAIL_MB=${AVAIL//[!0-9]/}
+        AVAIL_MB=$(get_avail_mb)
 
         if [ $AVAIL_MB -lt $2 ]; then
             echo "Insufficient disk space to copy recordings from ${1}"
