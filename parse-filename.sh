@@ -52,15 +52,17 @@ parse_filename() {
     fi
 
     # Output the parsed information as JSON
-    json_output=$(cat <<EOF
-{
-  "show_name": "$(echo "$show_name" | sed 's/"/\\"/g')",
-  "season": "$season_num",
-  "episode": "$episode_num",
-  "title": "$(echo "$episode_title" | sed 's/"/\\"/g')"
-}
-EOF
-)
+    json_output=$(jq -n \
+        --arg show_name "$show_name" \
+        --arg season "$season_num" \
+        --arg episode "$episode_num" \
+        --arg title "$episode_title" \
+        '{
+          "show_name": $show_name,
+          "season": $season,
+          "episode": $episode,
+          "title": $title
+        }')
     echo "$json_output"
 
     # Optionally, still export variables if needed elsewhere
