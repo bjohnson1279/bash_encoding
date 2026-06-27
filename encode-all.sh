@@ -177,7 +177,12 @@ if [ -d "$RECORDING_PATH" ]; then
 
                                     episode_data=$(parseFilename "${i}")
                                     echo "Episode Data: ${episode_data}"
-                                    SHOW_NAME=$(echo "$episode_data" | jq -r '.show')
+                                    if [[ "$episode_data" =~ \"show\":\"(([^\"\\]|\\.)*)\" ]]; then
+                                        SHOW_NAME="${BASH_REMATCH[1]}"
+                                        SHOW_NAME="${SHOW_NAME//\\\"/\"}"
+                                    else
+                                        SHOW_NAME=""
+                                    fi
 
                                     # Apply pattern matching to remove extraneous data in file name
                                     # Removes year, dashes, and adds space between season and episode number
