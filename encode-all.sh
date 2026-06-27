@@ -188,7 +188,13 @@ if [ -d "$RECORDING_PATH" ]; then
                                     new_file=${new_file%.*}
 
                                     # Remove the second occurrence of the show name
-                                    new_file=$(echo "$new_file" | sed "s/$SHOW_NAME//2")
+                                    first_part="${new_file%%"$SHOW_NAME"*}"
+                                    rest="${new_file#*"$SHOW_NAME"}"
+                                    if [[ "$rest" == *"$SHOW_NAME"* ]]; then
+                                        second_part="${rest%%"$SHOW_NAME"*}"
+                                        third_part="${rest#*"$SHOW_NAME"}"
+                                        new_file="${first_part}${SHOW_NAME}${second_part}${third_part}"
+                                    fi
                                     new_file=${new_file##*( )}
                                     new_file=${new_file%%*( )}
 echo "New File: ${new_file}"
