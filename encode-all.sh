@@ -25,7 +25,12 @@ DEL_ORIG=1
 
 # Function to obtain length of video
 getDuration() {
-    ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${1}"
+    local dur
+    dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${1}")
+    if [ "${dur}" = "N/A" ] || [ -z "${dur}" ]; then
+        dur=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 "${1}")
+    fi
+    echo "${dur}"
 }
 
 # Extract Show Name From File Name
