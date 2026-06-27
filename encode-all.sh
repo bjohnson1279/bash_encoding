@@ -25,7 +25,7 @@ DEL_ORIG=1
 
 # Function to obtain length of video
 getDuration() {
-    ffmpeg -i "${1}" 2>&1 | grep "Duration" | cut -d ' ' -f 4 | sed s/,// | sed s/00://
+    ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${1}"
 }
 
 # Extract Show Name From File Name
