@@ -72,24 +72,4 @@ EOF
     return 0 # Indicate success
 }
 
-# --- How to use this function ---
-# Example Usage:
-# parse_filename "My.Awesome.Show.S01E05.The.Big.Adventure.mkv"
-# parse_filename "Another Show - S02E10 - A New Day.mp4"
-# parse_filename "Series.Title.S03E01.avi"
-# parse_filename "Unparseable Filename.mp4" # This will fail
-
-# Example with a real file (you can comment this out or use your own test files)
-# touch "Test.Show.Name.S01E02.Pilot.mkv"
-# parse_filename "Test.Show.Name.S01E02.Pilot.mkv"
-# rm "Test.Show.Name.S01E02.Pilot.mkv" # Clean up test file
-
-# Remember to source this script or include it in your main script
-# For testing:
-# parse_filename "The.Mandalorian.S01E01.Chapter.1.mkv"
-# parse_filename "Stranger Things - S04E01 - Chapter One - The Hellfire Club.mp4"
-# parse_filename "My Show S01E01.avi"
-# parse_filename "Game of Thrones S01E01 Winter Is Coming.mp4" # Notice the missing hyphen/dot
-# parse_filename "This Is Not A TV Show.mp4" # Should fail
-
 parse_filename "$1"
