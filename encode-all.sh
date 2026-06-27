@@ -28,20 +28,6 @@ getDuration() {
     ffmpeg -i "${1}" 2>&1 | grep "Duration" | cut -d ' ' -f 4 | sed s/,// | sed s/00://
 }
 
-# Extract Show Name From File Name
-parseShowTitle() {
-    # $1 => File Name
-    FILE="${1%.ts}"
-    
-    SHOW_NAME="$FILE \([0-9]*}"
-    SHOW_NAME="${SHOW_NAME% S[0-9]*}"
-    shopt -s extglob
-    SHOW_NAME="${SHOW_NAME##*( )}"
-    SHOW_NAME="${SHOW_NAME%%*( )}"
-    shopt -u extglob
-    echo "$SHOW_NAME"
-}
-
 # Extract Part of File Name Into JSON String To Use As Metadata
 parseFilename() {
     # $1 => File Name
