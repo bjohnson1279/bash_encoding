@@ -45,8 +45,7 @@ assert_equal "Saturday Night Live (1975) -" "$actual" "Show Name with complex ep
 actual=$(parseShowTitle "Show Name.ts")
 assert_equal "Show Name" "$actual" "Show Name with no extra parts"
 
-# Clean up
-rm tmp_parseShowTitle.sh
+# Clean up handled by trap
 
 if [ $FAILED -gt 0 ]; then
     echo "Summary: $FAILED tests failed."
