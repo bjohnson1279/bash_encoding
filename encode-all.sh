@@ -231,7 +231,7 @@ echo "New File: ${new_file}"
                                             echo "Destination File Duration: $dest_duration"
 
                                             if [ "$src_duration" == "$dest_duration" ]; then
-                                                rm "$i"
+                                                rm -- "$i"
                                             fi
                                         fi
                                     fi
