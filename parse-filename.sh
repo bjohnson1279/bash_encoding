@@ -21,12 +21,11 @@ parse_filename() {
         episode_title="${BASH_REMATCH[5]}" # This might be empty
 
         # Clean up show_name: replace dots/underscores with spaces, trim trailing spaces/hyphens
-        show_name=$(echo "$show_name" | sed -E 's/(\.|_)/ /g' | sed -E 's/[[:space:]]+$//' | sed -E 's/^[[:space:]]+//')
-        show_name=$(echo "$show_name" | sed -E 's/( -)+$//') # Remove trailing " -" if present from parsing "Show Name - S01E01"
+        show_name=$(echo "$show_name" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//; s/( -)+$//')
 
         # Clean up episode_title: replace dots/underscores with spaces, trim leading/trailing spaces
         if [[ -n "$episode_title" ]]; then
-            episode_title=$(echo "$episode_title" | sed -E 's/(\.|_)/ /g' | sed -E 's/[[:space:]]+$//' | sed -E 's/^[[:space:]]+//')
+            episode_title=$(echo "$episode_title" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//')
         fi
 
     # Pattern 2: Show Name S01 E02 [Episode Title]
@@ -36,11 +35,10 @@ parse_filename() {
         episode_num="${BASH_REMATCH[3]}"
         episode_title="${BASH_REMATCH[4]}"
 
-        show_name=$(echo "$show_name" | sed -E 's/(\.|_)/ /g' | sed -E 's/[[:space:]]+$//' | sed -E 's/^[[:space:]]+//')
-        show_name=$(echo "$show_name" | sed -E 's/( -)+$//')
+        show_name=$(echo "$show_name" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//; s/( -)+$//')
 
         if [[ -n "$episode_title" ]]; then
-            episode_title=$(echo "$episode_title" | sed -E 's/(\.|_)/ /g' | sed -E 's/[[:space:]]+$//' | sed -E 's/^[[:space:]]+//')
+            episode_title=$(echo "$episode_title" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//')
         fi
 
     # Add more patterns here if needed, or refine the current one
