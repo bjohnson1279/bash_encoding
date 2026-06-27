@@ -1,8 +1,11 @@
 #!/bin/bash
 
 # Extract parseShowTitle function from encode-all.sh to avoid executing its main block
-sed -n '/^parseShowTitle() {/,/^}/p' encode-all.sh > tmp_parseShowTitle.sh
-source tmp_parseShowTitle.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TMP_FILE="${SCRIPT_DIR}/tmp_parseShowTitle.sh"
+trap 'rm -f "$TMP_FILE"' EXIT
+sed -n '/^parseShowTitle() {/,/^}/p' "$SCRIPT_DIR/encode-all.sh" > "$TMP_FILE"
+source "$TMP_FILE"
 
 # Counter for failed tests
 FAILED=0
