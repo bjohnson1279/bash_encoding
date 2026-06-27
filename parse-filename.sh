@@ -105,4 +105,6 @@ parse_filename() {
     return 0 # Indicate success
 }
 
-parse_filename "$1"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    parse_filename "$1"
+fi
