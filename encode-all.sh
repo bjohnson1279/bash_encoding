@@ -137,7 +137,10 @@ parseFilename() {
 
 if [ -d "$RECORDING_PATH" ]; then
     cd "$RECORDING_PATH" || continue
-    file_count=$(ls -A 2>/dev/null | wc -l)
+    shopt -s nullglob dotglob
+    files=(*)
+    file_count=${#files[@]}
+    shopt -u nullglob dotglob
     if [ $file_count != 0 ]; then
         # Iterate through all directories in folder containing your recordings
         for dir in */; do
@@ -148,7 +151,10 @@ if [ -d "$RECORDING_PATH" ]; then
                 cd "${dir}" || continue
 
                 # Get number of folders in directory (Seasons)
-                dir_file_count=$(ls -A 2>/dev/null | wc -l)
+                shopt -s nullglob dotglob
+                dir_files=(*)
+                dir_file_count=${#dir_files[@]}
+                shopt -u nullglob dotglob
                 echo "$dir directory file count: ${dir_file_count}"
 
                 if [ $dir_file_count != 0 ]; then
@@ -159,12 +165,10 @@ if [ -d "$RECORDING_PATH" ]; then
                             cd "${season}" || continue
                             
                             # Get number of .ts files found in Season directory
+                            shopt -s nullglob
                             ts_files=(*.ts)
-                            if [ -e "${ts_files[0]}" ]; then
-                                ts_dir_file_count=${#ts_files[@]}
-                            else
-                                ts_dir_file_count=0
-                            fi
+                            ts_dir_file_count=${#ts_files[@]}
+                            shopt -u nullglob
                             echo "${season} ts file count: ${ts_dir_file_count}"
 
                             if [ $ts_dir_file_count != 0 ]; then
