@@ -21,7 +21,7 @@ parse_filename() {
         episode_title="${BASH_REMATCH[5]}" # This might be empty
 
         # Clean up show_name: replace dots/underscores with spaces, trim trailing spaces/hyphens
-        show_name=$(echo "$show_name" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//; s/( -)+$//')
+        show_name=$(printf '%s\n' "$show_name" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//; s/( -)+$//')
 
         # Clean up episode_title: replace dots/underscores with spaces, trim leading/trailing spaces
         if [[ -n "$episode_title" ]]; then
