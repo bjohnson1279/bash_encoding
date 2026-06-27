@@ -25,7 +25,7 @@ parse_filename() {
 
         # Clean up episode_title: replace dots/underscores with spaces, trim leading/trailing spaces
         if [[ -n "$episode_title" ]]; then
-            episode_title=$(echo "$episode_title" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//')
+            episode_title=$(printf '%s\n' "$episode_title" | sed -E 's/(\.|_)/ /g; s/[[:space:]]+$//; s/^[[:space:]]+//')
         fi
 
     # Pattern 2: Show Name S01 E02 [Episode Title]
