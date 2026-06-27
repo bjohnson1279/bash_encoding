@@ -44,7 +44,7 @@ get_avail_mb() {
     fi
     # df -P -> POSIX standard, reliable output
     # awk -> extract the available space (4th column), convert from 1K-blocks to MB
-    df -P "$target_dir" | awk 'NR==2 { print int($4 / 1024) }'
+    df -P -- "$target_dir" | awk 'NR==2 { print int($4 / 1024) }'
 }
 
 # Gets folder size in Megabytes.
