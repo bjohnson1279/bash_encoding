@@ -43,7 +43,7 @@ assert_equal "Saturday Night Live (1975) -" "$actual" "Show Name with complex ep
 
 # A basic file without any expected patterns to see what happens
 actual=$(parseShowTitle "Show Name.ts")
-assert_equal "Show Name \([0-9]*}" "$actual" "Show Name with no extra parts"
+assert_equal "Show Name" "$actual" "Show Name with no extra parts"
 
 # Clean up
 rm tmp_parseShowTitle.sh
