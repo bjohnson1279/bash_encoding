@@ -170,9 +170,6 @@ if [ -d "$RECORDING_PATH" ]; then
                             if [ $ts_dir_file_count != 0 ]; then
                                 for i in *.ts; do
                                     echo "${i}"
-                                    # Get video duration of encoding source
-                                    src_duration=$(getDuration "${i}")
-                                    src_duration="${src_duration%.*}"
 
                                     episode_data=$(parseFilename "${i}")
                                     echo "Episode Data: ${episode_data}"
@@ -232,6 +229,10 @@ echo "New File: ${new_file}"
                                         # OPTIONAL: Delete source (ts) file when new file (mp4) is created, for space saving purposes
                                         # Set DEL_ORIG value to 0 above if you don't want this to happen
                                         if [ $DEL_ORIG == 1 ]; then
+                                            # Get video duration of encoding source
+                                            src_duration=$(getDuration "${i}")
+                                            src_duration="${src_duration%.*}"
+
                                             dest_duration=$(getDuration "$new_file_full")
                                             dest_duration="${dest_duration%.*}"
                                             echo "dest_duration: $dest_duration"
