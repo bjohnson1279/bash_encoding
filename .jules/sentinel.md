@@ -1,0 +1,4 @@
+## 2024-05-18 - [CRITICAL] Prevent Command Injection in `sed` Via Filenames
+**Vulnerability:** Arbitrary Command Execution and Logic Breaking via `sed` pattern injection
+**Learning:** `encode-all.sh` parsed filenames and stored parts in `$SHOW_NAME`. Later, it executed `sed "s/$SHOW_NAME//2"`. If a parsed filename contained `/`, it would cause a `sed` syntax error. More critically, if a filename contained maliciously crafted sequences like `x//2; e command_here ; s//`, it would result in arbitrary shell command execution during the encoding loop.
+**Prevention:** Avoid interpolating unsanitized variables directly into `sed` execution strings. Utilize pure Bash parameter expansion (e.g., `${var#*pattern}`) as a safer alternative for targeted string replacement or sanitizing input before use.
