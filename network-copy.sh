@@ -82,7 +82,7 @@ folderSync() {
             echo "Insufficient disk space to copy recordings from ${1}"
         else
             echo "Copying from $1"
-            FOLDER_SIZE=`du -sh -BM -- "$1"`
+            FOLDER_SIZE=$(du -sh -BM -- "$1")
             FOLDER_SIZE="${FOLDER_SIZE//$1}"
             FOLDER_SIZE_MB=${FOLDER_SIZE//[!0-9]/}
             echo "Actual Folder Size in MB: $FOLDER_SIZE_MB"
