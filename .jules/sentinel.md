@@ -2,3 +2,7 @@
 **Vulnerability:** Arbitrary Command Execution and Logic Breaking via `sed` pattern injection
 **Learning:** `encode-all.sh` parsed filenames and stored parts in `$SHOW_NAME`. Later, it executed `sed "s/$SHOW_NAME//2"`. If a parsed filename contained `/`, it would cause a `sed` syntax error. More critically, if a filename contained maliciously crafted sequences like `x//2; e command_here ; s//`, it would result in arbitrary shell command execution during the encoding loop.
 **Prevention:** Avoid interpolating unsanitized variables directly into `sed` execution strings. Utilize pure Bash parameter expansion (e.g., `${var#*pattern}`) as a safer alternative for targeted string replacement or sanitizing input before use.
+## 2024-05-18 - [MEDIUM] Prevent Option Injection via Filenames Starting with Hyphens
+**Vulnerability:** Option Injection leading to command failure or unintended behavior.
+**Learning:** `encode-all.sh` used commands like `cd $dir` and `ffprobe $1`. If a filename or directory name starts with a hyphen (e.g., `-test.ts` or `-season`), commands like `cd` and `ffprobe` interpret the name as a command-line option rather than a path, leading to syntax errors or potentially dangerous unintended behavior.
+**Prevention:** Always terminate command-line options before passing variable file or directory paths to bash commands. Use `--` (e.g., `cd -- "$dir"`) for built-in bash commands and standard utilities. For specific tools like `ffmpeg` or `ffprobe`, use their designated input flags (e.g., `-i "$1"`).

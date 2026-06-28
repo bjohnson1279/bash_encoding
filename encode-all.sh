@@ -26,9 +26,9 @@ DEL_ORIG=1
 # Function to obtain length of video
 getDuration() {
     local dur
-    dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${1}")
+    dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -i "${1}")
     if [ "${dur}" = "N/A" ] || [ -z "${dur}" ]; then
-        dur=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 "${1}")
+        dur=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 -i "${1}")
     fi
     echo "${dur}"
 }
@@ -136,7 +136,7 @@ parseFilename() {
 }
 
 if [ -d "$RECORDING_PATH" ]; then
-    cd "$RECORDING_PATH" || continue
+    cd -- "$RECORDING_PATH" || continue
     shopt -s nullglob dotglob
     files=(*)
     file_count=${#files[@]}
@@ -148,7 +148,7 @@ if [ -d "$RECORDING_PATH" ]; then
 
             # Validate directory exists, in case folder was deleted after list was obtained
             if [ -d "${dir}" ]; then
-                cd "${dir}" || continue
+                cd -- "${dir}" || continue
 
                 # Get number of folders in directory (Seasons)
                 shopt -s nullglob dotglob
@@ -162,7 +162,7 @@ if [ -d "$RECORDING_PATH" ]; then
                     for season in */; do
                         echo "${season}"
                         if [ -d "${season}" ]; then
-                            cd "${season}" || continue
+                            cd -- "${season}" || continue
                             
                             # Get number of .ts files found in Season directory
                             shopt -s nullglob
@@ -265,7 +265,7 @@ echo "New File: ${new_file}"
                 fi
 
                 # Go back to recording path to move on to the next show
-                cd "$RECORDING_PATH"
+                cd -- "$RECORDING_PATH"
             fi
         done # END for loop for all TV show directories
     fi
