@@ -159,12 +159,7 @@ if [ -d "$RECORDING_PATH" ]; then
                             cd "${season}" || continue
                             
                             # Get number of .ts files found in Season directory
-                            ts_files=(*.ts)
-                            if [ -e "${ts_files[0]}" ]; then
-                                ts_dir_file_count=${#ts_files[@]}
-                            else
-                                ts_dir_file_count=0
-                            fi
+                            ts_dir_file_count=$(ls -A *.ts 2>/dev/null | wc -l)
                             echo "${season} ts file count: ${ts_dir_file_count}"
 
                             if [ $ts_dir_file_count != 0 ]; then
