@@ -189,7 +189,13 @@ if [ -d "$RECORDING_PATH" ]; then
                                     shopt -s extglob
                                     new_file=${i//\(*\) /}}
                                     new_file=${new_file//- /}}
-                                   new_file=$(echo "$new_file" | sed 's/\([0-9]\)E/\1 E/g')
+
+                                    # ⚡ Bolt Optimization: Replace subshell and sed with native bash parameter expansion
+                                    # This avoids spawning a new process for each file, significantly improving speed in busy loops
+                                    for j in {0..9}; do
+                                        new_file="${new_file//${j}E/${j} E}"
+                                    done
+
                                     new_file=${new_file// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
                                     new_file=${new_file%.*}
 
