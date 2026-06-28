@@ -10,8 +10,8 @@ setup() {
 }
 
 @test "getDuration parses typical ffmpeg duration correctly" {
-    ffmpeg() {
-        echo "  Duration: 00:05:43.50, start: 0.000000, bitrate: 1234 kb/s"
+    ffprobe() {
+        echo "05:43.50"
     }
 
     result=$(getDuration "dummy.ts")
@@ -19,8 +19,8 @@ setup() {
 }
 
 @test "getDuration parses duration with non-zero hours correctly" {
-    ffmpeg() {
-        echo "  Duration: 01:05:43.50, start: 0.000000, bitrate: 1234 kb/s"
+    ffprobe() {
+        echo "01:05:43.50"
     }
 
     result=$(getDuration "dummy.ts")
@@ -28,8 +28,8 @@ setup() {
 }
 
 @test "getDuration handles empty output when no duration is found" {
-    ffmpeg() {
-        echo "  Some other output without duration"
+    ffprobe() {
+        echo ""
     }
 
     result=$(getDuration "dummy.ts")
@@ -37,8 +37,8 @@ setup() {
 }
 
 @test "getDuration parses duration without leading zero hours correctly" {
-    ffmpeg() {
-        echo "  Duration: 02:30:15.00, start: 0.000000, bitrate: 1234 kb/s"
+    ffprobe() {
+        echo "02:30:15.00"
     }
 
     result=$(getDuration "dummy.ts")
