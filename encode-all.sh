@@ -124,14 +124,39 @@ parseFilename() {
     shopt -u extglob
     # echo "Episode Title: '${EPISODE_TITLE}'"
     
-    EPISODE_DATA=$(jq -c -n \
-        --arg show "$SHOW_NAME" \
-        --arg season "$SEASON" \
-        --arg episode "$EPISODE" \
-        --arg title "$EPISODE_TITLE" \
-        --arg premiered "$YEAR_PREMIERED" \
-        --arg date "$DATE" \
-        '{ show: $show, season: $season, episode: $episode, title: $title, premiered: $premiered, date: $date }')
+    # ⚡ Bolt Optimization: Use printf and native bash parameter expansion instead of jq subshell
+    # This significantly improves performance in busy loops by avoiding process overhead
+    local esc_show="${SHOW_NAME//\\/\\\\}"
+    esc_show="${esc_show//\"/\\\"}"
+    esc_show="${esc_show//$'\n'/\\n}"
+
+    local esc_season="${SEASON//\\/\\\\}"
+    esc_season="${esc_season//\"/\\\"}"
+    esc_season="${esc_season//$'\n'/\\n}"
+
+    local esc_episode="${EPISODE//\\/\\\\}"
+    esc_episode="${esc_episode//\"/\\\"}"
+    esc_episode="${esc_episode//$'\n'/\\n}"
+
+    local esc_title="${EPISODE_TITLE//\\/\\\\}"
+    esc_title="${esc_title//\"/\\\"}"
+    esc_title="${esc_title//$'\n'/\\n}"
+
+    local esc_premiered="${YEAR_PREMIERED//\\/\\\\}"
+    esc_premiered="${esc_premiered//\"/\\\"}"
+    esc_premiered="${esc_premiered//$'\n'/\\n}"
+
+    local esc_date="${DATE//\\/\\\\}"
+    esc_date="${esc_date//\"/\\\"}"
+    esc_date="${esc_date//$'\n'/\\n}"
+
+    printf -v EPISODE_DATA '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
+        "$esc_show" \
+        "$esc_season" \
+        "$esc_episode" \
+        "$esc_title" \
+        "$esc_premiered" \
+        "$esc_date"
     echo "$EPISODE_DATA"
 }
 
