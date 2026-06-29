@@ -26,9 +26,9 @@ DEL_ORIG=1
 # Function to obtain length of video
 getDuration() {
     local dur
-    dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${1}")
+    dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -i "${1}")
     if [ "${dur}" = "N/A" ] || [ -z "${dur}" ]; then
-        dur=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 "${1}")
+        dur=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 -i "${1}")
     fi
     echo "${dur}"
 }
@@ -124,20 +124,48 @@ parseFilename() {
     shopt -u extglob
     # echo "Episode Title: '${EPISODE_TITLE}'"
     
-    EPISODE_DATA=$(jq -c -n \
-        --arg show "$SHOW_NAME" \
-        --arg season "$SEASON" \
-        --arg episode "$EPISODE" \
-        --arg title "$EPISODE_TITLE" \
-        --arg premiered "$YEAR_PREMIERED" \
-        --arg date "$DATE" \
-        '{ show: $show, season: $season, episode: $episode, title: $title, premiered: $premiered, date: $date }')
+    # ⚡ Bolt Optimization: Use printf and native bash parameter expansion instead of jq subshell
+    # This significantly improves performance in busy loops by avoiding process overhead
+    local esc_show="${SHOW_NAME//\\/\\\\}"
+    esc_show="${esc_show//\"/\\\"}"
+    esc_show="${esc_show//$'\n'/\\n}"
+
+    local esc_season="${SEASON//\\/\\\\}"
+    esc_season="${esc_season//\"/\\\"}"
+    esc_season="${esc_season//$'\n'/\\n}"
+
+    local esc_episode="${EPISODE//\\/\\\\}"
+    esc_episode="${esc_episode//\"/\\\"}"
+    esc_episode="${esc_episode//$'\n'/\\n}"
+
+    local esc_title="${EPISODE_TITLE//\\/\\\\}"
+    esc_title="${esc_title//\"/\\\"}"
+    esc_title="${esc_title//$'\n'/\\n}"
+
+    local esc_premiered="${YEAR_PREMIERED//\\/\\\\}"
+    esc_premiered="${esc_premiered//\"/\\\"}"
+    esc_premiered="${esc_premiered//$'\n'/\\n}"
+
+    local esc_date="${DATE//\\/\\\\}"
+    esc_date="${esc_date//\"/\\\"}"
+    esc_date="${esc_date//$'\n'/\\n}"
+
+    printf -v EPISODE_DATA '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
+        "$esc_show" \
+        "$esc_season" \
+        "$esc_episode" \
+        "$esc_title" \
+        "$esc_premiered" \
+        "$esc_date"
     echo "$EPISODE_DATA"
 }
 
 if [ -d "$RECORDING_PATH" ]; then
-    cd "$RECORDING_PATH" || continue
-    file_count=$(ls -A 2>/dev/null | wc -l)
+    cd -- "$RECORDING_PATH" || continue
+    shopt -s nullglob dotglob
+    files=(*)
+    file_count=${#files[@]}
+    shopt -u nullglob dotglob
     if [ $file_count != 0 ]; then
         # Iterate through all directories in folder containing your recordings
         for dir in */; do
@@ -145,10 +173,13 @@ if [ -d "$RECORDING_PATH" ]; then
 
             # Validate directory exists, in case folder was deleted after list was obtained
             if [ -d "${dir}" ]; then
-                cd "${dir}" || continue
+                cd -- "${dir}" || continue
 
                 # Get number of folders in directory (Seasons)
-                dir_file_count=$(ls -A 2>/dev/null | wc -l)
+                shopt -s nullglob dotglob
+                dir_files=(*)
+                dir_file_count=${#dir_files[@]}
+                shopt -u nullglob dotglob
                 echo "$dir directory file count: ${dir_file_count}"
 
                 if [ $dir_file_count != 0 ]; then
@@ -156,7 +187,7 @@ if [ -d "$RECORDING_PATH" ]; then
                     for season in */; do
                         echo "${season}"
                         if [ -d "${season}" ]; then
-                            cd "${season}" || continue
+                            cd -- "${season}" || continue
                             
                             # Get number of .ts files found in Season directory
                             ts_dir_file_count=$(ls -A *.ts 2>/dev/null | wc -l)
@@ -165,20 +196,28 @@ if [ -d "$RECORDING_PATH" ]; then
                             if [ $ts_dir_file_count != 0 ]; then
                                 for i in *.ts; do
                                     echo "${i}"
-                                    # Get video duration of encoding source
-                                    src_duration=$(getDuration "${i}")
-                                    src_duration="${src_duration%.*}"
 
                                     episode_data=$(parseFilename "${i}")
                                     echo "Episode Data: ${episode_data}"
-                                    SHOW_NAME=$(echo "$episode_data" | jq -r '.show')
+                                    if [[ "$episode_data" =~ \"show\":\"(([^\"\\]|\\.)*)\" ]]; then
+                                        SHOW_NAME="${BASH_REMATCH[1]}"
+                                        SHOW_NAME="${SHOW_NAME//\\\"/\"}"
+                                    else
+                                        SHOW_NAME=""
+                                    fi
 
                                     # Apply pattern matching to remove extraneous data in file name
                                     # Removes year, dashes, and adds space between season and episode number
                                     shopt -s extglob
                                     new_file=${i//\(*\) /}}
                                     new_file=${new_file//- /}}
-                                   new_file=$(echo "$new_file" | sed 's/\([0-9]\)E/\1 E/g')
+
+                                    # ⚡ Bolt Optimization: Replace subshell and sed with native bash parameter expansion
+                                    # This avoids spawning a new process for each file, significantly improving speed in busy loops
+                                    for j in {0..9}; do
+                                        new_file="${new_file//${j}E/${j} E}"
+                                    done
+
                                     new_file=${new_file// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
                                     new_file=${new_file%.*}
 
@@ -227,6 +266,10 @@ echo "New File: ${new_file}"
                                         # OPTIONAL: Delete source (ts) file when new file (mp4) is created, for space saving purposes
                                         # Set DEL_ORIG value to 0 above if you don't want this to happen
                                         if [ $DEL_ORIG == 1 ]; then
+                                            # Get video duration of encoding source
+                                            src_duration=$(getDuration "${i}")
+                                            src_duration="${src_duration%.*}"
+
                                             dest_duration=$(getDuration "$new_file_full")
                                             dest_duration="${dest_duration%.*}"
                                             echo "dest_duration: $dest_duration"
@@ -234,7 +277,7 @@ echo "New File: ${new_file}"
                                             echo "Source File Duration: $src_duration"
                                             echo "Destination File Duration: $dest_duration"
 
-                                            if [ "$src_duration" == "$dest_duration" ]; then
+                                            if [ -n "$src_duration" ] && [ "$src_duration" != "N/A" ] && [ "$src_duration" == "$dest_duration" ]; then
                                                 rm -- "$i"
                                             fi
                                         fi
@@ -250,7 +293,7 @@ echo "New File: ${new_file}"
                 fi
 
                 # Go back to recording path to move on to the next show
-                cd "$RECORDING_PATH"
+                cd -- "$RECORDING_PATH"
             fi
         done # END for loop for all TV show directories
     fi
