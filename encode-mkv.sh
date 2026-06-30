@@ -1,2 +1,34 @@
-# Encode all .mkv files in a directory
-for i in *.mkv; do ffmpeg -i "$i" -vf yadif -c:v libx264 -preset veryslow -pix_fmt yuv420p -crf 21 -movflags faststart -y "${i%.*}.mp4"; done
+#!/usr/bin/env sh
+
+# Encode all .mkv files in a directory to .mp4
+
+# --- Configuration ---
+# FFMPEG encoder to be used
+ENC_TYPE="libx264"
+# Video filters applied, default is yadif for deinterlacing
+VF="yadif"
+# Speed of encoding process, default is veryslow for smaller file sizes
+PRESET="veryslow"
+# Quality level, default is 21
+QUALITY=21
+
+# Find and loop through all .mkv files in the current directory
+find . -type f -name "*.mkv" | while read -r i; do
+    # Construct the output filename
+    new_file="${i%.*}.mp4"
+
+    echo "Encoding '$i' to '$new_file'..."
+
+    # Construct and execute the ffmpeg command
+    ffmpeg -i "$i" \
+        -vf "$VF" \
+        -c:v "$ENC_TYPE" \
+        -preset "$PRESET" \
+        -crf "$QUALITY" \
+        -pix_fmt yuv420p \
+        -c:a copy \
+        -movflags faststart \
+        -y "$new_file"
+done
+
+echo "Done."
