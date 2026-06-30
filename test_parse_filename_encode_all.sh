@@ -33,17 +33,17 @@ echo "Testing parseFilename function..."
 # The current code in encode-all.sh relies heavily on assumptions about filename format,
 # particularly Plex-style recordings "Show Name (2020) S01E01.ts" and similar.
 
-parseFilename "Show Name (2020) S01E01.ts" actual
+actual=$(parseFilename "Show Name (2020) S01E01.ts")
 assert_equal "Show Name (2020)" "$(echo "$actual" | jq -r '.show')" "Standard Show Name with Year and Season/Episode - Show"
 assert_equal "01" "$(echo "$actual" | jq -r '.season')" "Standard Show Name with Year and Season/Episode - Season"
 assert_equal "01" "$(echo "$actual" | jq -r '.episode')" "Standard Show Name with Year and Season/Episode - Episode"
 
-parseFilename "Another Show S02E03.ts" actual
+actual=$(parseFilename "Another Show S02E03.ts")
 assert_equal "Another Show" "$(echo "$actual" | jq -r '.show')" "Standard Show Name with Season/Episode - Show"
 assert_equal "02" "$(echo "$actual" | jq -r '.season')" "Standard Show Name with Season/Episode - Season"
 assert_equal "03" "$(echo "$actual" | jq -r '.episode')" "Standard Show Name with Season/Episode - Episode"
 
-parseFilename "The Simpsons (1989) - S32E01 - Undercover Burns.ts" actual
+actual=$(parseFilename "The Simpsons (1989) - S32E01 - Undercover Burns.ts")
 assert_equal "The Simpsons (1989) -" "$(echo "$actual" | jq -r '.show')" "Show Name with hyphens - Show"
 assert_equal "32" "$(echo "$actual" | jq -r '.season')" "Show Name with hyphens - Season"
 assert_equal "01" "$(echo "$actual" | jq -r '.episode')" "Show Name with hyphens - Episode"
