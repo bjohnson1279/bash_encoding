@@ -43,7 +43,9 @@ parse_filename() {
     # Use IFS to split the parsed string into variables
     old_ifs=$IFS
     IFS="|"
+    set -f # Temporarily disable globbing to prevent issues with filenames
     set -- $parsed
+    set +f # Re-enable globbing
     IFS=$old_ifs
 
     show_name=$(cleanup_name "$1")
