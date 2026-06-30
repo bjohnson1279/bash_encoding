@@ -83,17 +83,30 @@ parse_filename() {
     fi
 
     # Output the parsed information as JSON
-    json_output=$(jq -n \
-        --arg show_name "$show_name" \
-        --arg season "$season_num" \
-        --arg episode "$episode_num" \
-        --arg title "$episode_title" \
-        '{
-          "show_name": $show_name,
-          "season": $season,
-          "episode": $episode,
-          "title": $title
-        }')
+    # ⚡ Bolt Optimization: Use printf and native bash parameter expansion instead of jq subshell
+    # This significantly improves performance in busy loops by avoiding process overhead
+    local esc_show_name="${show_name//\\/\\\\}"
+    esc_show_name="${esc_show_name//\"/\\\"}"
+    esc_show_name="${esc_show_name//$'\n'/\\n}"
+
+    local esc_season_num="${season_num//\\/\\\\}"
+    esc_season_num="${esc_season_num//\"/\\\"}"
+    esc_season_num="${esc_season_num//$'\n'/\\n}"
+
+    local esc_episode_num="${episode_num//\\/\\\\}"
+    esc_episode_num="${esc_episode_num//\"/\\\"}"
+    esc_episode_num="${esc_episode_num//$'\n'/\\n}"
+
+    local esc_episode_title="${episode_title//\\/\\\\}"
+    esc_episode_title="${esc_episode_title//\"/\\\"}"
+    esc_episode_title="${esc_episode_title//$'\n'/\\n}"
+
+    printf -v json_output '{
+  "show_name": "%s",
+  "season": "%s",
+  "episode": "%s",
+  "title": "%s"
+}' "$esc_show_name" "$esc_season_num" "$esc_episode_num" "$esc_episode_title"
     echo "$json_output"
 
     # Optionally, still export variables if needed elsewhere
@@ -105,4 +118,6 @@ parse_filename() {
     return 0 # Indicate success
 }
 
-parse_filename "$1"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    parse_filename "$1"
+fi
