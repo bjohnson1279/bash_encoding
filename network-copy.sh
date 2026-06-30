@@ -1,10 +1,29 @@
 #!/usr/bin/env sh
 
+# Exit on error, pipe failure
+set -eo pipefail
+
+# Error handler trap
+trap 'echo "An unexpected error occurred at line $LINENO. Exiting." >&2' ERR
+
 # Copy Plex recordings from a network location
 
-# --- Configuration ---
-# Enter your mount path for network share (used for mounting instructions)
-MNT_SHARE_PATH="/mnt/plex"
+clear
+
+# Dependency check
+for cmd in rsync awk df du mount.cifs; do
+    # For mount.cifs, it might not be in the standard PATH for non-root users, so check /sbin explicitly
+    if ! command -v "$cmd" >/dev/null 2>&1 && [ ! -x "/sbin/$cmd" ] && [ ! -x "/usr/sbin/$cmd" ]; then
+        echo "Error: Required command '$cmd' is not installed." >&2
+        if [ "$cmd" = "mount.cifs" ]; then
+            echo "  Please install cifs-utils (e.g., 'sudo apk add cifs-utils' on Alpine or 'sudo apt install cifs-utils' on Debian)." >&2
+        fi
+        exit 1
+    fi
+done
+
+# Enter your mount path for network share
+MNT_SHARE_PATH=""
 
 # Enter mount location on your local machine
 LOCAL_SHARE_PATH="/mnt/plex"
@@ -15,14 +34,17 @@ RECORDING_PATH="/path/to/local/recordings"
 # Required Available Space in MB, default is 1 GB
 REQUIRED_DISK_AMOUNT=1000
 
-# --- Functions ---
-
 # Gets available disk space in Megabytes.
 # POSIX-compliant alternative to 'df -BM --output=avail'
 get_avail_mb() {
-    # df -P . -> POSIX standard, reliable output
+    local target_dir="${1:-.}"
+    # Verify the target directory exists first
+    if [ ! -d "$target_dir" ]; then
+        return 1
+    fi
+    # df -P -> POSIX standard, reliable output
     # awk -> extract the available space (4th column), convert from 1K-blocks to MB
-    df -P . | awk 'NR==2 { print int($4 / 1024) }'
+    df -P -- "$target_dir" | awk 'NR==2 { print int($4 / 1024) }'
 }
 
 # Gets folder size in Megabytes.
