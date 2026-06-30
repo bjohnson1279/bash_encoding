@@ -150,14 +150,25 @@ parseFilename() {
     esc_date="${esc_date//\"/\\\"}"
     esc_date="${esc_date//$'\n'/\\n}"
 
-    printf -v EPISODE_DATA '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
+    # ⚡ Bolt Optimization: Accept a nameref (reference to a variable) as an optional argument.
+    # If the second argument is provided, write the JSON string directly into that variable.
+    # Otherwise, fallback to echo to maintain backward compatibility (e.g., for tests).
+    # This eliminates subshell overhead `$(parseFilename ...)` when used in busy loops.
+    local json_str
+    printf -v json_str '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
         "$esc_show" \
         "$esc_season" \
         "$esc_episode" \
         "$esc_title" \
         "$esc_premiered" \
         "$esc_date"
-    echo "$EPISODE_DATA"
+
+    if [[ -n "$2" ]]; then
+        local -n out_var="$2"
+        out_var="$json_str"
+    else
+        echo "$json_str"
+    fi
 }
 
 if [ -d "$RECORDING_PATH" ]; then
@@ -200,7 +211,9 @@ if [ -d "$RECORDING_PATH" ]; then
                                 for i in *.ts; do
                                     echo "${i}"
 
-                                    episode_data=$(parseFilename "${i}")
+                                    # ⚡ Bolt Optimization: Pass 'episode_data' as a nameref instead of using a subshell `episode_data=$(...)`.
+                                    # Spawning subshells in a busy loop carries a large overhead; namerefs skip the subshell entirely.
+                                    parseFilename "${i}" episode_data
                                     echo "Episode Data: ${episode_data}"
                                     if [[ "$episode_data" =~ \"show\":\"(([^\"\\]|\\.)*)\" ]]; then
                                         SHOW_NAME="${BASH_REMATCH[1]}"
