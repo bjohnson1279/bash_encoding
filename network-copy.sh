@@ -62,7 +62,7 @@ AVAIL_MB=$(get_avail_mb)
 # Output available disk space if you'd like, comment out if not
 echo "$AVAIL_MB"
 
-if [ $AVAIL_MB -lt $REQUIRED_DISK_AMOUNT ]; then
+if [ -z "$AVAIL_MB" ] || [ "$AVAIL_MB" -lt "$REQUIRED_DISK_AMOUNT" ]; then
     echo "Insufficient disk space to copy recordings"
     exit
 fi
@@ -76,13 +76,13 @@ folderSync() {
         # Get space available on local hard drive
         AVAIL_MB=$(get_avail_mb)
 
-        if [ $AVAIL_MB -lt $2 ]; then
+        if [ -z "$AVAIL_MB" ] || [ "$AVAIL_MB" -lt "$2" ]; then
             echo "Insufficient disk space to copy recordings from ${1}"
         else
             echo "Copying from $1"
             FOLDER_SIZE_MB=$(get_folder_size_mb "$1")
             echo "Actual Folder Size in MB: $FOLDER_SIZE_MB"
-            if [ $AVAIL_MB -lt $FOLDER_SIZE_MB ]; then
+            if [ -z "$AVAIL_MB" ] || [ -z "$FOLDER_SIZE_MB" ] || [ "$AVAIL_MB" -lt "$FOLDER_SIZE_MB" ]; then
                 echo "Insufficient disk space to copy recordings from $1"
             else
                 rsync -avzh --progress -- "$1" "$RECORDING_PATH"
