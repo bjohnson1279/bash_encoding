@@ -350,7 +350,7 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
 
     # --- Pre-flight check on the source file ---
     echo "Verifying source file integrity with ffprobe..."
-    if ! ffprobe -v error "$ts_file" >/dev/null 2>&1; then
+    if ! ffprobe -v error -i "$ts_file" >/dev/null 2>&1; then
         echo "Error: Source file '$ts_file' appears to be corrupt or unreadable by ffprobe. Skipping."
         continue
     fi
@@ -388,20 +388,24 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
 
     # Verify encoding and optionally delete original
     if [ -f "$new_file_full" ]; then
-        src_duration=$(get_duration "$ts_file")
-        dest_duration=$(get_duration "$new_file_full")
+        src_duration=$(getDuration "$ts_file")
+        dest_duration=$(getDuration "$new_file_full")
 
-        # Compare durations (allowing for small floating point differences)
-        duration_diff=$(echo "d = $src_duration - $dest_duration; if (d < 0) d = -d; d" | bc)
-
-        if (( $(echo "$duration_diff < 1.0" | bc -l) )); then
-            echo "Encoding successful. Durations match."
-            if [ "$DEL_ORIG" -eq 1 ]; then
-                echo "Deleting original file: $ts_file"
-                rm "$ts_file"
-            fi
+        if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
+            echo "Warning: Duration could not be reliably determined. Original file kept."
         else
-            echo "Warning: Duration mismatch. Source: ${src_duration}s, Dest: ${dest_duration}s. Original file kept."
+            # Compare durations (allowing for small floating point differences)
+            duration_diff=$(echo "d = $src_duration - $dest_duration; if (d < 0) d = -d; d" | bc)
+
+            if (( $(echo "$duration_diff < 1.0" | bc -l) )); then
+                echo "Encoding successful. Durations match."
+                if [ "$DEL_ORIG" -eq 1 ]; then
+                    echo "Deleting original file: $ts_file"
+                    rm -- "$ts_file"
+                fi
+            else
+                echo "Warning: Duration mismatch. Source: ${src_duration}s, Dest: ${dest_duration}s. Original file kept."
+            fi
         fi
     else
         # This case should now be caught by the ! ffmpeg ... check above, but we leave it as a safeguard.
