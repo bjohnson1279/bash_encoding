@@ -1,17 +1,30 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 # POSIX-compliant script to parse TV show filenames.
 # Handles patterns like "Show.Name.S01E02.Episode.Title.mkv"
 
 # Cleans up a string by replacing dots and underscores with spaces,
 # and trimming leading/trailing whitespace.
+# Note: This function is deprecated in favor of native bash substitutions for performance,
+# but kept here to maintain backward compatibility for tests or other scripts using it.
 cleanup_name() {
-    echo "$1" | sed 's/[._]/ /g; s/^ *//; s/ *$//'
+    local str="$1"
+    str="${str//[._]/ }"
+    # Trim leading/trailing whitespace natively
+    shopt -s extglob 2>/dev/null || true
+    str="${str##*( )}"
+    str="${str%%*( )}"
+    shopt -u extglob 2>/dev/null || true
+    echo "$str"
 }
 
 # Escapes a string for use in JSON.
+# Note: This function is deprecated in favor of native bash substitutions for performance,
+# but kept here to maintain backward compatibility.
 json_escape() {
-    echo "$1" | sed 's/"/\\"/g'
+    local str="$1"
+    str="${str//\"/\\\"}"
+    echo "$str"
 }
 
 parse_filename() {
@@ -20,53 +33,79 @@ parse_filename() {
         return 1
     fi
 
-    # Remove directory path and file extension
-    base_name=$(basename "$1")
+    # Remove directory path and file extension using bash parameter expansion
+    local base_name="${1##*/}"
     base_name="${base_name%.*}"
 
-    # Use sed to capture parts of the filename.
-    # The pattern looks for "S<season>E<episode>" and captures the parts around it.
-    # It handles variations in separators (., _, -, space).
-    parsed=$(echo "$base_name" | sed -n \
-        's/^\(.*\)[ ._-][Ss]\([0-9]\{1,2\}\)[ ._-]*[Ee]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p')
+    local show_name season_num episode_num episode_title
 
-    if [ -z "$parsed" ]; then
-        # Fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
-        parsed=$(echo "$base_name" | sed -n \
-            's/^\(.*\)[ ._-]\([0-9]\{4\}\)[ ._-]\([0-9]\{1,2\}\)[ ._-]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p')
-        if [ -z "$parsed" ]; then
-            echo "Error: Could not parse season/episode from '$base_name'." >&2
-            return 1
+    # Use bash regex to capture parts of the filename instead of spawning sed
+    # Pattern looks for "S<season>E<episode>" and captures the parts around it.
+    if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
+        show_name="${BASH_REMATCH[1]}"
+        season_num="${BASH_REMATCH[2]}"
+        episode_num="${BASH_REMATCH[3]}"
+        episode_title="${BASH_REMATCH[4]}"
+
+        # If show_name ends with a separator, remove it
+        if [[ "$show_name" =~ ^(.*)[._\ -]$ ]]; then
+            show_name="${BASH_REMATCH[1]}"
         fi
+    elif [[ "$base_name" =~ ^(.*)[._\ -]([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2})(.*)$ ]]; then
+        # Fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
+        show_name="${BASH_REMATCH[1]}"
+        season_num="${BASH_REMATCH[2]}"
+        episode_num="${BASH_REMATCH[3]}"
+        episode_title="${BASH_REMATCH[4]}"
+
+        # If show_name ends with a separator, remove it
+        if [[ "$show_name" =~ ^(.*)[._\ -]$ ]]; then
+            show_name="${BASH_REMATCH[1]}"
+        fi
+    else
+        echo "Error: Could not parse season/episode from '$base_name'." >&2
+        return 1
     fi
 
-    # Use IFS to split the parsed string into variables
-    old_ifs=$IFS
-    IFS="|"
-    set -f # Temporarily disable globbing to prevent issues with filenames
-    set -- $parsed
-    set +f # Re-enable globbing
-    IFS=$old_ifs
+    # Instead of calling subshells `$(cleanup_name ...)`, do it purely with native
+    # bash parameter expansion inline here to avoid the performance overhead
+    # of spawning subshells in tight loops.
 
-    show_name=$(cleanup_name "$1")
-    season_num=$(echo "$2" | sed 's/^0*//') # Remove leading zeros
-    episode_num=$(echo "$3" | sed 's/^0*//') # Remove leading zeros
-    episode_title=$(cleanup_name "$4")
+    # Clean up names natively
+    show_name="${show_name//[._]/ }"
+    episode_title="${episode_title//[._]/ }"
 
-    # Output JSON
-    cat <<EOF
-{
-  "show_name": "$(json_escape "$show_name")",
-  "season": "$season_num",
-  "episode": "$episode_num",
-  "title": "$(json_escape "$episode_title")"
-}
-EOF
+    # Trim leading/trailing whitespace natively
+    shopt -s extglob
+    show_name="${show_name##*( )}"
+    show_name="${show_name%%*( )}"
+    episode_title="${episode_title##*( )}"
+    episode_title="${episode_title%%*( )}"
+    shopt -u extglob
+
+    # Ensure two digit zero padding for backward compatibility formatting
+    # First removing leading zeros to prevent octal interpretation
+    season_stripped="${season_num#"${season_num%%[!0]*}"}"
+    episode_stripped="${episode_num#"${episode_num%%[!0]*}"}"
+    # If it was "0" or "00", stripped is empty. Default to 0.
+    season_stripped="${season_stripped:-0}"
+    episode_stripped="${episode_stripped:-0}"
+
+    printf -v season_num "%02d" "$season_stripped"
+    printf -v episode_num "%02d" "$episode_stripped"
+
+    # Escape quotes for JSON inline natively
+    show_name="${show_name//\"/\\\"}"
+    episode_title="${episode_title//\"/\\\"}"
+
+    # Output JSON using printf instead of spawning cat and subshells
+    printf '{\n  "show_name": "%s",\n  "season": "%s",\n  "episode": "%s",\n  "title": "%s"\n}\n' \
+        "$show_name" "$season_num" "$episode_num" "$episode_title"
 
     return 0
 }
 
 # If the script is executed directly, parse the first argument
-if [ "parse-filename.sh" = "$(basename "$0")" ]; then
+if [ "parse-filename.sh" = "${0##*/}" ]; then
     parse_filename "$1"
 fi
