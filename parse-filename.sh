@@ -49,8 +49,8 @@ parse_filename() {
     IFS=$old_ifs
 
     show_name=$(cleanup_name "$1")
-    season_num=$(echo "$2" | sed 's/^0*//') # Remove leading zeros
-    episode_num=$(echo "$3" | sed 's/^0*//') # Remove leading zeros
+    season_num="${2#"${2%%[!0]*}"}" # Remove leading zeros
+    episode_num="${3#"${3%%[!0]*}"}" # Remove leading zeros
     episode_title=$(cleanup_name "$4")
 
     # Output JSON
