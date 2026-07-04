@@ -11,7 +11,7 @@ cleanup_name() {
 
 # Escapes a string for use in JSON.
 json_escape() {
-    echo "$1" | sed 's/"/\\"/g'
+    printf '%s\n' "${1//\"/\\\"}"
 }
 
 parse_filename() {
