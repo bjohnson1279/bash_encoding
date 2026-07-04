@@ -19,3 +19,7 @@
 **Vulnerability:** Option Injection (e.g. `basename`, `echo`, `du`, `rsync` treating unescaped variables as flags)
 **Learning:** The codebase frequently uses variables directly in shell commands (e.g., `basename $1` or `echo $VAR`). When the variable content begins with a hyphen (e.g., `-test.mkv`), the utility will interpret it as a command-line option rather than a positional argument, leading to unexpected behavior, command failure, or data loss.
 **Prevention:** Use `--` to terminate option parsing for utilities that support it (e.g., `basename -- $1`, `du -sk -- $1`, `rsync -- $SRC $DST`). For built-ins like `echo` that lack robust POSIX `--` support, replace `echo` with `printf '%s\n' $VAR` to safely handle any input string.
+## 2024-07-04 - Fix Option Injection in echo
+**Vulnerability:** Widespread use of `echo "$var"` when printing untrusted user input, such as filenames (`$new_filename`, `$i`), directory paths (`$dir`), and externally fetched string content (`$json_str`).
+**Learning:** In Bash, variables parsed via `echo "$var"` are susceptible to option injection if the content starts with hyphens (e.g., `-n`, `-e`). For instance, a malicious or poorly formatted filename like `-e malicious_content` can manipulate `echo`'s behavior unexpectedly.
+**Prevention:** Always use `printf '%s\n' "$var"` instead of `echo "$var"` to safely output variable contents, as `printf` is not vulnerable to option injection and explicitly treats the subsequent argument as literal string data.
