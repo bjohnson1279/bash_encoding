@@ -53,7 +53,7 @@ get_folder_size_mb() {
     # $1: folder path
     # du -sk -> POSIX standard, size in 1K-blocks
     # awk -> extract the size, convert from 1K-blocks to MB
-    du -sk "$1" | awk '{ print int($1 / 1024) }'
+    du -sk -- "$1" | awk '{ print int($1 / 1024) }'
 }
 
 # Syncs a folder if there is enough disk space.
@@ -93,7 +93,7 @@ folder_sync() {
     fi
 
     echo "Starting copy from '$src_folder' to '$RECORDING_PATH'..."
-    rsync -avzh --progress "$src_folder/" "$RECORDING_PATH"
+    rsync -avzh --progress -- "$src_folder/" "$RECORDING_PATH"
     echo "Copy complete."
 }
 
