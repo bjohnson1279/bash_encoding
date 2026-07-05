@@ -23,7 +23,7 @@ getDuration() {
     if [ "${dur}" = "N/A" ] || [ -z "${dur}" ]; then
         dur=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 -i "${1}")
     fi
-    echo "${dur}"
+    printf '%s\n' "${dur}"
 }
 
 # Extract Part of File Name Into JSON String To Use As Metadata
@@ -160,7 +160,7 @@ parseFilename() {
         local -n out_var="$2"
         out_var="$json_str"
     else
-        echo "$json_str"
+        printf '%s\n' "$json_str"
     fi
 }
 
@@ -173,7 +173,7 @@ if [ -d "$RECORDING_PATH" ]; then
     if [ $file_count != 0 ]; then
         # Iterate through all directories in folder containing your recordings
         for dir in */; do
-            echo "${dir}"
+            printf '%s\n' "${dir}"
 
             # Validate directory exists, in case folder was deleted after list was obtained
             if [ -d "${dir}" ]; then
@@ -189,7 +189,7 @@ if [ -d "$RECORDING_PATH" ]; then
                 if [ $dir_file_count != 0 ]; then
                     # Iterate through Season folders
                     for season in */; do
-                        echo "${season}"
+                        printf '%s\n' "${season}"
                         if [ -d "${season}" ]; then
                             cd -- "${season}" || continue
                             
@@ -202,7 +202,7 @@ if [ -d "$RECORDING_PATH" ]; then
 
                             if [ $ts_dir_file_count != 0 ]; then
                                 for i in *.ts; do
-                                    echo "${i}"
+                                    printf '%s\n' "${i}"
 
                                     # ⚡ Bolt Optimization: Pass 'episode_data' as a nameref instead of using a subshell `episode_data=$(...)`.
                                     # Spawning subshells in a busy loop carries a large overhead; namerefs skip the subshell entirely.
