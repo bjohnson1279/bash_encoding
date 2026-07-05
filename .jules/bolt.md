@@ -10,3 +10,11 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Eliminate Subshell Process Forking Overhead in Loops
 **Learning:** Spawning subshells (`$(...)`) to capture the output of bash functions inside tight loops creates a significant performance bottleneck due to process forking overhead.
 **Action:** When a function needs to return a string and is called frequently in a loop, avoid subshells. Instead, pass the name of an output variable to the function and use a nameref (`local -n var="$2"`) or `printf -v "$2"` to write the result directly into the variable.
+
+## 2024-10-31 - Overwriting Executable Shell Scripts
+**Learning:** When completely overwriting executable shell scripts (e.g., via `cat << 'EOF' > file.sh`), the file may unexpectedly lose its executable permissions (changing from `100755` to `100644`). This loss of the executable bit breaks direct command-line execution and introduces blocking regressions.
+**Action:** Always verify the file mode via `git diff` or `ls -l` after overwriting a script. Explicitly restore the executable bit (`chmod +x file.sh`) if it was lost during the file modification process.
+
+## 2024-10-31 - Modifying POSIX Scripts
+**Learning:** When optimizing a script explicitly marked as "POSIX-compliant" or using the `#!/usr/bin/env sh` shebang, changing the shebang to `bash` or introducing pure bashisms (like `${var//pattern/replacement}`) violates the project's architectural constraints.
+**Action:** Always strictly maintain POSIX compliance for `sh` scripts. If parameter expansion is needed, utilize POSIX-compliant syntax (like `${var#"${var%%[! ]*}"}`) and avoid bash-only extensions.
