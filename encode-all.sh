@@ -333,6 +333,8 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
 
     # Create a clean, organized filename
     new_filename=$(printf "%s - S%02dE%02d - %s.mp4" "$show_name" "$season" "$episode" "$title")
+    # ⚡ Bolt Optimization: Replace subshell and sed with native bash parameter expansion
+    # This avoids spawning a new process for each file, improving speed in busy loops
     # Remove any invalid characters for filenames
     new_filename="${new_filename//[\/\\\\?%*:|\"<>]/_}"
     new_file_full="$DESTINATION_PATH/$new_filename"
