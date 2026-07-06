@@ -17,6 +17,10 @@ cleanup_name() {
     val="${val#"${val%%[! ]*}"}"
     # Strip trailing whitespace
     val="${val%"${val##*[! ]}"}"
+    # Strip trailing " -" if present
+    val="${val%" -"}"
+    # Strip trailing whitespace again
+    val="${val%"${val##*[! ]}"}"
     printf '%s\n' "$val"
 }
 
@@ -65,8 +69,23 @@ parse_filename() {
 
     show_name=$(cleanup_name "$1")
     # ⚡ Bolt Optimization: Replace subshells and sed with native POSIX parameter expansion to remove leading zeros
-    season_num="${2#"${2%%[!0]*}"}"
-    episode_num="${3#"${3%%[!0]*}"}"
+    season_stripped="${2#"${2%%[!0]*}"}"
+    episode_stripped="${3#"${3%%[!0]*}"}"
+    season_stripped="${season_stripped:-0}"
+    episode_stripped="${episode_stripped:-0}"
+
+    # Pad to 2 digits natively in POSIX sh
+    if [ ${#season_stripped} -eq 1 ]; then
+        season_num="0$season_stripped"
+    else
+        season_num="$season_stripped"
+    fi
+
+    if [ ${#episode_stripped} -eq 1 ]; then
+        episode_num="0$episode_stripped"
+    else
+        episode_num="$episode_stripped"
+    fi
     episode_title=$(cleanup_name "$4")
 
     # Output JSON
