@@ -172,7 +172,7 @@ parseFilename() {
 }
 
 if [ -d "$RECORDING_PATH" ]; then
-    cd -- "$RECORDING_PATH" || continue
+    cd -- "$RECORDING_PATH" || exit 1
     shopt -s nullglob dotglob
     files=(*)
     file_count=${#files[@]}
@@ -304,13 +304,13 @@ echo "New File: ${new_file}"
                             fi
 
                             # Done with directory, go one up to move on to next
-                            cd ..
+                            cd .. || exit 1
                         fi
                     done # END for loop for Season directories
                 fi
 
                 # Go back to recording path to move on to the next show
-                cd -- "$RECORDING_PATH"
+                cd -- "$RECORDING_PATH" || exit 1
             fi
         done # END for loop for all TV show directories
     fi

@@ -23,3 +23,8 @@
 **Vulnerability:** Widespread use of `echo "$var"` when printing untrusted user input, such as filenames (`$new_filename`, `$i`), directory paths (`$dir`), and externally fetched string content (`$json_str`).
 **Learning:** In Bash, variables parsed via `echo "$var"` are susceptible to option injection if the content starts with hyphens (e.g., `-n`, `-e`). For instance, a malicious or poorly formatted filename like `-e malicious_content` can manipulate `echo`'s behavior unexpectedly.
 **Prevention:** Always use `printf '%s\n' "$var"` instead of `echo "$var"` to safely output variable contents, as `printf` is not vulnerable to option injection and explicitly treats the subsequent argument as literal string data.
+
+## 2024-05-18 - [CRITICAL] Prevent Fail-Open Directory Traversal
+**Vulnerability:** Arbitrary file operation (e.g. deletion) due to unhandled `cd` failures (Fail-Open behavior).
+**Learning:** `encode-all.sh` used commands like `cd ..` and `cd -- "$RECORDING_PATH" || continue` (outside a loop structure). If a directory change fails (due to permissions, deleted folders, or symlink issues), bash continues executing the script in the current, unintended directory. In scripts that perform destructive actions like `rm`, this can result in catastrophic arbitrary file deletion.
+**Prevention:** Always check the exit status of directory changes and fail securely. Use `cd /path || exit 1` or `cd /path || return` to ensure the script aborts if the required directory state cannot be reached.
