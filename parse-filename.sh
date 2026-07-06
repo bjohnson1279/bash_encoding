@@ -54,7 +54,7 @@ parse_filename() {
         parsed=$(printf '%s\n' "$base_name" | sed -n \
             's/^\(.*\)[ ._-]\([0-9]\{4\}\)[ ._-]\([0-9]\{1,2\}\)[ ._-]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p')
         if [ -z "$parsed" ]; then
-            echo "Error: Could not parse season/episode from '$base_name'." >&2
+            printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
             return 1
         fi
     fi

@@ -191,7 +191,7 @@ if [ -d "$RECORDING_PATH" ]; then
                 dir_files=(*)
                 dir_file_count=${#dir_files[@]}
                 shopt -u nullglob dotglob
-                echo "$dir directory file count: ${dir_file_count}"
+                printf '%s\n' "$dir directory file count: ${dir_file_count}"
 
                 if [ $dir_file_count != 0 ]; then
                     # Iterate through Season folders
@@ -205,7 +205,7 @@ if [ -d "$RECORDING_PATH" ]; then
                             ts_files=(*.ts)
                             ts_dir_file_count=${#ts_files[@]}
                             shopt -u nullglob
-                            echo "${season} ts file count: ${ts_dir_file_count}"
+                            printf '%s\n' "${season} ts file count: ${ts_dir_file_count}"
 
                             if [ $ts_dir_file_count != 0 ]; then
                                 for i in *.ts; do

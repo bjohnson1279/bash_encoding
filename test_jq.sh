@@ -14,4 +14,4 @@ json_output=$(jq -n \
         "episode": $episode,
         "title": $title
     }')
-echo "$json_output"
+printf "%s\n" "$json_output"
