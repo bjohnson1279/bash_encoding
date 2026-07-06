@@ -18,3 +18,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-10-31 - Modifying POSIX Scripts
 **Learning:** When optimizing a script explicitly marked as "POSIX-compliant" or using the `#!/usr/bin/env sh` shebang, changing the shebang to `bash` or introducing pure bashisms (like `${var//pattern/replacement}`) violates the project's architectural constraints.
 **Action:** Always strictly maintain POSIX compliance for `sh` scripts. If parameter expansion is needed, utilize POSIX-compliant syntax (like `${var#"${var%%[! ]*}"}`) and avoid bash-only extensions.
+
+## 2024-11-20 - Eliminate Subshell Process Forking Overhead in Loops (Part 2)
+**Learning:** Command substitution like `var=$(printf ...)` inside tight loops spawns a subshell for each iteration, causing significant overhead.
+**Action:** Use native Bash `printf -v <var>` instead of command substitution `var=$(printf ...)` for string formatting and assignment to completely eliminate subshell process creation overhead in busy loops.

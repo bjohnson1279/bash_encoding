@@ -23,7 +23,14 @@ getDuration() {
     if [ "${dur}" = "N/A" ] || [ -z "${dur}" ]; then
         dur=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 -i "${1}")
     fi
-    printf '%s\n' "${dur}"
+
+    # ⚡ Bolt Optimization: Support nameref for direct variable assignment, avoiding subshells
+    if [[ -n "$2" ]]; then
+        local -n out_var="$2"
+        out_var="${dur}"
+    else
+        printf '%s\n' "${dur}"
+    fi
 }
 
 # Extract Part of File Name Into JSON String To Use As Metadata
@@ -276,10 +283,11 @@ echo "New File: ${new_file}"
                                         # Set DEL_ORIG value to 0 above if you don't want this to happen
                                         if [ $DEL_ORIG == 1 ]; then
                                             # Get video duration of encoding source
-                                            src_duration=$(getDuration "${i}")
+                                            # ⚡ Bolt Optimization: Replace subshells with nameref for performance
+                                            getDuration "${i}" src_duration
                                             src_duration="${src_duration%.*}"
 
-                                            dest_duration=$(getDuration "$new_file_full")
+                                            getDuration "$new_file_full" dest_duration
                                             dest_duration="${dest_duration%.*}"
                                             echo "dest_duration: $dest_duration"
 
@@ -332,7 +340,8 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
     title="$PARSED_EPISODE_TITLE"
 
     # Create a clean, organized filename
-    new_filename=$(printf "%s - S%02dE%02d - %s.mp4" "$show_name" "$season" "$episode" "$title")
+    # ⚡ Bolt Optimization: Replace subshell `$(printf...)` with native bash `printf -v` to avoid process spawning in busy loops
+    printf -v new_filename "%s - S%02dE%02d - %s.mp4" "$show_name" "$season" "$episode" "$title"
     # ⚡ Bolt Optimization: Replace subshell and sed with native bash parameter expansion
     # This avoids spawning a new process for each file, improving speed in busy loops
     # Remove any invalid characters for filenames
@@ -390,8 +399,9 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
 
     # Verify encoding and optionally delete original
     if [ -f "$new_file_full" ]; then
-        src_duration=$(getDuration "$ts_file")
-        dest_duration=$(getDuration "$new_file_full")
+        # ⚡ Bolt Optimization: Replace subshells with nameref for performance
+        getDuration "$ts_file" src_duration
+        getDuration "$new_file_full" dest_duration
 
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
             echo "Warning: Duration could not be reliably determined. Original file kept."
