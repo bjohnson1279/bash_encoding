@@ -34,19 +34,19 @@ echo "Testing parseFilename function..."
 # particularly Plex-style recordings "Show Name (2020) S01E01.ts" and similar.
 
 actual=$(parseFilename "Show Name (2020) S01E01.ts")
-assert_equal "Show Name (2020)" "$(echo "$actual" | jq -r '.show')" "Standard Show Name with Year and Season/Episode - Show"
-assert_equal "01" "$(echo "$actual" | jq -r '.season')" "Standard Show Name with Year and Season/Episode - Season"
-assert_equal "01" "$(echo "$actual" | jq -r '.episode')" "Standard Show Name with Year and Season/Episode - Episode"
+assert_equal "Show Name (2020)" "$(printf "%s\n" "$actual" | jq -r '.show')" "Standard Show Name with Year and Season/Episode - Show"
+assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Standard Show Name with Year and Season/Episode - Season"
+assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Standard Show Name with Year and Season/Episode - Episode"
 
 actual=$(parseFilename "Another Show S02E03.ts")
-assert_equal "Another Show" "$(echo "$actual" | jq -r '.show')" "Standard Show Name with Season/Episode - Show"
-assert_equal "02" "$(echo "$actual" | jq -r '.season')" "Standard Show Name with Season/Episode - Season"
-assert_equal "03" "$(echo "$actual" | jq -r '.episode')" "Standard Show Name with Season/Episode - Episode"
+assert_equal "Another Show" "$(printf "%s\n" "$actual" | jq -r '.show')" "Standard Show Name with Season/Episode - Show"
+assert_equal "02" "$(printf "%s\n" "$actual" | jq -r '.season')" "Standard Show Name with Season/Episode - Season"
+assert_equal "03" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Standard Show Name with Season/Episode - Episode"
 
 actual=$(parseFilename "The Simpsons (1989) - S32E01 - Undercover Burns.ts")
-assert_equal "The Simpsons (1989) -" "$(echo "$actual" | jq -r '.show')" "Show Name with hyphens - Show"
-assert_equal "32" "$(echo "$actual" | jq -r '.season')" "Show Name with hyphens - Season"
-assert_equal "01" "$(echo "$actual" | jq -r '.episode')" "Show Name with hyphens - Episode"
+assert_equal "The Simpsons (1989) -" "$(printf "%s\n" "$actual" | jq -r '.show')" "Show Name with hyphens - Show"
+assert_equal "32" "$(printf "%s\n" "$actual" | jq -r '.season')" "Show Name with hyphens - Season"
+assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Show Name with hyphens - Episode"
 
 if [ $FAILED -gt 0 ]; then
     echo "Summary: $FAILED tests failed."

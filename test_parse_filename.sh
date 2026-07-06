@@ -44,12 +44,12 @@ run_test() {
 
     # Extract JSON part from output (ignoring the "Parsing filename: ..." line)
     local json_output
-    json_output=$(echo "$output" | grep -v "^Parsing filename:")
+    json_output=$(printf "%s\n" "$output" | grep -v "^Parsing filename:")
 
-    local show=$(echo "$json_output" | jq -r '.show_name')
-    local season=$(echo "$json_output" | jq -r '.season')
-    local episode=$(echo "$json_output" | jq -r '.episode')
-    local title=$(echo "$json_output" | jq -r '.title')
+    local show=$(printf "%s\n" "$json_output" | jq -r '.show_name')
+    local season=$(printf "%s\n" "$json_output" | jq -r '.season')
+    local episode=$(printf "%s\n" "$json_output" | jq -r '.episode')
+    local title=$(printf "%s\n" "$json_output" | jq -r '.title')
 
     local test_failed=0
 
