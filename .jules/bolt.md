@@ -22,3 +22,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Eliminate Subshell Process Forking Overhead in Loops (Part 2)
 **Learning:** Command substitution like `var=$(printf ...)` inside tight loops spawns a subshell for each iteration, causing significant overhead.
 **Action:** Use native Bash `printf -v <var>` instead of command substitution `var=$(printf ...)` for string formatting and assignment to completely eliminate subshell process creation overhead in busy loops.
+
+## 2024-11-20 - POSIX String Splitting with IFS
+**Learning:** When working in POSIX compliant shell scripts (e.g. `sh`), using `tr` combined with process substitution (like `$(printf '%s\n' "$1" | tr '._' '  ')`) adds significant overhead by creating subshells. It's much faster to use the native shell's Internal Field Separator (`IFS`) to split and parse the string without launching external commands.
+**Action:** When working in strict POSIX mode where bash extensions are not available, utilize `IFS` inside the shell for string splitting to avoid slow external processes in tight loops.

@@ -11,8 +11,28 @@
 cleanup_name() {
     # Replace dots and underscores with spaces
     # shellcheck disable=SC3043 # local is supported in environments where this script is executed
+    # ⚡ Bolt Optimization: Replace `tr` and command substitution with POSIX IFS string splitting.
+    # This avoids spawning a subshell and process for each cleanup.
     local val
-    val=$(printf '%s\n' "$1" | tr '._' '  ')
+    # shellcheck disable=SC3043 # local is supported in environments where this script is executed
+    local IFS="._"
+    # shellcheck disable=SC3043
+    local old_set="$-"
+
+    set -f
+    # shellcheck disable=SC2086 # Expected to split the string
+    set -- $1
+
+    # We set IFS to space to join the arguments via "$*"
+    IFS=" "
+    val="$*"
+
+    # Restore previous globbing state safely
+    case "$old_set" in
+        *f*) ;;         # Was already off, do nothing
+        *) set +f ;;    # Was on, turn it back on
+    esac
+
     # Strip leading whitespace
     val="${val#"${val%%[! ]*}"}"
     # Strip trailing whitespace
