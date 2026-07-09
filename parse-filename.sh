@@ -66,17 +66,17 @@ parse_filename() {
     # Use sed to capture parts of the filename.
     # The pattern looks for "S<season>E<episode>" and captures the parts around it.
     # It handles variations in separators (., _, -, space).
+    # ⚡ Bolt Optimization: Combine sequential sed operations into a single invocation
+    # using `-e` and the conditional branch command `t` to prevent the second substitution
+    # if the first one succeeds. This cuts process spawning overhead in half for date-based fallbacks.
     parsed=$(printf '%s\n' "$base_name" | sed -n \
-        's/^\(.*\)[ ._-][Ss]\([0-9]\{1,2\}\)[ ._-]*[Ee]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p')
+        -e 's/^\(.*\)[ ._-][Ss]\([0-9]\{1,2\}\)[ ._-]*[Ee]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p' \
+        -e 't' \
+        -e 's/^\(.*\)[ ._-]\([0-9]\{4\}\)[ ._-]\([0-9]\{1,2\}\)[ ._-]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p')
 
     if [ -z "$parsed" ]; then
-        # Fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
-        parsed=$(printf '%s\n' "$base_name" | sed -n \
-            's/^\(.*\)[ ._-]\([0-9]\{4\}\)[ ._-]\([0-9]\{1,2\}\)[ ._-]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p')
-        if [ -z "$parsed" ]; then
-            printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
-            return 1
-        fi
+        printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
+        return 1
     fi
 
     # Use IFS to split the parsed string into variables
