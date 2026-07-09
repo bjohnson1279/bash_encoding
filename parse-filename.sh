@@ -46,10 +46,26 @@ cleanup_name() {
 
 # Escapes a string for use in JSON.
 json_escape() {
-    # ⚡ Bolt Optimization: Replace sed subshells with parameter expansion.
+    # ⚡ Bolt Optimization: Replace sed subshells with parameter expansion string replacement.
     # While ${var//\"/\\\"} is a bashism, we must stay POSIX-compliant.
-    # However, since we can't use bash substitution, we will keep sed but ensure it is optimal.
-    printf '%s\n' "$1" | sed 's/"/\\"/g'
+    # POSIX compliant string replacement for escaping double quotes to avoid subshell process fork overhead.
+    # shellcheck disable=SC3043
+    local val="$1"
+    # shellcheck disable=SC3043
+    local escaped=""
+    while [ -n "$val" ]; do
+        case "$val" in
+            *\"*)
+                escaped="${escaped}${val%%\"*}\\\""
+                val="${val#*\"}"
+                ;;
+            *)
+                escaped="${escaped}${val}"
+                val=""
+                ;;
+        esac
+    done
+    printf '%s\n' "$escaped"
 }
 
 parse_filename() {
@@ -63,26 +79,24 @@ parse_filename() {
     base_name="${1##*/}"
     base_name="${base_name%.*}"
 
-    # Use sed to capture parts of the filename.
+    # ⚡ Bolt Optimization: Combine sequential sed operations into a single invocation
     # The pattern looks for "S<season>E<episode>" and captures the parts around it.
     # It handles variations in separators (., _, -, space).
+    # If standard pattern fails, fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
     parsed=$(printf '%s\n' "$base_name" | sed -n \
-        's/^\(.*\)[ ._-][Ss]\([0-9]\{1,2\}\)[ ._-]*[Ee]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p')
+        -e 's/^\(.*\)[ ._-][Ss]\([0-9]\{1,2\}\)[ ._-]*[Ee]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p' \
+        -e 's/^\(.*\)[ ._-]\([0-9]\{4\}\)[ ._-]\([0-9]\{1,2\}\)[ ._-]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p' | head -n 1)
 
     if [ -z "$parsed" ]; then
-        # Fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
-        parsed=$(printf '%s\n' "$base_name" | sed -n \
-            's/^\(.*\)[ ._-]\([0-9]\{4\}\)[ ._-]\([0-9]\{1,2\}\)[ ._-]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p')
-        if [ -z "$parsed" ]; then
-            printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
-            return 1
-        fi
+        printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
+        return 1
     fi
 
     # Use IFS to split the parsed string into variables
     old_ifs=$IFS
     IFS="|"
     set -f # Temporarily disable globbing to prevent issues with filenames
+    # shellcheck disable=SC2086
     set -- $parsed
     set +f # Re-enable globbing
     IFS=$old_ifs

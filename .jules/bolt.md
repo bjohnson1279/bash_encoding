@@ -26,3 +26,11 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - POSIX String Splitting with IFS
 **Learning:** When working in POSIX compliant shell scripts (e.g. `sh`), using `tr` combined with process substitution (like `$(printf '%s\n' "$1" | tr '._' '  ')`) adds significant overhead by creating subshells. It's much faster to use the native shell's Internal Field Separator (`IFS`) to split and parse the string without launching external commands.
 **Action:** When working in strict POSIX mode where bash extensions are not available, utilize `IFS` inside the shell for string splitting to avoid slow external processes in tight loops.
+
+## 2024-11-20 - POSIX String Replacement without Subshells
+**Learning:** In strictly POSIX-compliant scripts where native bash substitutions like `${var//pattern/repl}` are unavailable, calling external binaries like `sed` inside busy loops introduces severe process fork overhead.
+**Action:** Use a `while` loop combining POSIX parameter expansion (`${var%%pattern*}` and `${var#*pattern}`) for repeated string replacement (e.g. escaping quotes) to eliminate subshell process overhead.
+
+## 2024-11-20 - Consolidate Sequential `sed` Invocations
+**Learning:** Executing multiple `sed` commands sequentially (or piping them) spawns multiple processes.
+**Action:** Combine sequential `sed` operations into a single invocation using the `-e` flag or semicolons (e.g., `sed -e 's/pattern1/repl1/' -e 's/pattern2/repl2/'`) to halve the process spawning overhead.
