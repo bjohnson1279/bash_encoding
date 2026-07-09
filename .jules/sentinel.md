@@ -28,3 +28,7 @@
 **Vulnerability:** Arbitrary file operation (e.g. deletion) due to unhandled `cd` failures (Fail-Open behavior).
 **Learning:** `encode-all.sh` used commands like `cd ..` and `cd -- "$RECORDING_PATH" || continue` (outside a loop structure). If a directory change fails (due to permissions, deleted folders, or symlink issues), bash continues executing the script in the current, unintended directory. In scripts that perform destructive actions like `rm`, this can result in catastrophic arbitrary file deletion.
 **Prevention:** Always check the exit status of directory changes and fail securely. Use `cd /path || exit 1` or `cd /path || return` to ensure the script aborts if the required directory state cannot be reached.
+## 2024-05-20 - [HIGH] Prevent JSON Injection in Manual JSON Construction
+**Vulnerability:** Arbitrary JSON Injection
+**Learning:** When manually constructing JSON strings in bash using 'sed', only escaping quotes (") is insufficient. If a variable contains a backslash followed by a quote (e.g., \"), it escapes the injected quote escape, allowing an attacker to break out of the JSON string context.
+**Prevention:** Always escape backslashes first (s/\\/\\\\/g) before escaping quotes (s/"/\\"/g) when manually building JSON strings.

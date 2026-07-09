@@ -49,7 +49,7 @@ json_escape() {
     # ⚡ Bolt Optimization: Replace sed subshells with parameter expansion.
     # While ${var//\"/\\\"} is a bashism, we must stay POSIX-compliant.
     # However, since we can't use bash substitution, we will keep sed but ensure it is optimal.
-    printf '%s\n' "$1" | sed 's/"/\\"/g'
+    printf '%s\n' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
 parse_filename() {
