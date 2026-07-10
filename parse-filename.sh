@@ -46,10 +46,10 @@ cleanup_name() {
 
 # Escapes a string for use in JSON.
 json_escape() {
-    # ⚡ Bolt Optimization: Replace sed subshells with parameter expansion.
-    # While ${var//\"/\\\"} is a bashism, we must stay POSIX-compliant.
-    # However, since we can't use bash substitution, we will keep sed but ensure it is optimal.
-    printf '%s\n' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+    # shellcheck disable=SC3043,SC3060
+    local val="${1//\\/\\\\}"
+    # shellcheck disable=SC3060
+    printf '%s\n' "${val//\"/\\\"}"
 }
 
 parse_filename() {
