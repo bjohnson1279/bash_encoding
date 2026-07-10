@@ -13,6 +13,25 @@ NC='\033[0m' # No Color
 FAILED_TESTS=0
 TOTAL_TESTS=0
 
+# Helper function to test cleanup_name
+run_cleanup_test() {
+    local input="$1"
+    local expected="$2"
+
+    ((TOTAL_TESTS++))
+
+    echo "Testing cleanup_name: '$input'"
+    local output
+    output=$(cleanup_name "$input")
+
+    if [ "$output" != "$expected" ]; then
+        echo -e "${RED}  FAIL: Expected '$expected', got '$output'${NC}"
+        ((FAILED_TESTS++))
+    else
+        echo -e "${GREEN}  PASS${NC}"
+    fi
+}
+
 # Helper function to run a test and assert JSON output
 run_test() {
     local filename="$1"
@@ -81,6 +100,17 @@ run_test() {
 }
 
 echo "Running tests for parse-filename.sh..."
+echo "----------------------------------------"
+
+echo "Testing cleanup_name function..."
+run_cleanup_test "My.Awesome.Show" "My Awesome Show"
+run_cleanup_test "Another_Show" "Another Show"
+run_cleanup_test "  Leading and trailing  " "Leading and trailing"
+run_cleanup_test "Multiple...Dots" "Multiple   Dots"
+run_cleanup_test ".Hidden.File" "Hidden File"
+run_cleanup_test "Show.Name_With.Both" "Show Name With Both"
+run_cleanup_test "  Leading_Trailing  " "Leading Trailing"
+run_cleanup_test "" ""
 echo "----------------------------------------"
 
 # run_test "filename" "expected_show" "expected_season" "expected_episode" "expected_title" "expected_exit_code"
