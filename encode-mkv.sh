@@ -13,7 +13,7 @@ PRESET="veryslow"
 QUALITY=21
 
 # Find and loop through all .mkv files in the current directory
-find . -type f -name "*.mkv" | while read -r i; do
+find . -type f -name "*.mkv" -print0 | while IFS= read -r -d '' i; do
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
