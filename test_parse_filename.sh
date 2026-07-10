@@ -104,6 +104,21 @@ run_test "Unparseable Filename.mp4" "" "" "" "" 1
 run_test "This Is Not A TV Show.mp4" "" "" "" "" 1
 run_test "" "" "" "" "" 1
 
+# Missing argument test
+((TOTAL_TESTS++))
+echo "Testing: missing argument"
+output=$(parse_filename 2>&1)
+exit_code=$?
+if [ $exit_code -ne 1 ]; then
+    echo -e "${RED}  FAIL: Expected exit code 1 for missing argument, got $exit_code${NC}"
+    ((FAILED_TESTS++))
+elif [ "$output" != "Usage: parse_filename \"<filename>\"" ]; then
+    echo -e "${RED}  FAIL: Expected usage message, got '$output'${NC}"
+    ((FAILED_TESTS++))
+else
+    echo -e "${GREEN}  PASS (Failed as expected)${NC}"
+fi
+
 echo "----------------------------------------"
 echo "Test summary:"
 echo "Total: $TOTAL_TESTS"
