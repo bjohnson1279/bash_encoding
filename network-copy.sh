@@ -4,10 +4,13 @@
 set -eo pipefail
 
 # Error handler trap
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 trap 'echo "An unexpected error occurred at line $LINENO. Exiting." >&2' ERR
+fi
 
 # Copy Plex recordings from a network location
 
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 clear
 
 # Dependency check
@@ -22,6 +25,7 @@ for cmd in rsync awk df du mount.cifs; do
     fi
 done
 
+fi
 # Enter your mount path for network share
 MNT_SHARE_PATH=""
 
@@ -97,6 +101,7 @@ folder_sync() {
     echo "Copy complete."
 }
 
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 # --- Main Script ---
 
 # Check initial disk space
@@ -128,3 +133,4 @@ folder_sync "$recordings_src_all" "$required_space_all"
 # recordings_src_another="$LOCAL_SHARE_PATH/Recorded TV Shows/Another Show (2022)"
 # required_space_another=3000
 # folder_sync "$recordings_src_another" "$required_space_another"
+fi
