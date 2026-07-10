@@ -4,10 +4,13 @@
 set -eo pipefail
 
 # Error handler trap
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 trap 'echo "An unexpected error occurred at line $LINENO. Exiting." >&2' ERR
+fi
 
 # Copy Plex recordings from a network location
 
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 clear
 
 # Dependency check
@@ -22,6 +25,7 @@ for cmd in rsync awk df du mount.cifs; do
     fi
 done
 
+fi
 # Enter your mount path for network share
 MNT_SHARE_PATH=""
 
@@ -76,7 +80,7 @@ folder_sync() {
     local avail_mb=$(get_avail_mb)
     echo "Available disk space: ${avail_mb}MB"
 
-    if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$required_space" ]; then
+    if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
         echo "Insufficient disk space to start copy from '$src_folder'."
         echo "Required: ${required_space}MB, Available: ${avail_mb:-Unknown}MB"
         return 1
@@ -86,7 +90,7 @@ folder_sync() {
     local folder_size_mb=$(get_folder_size_mb "$src_folder")
     echo "Source folder size: ${folder_size_mb}MB"
 
-    if [ -z "$avail_mb" ] || [ -z "$folder_size_mb" ] || [ "$avail_mb" -lt "$folder_size_mb" ]; then
+    if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
         echo "Insufficient disk space to copy '$src_folder'."
         echo "Required: ${folder_size_mb}MB, Available: ${avail_mb}MB"
         return 1
@@ -97,25 +101,18 @@ folder_sync() {
     echo "Copy complete."
 }
 
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 # --- Main Script ---
 
 # Check initial disk space
 avail_mb=$(get_avail_mb)
-if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
+if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
     echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
     exit 1
 fi
 
 # --- Define Folders to Copy ---
 # Add more calls to folder_sync for each show or directory you want to copy.
-
-# Example 1: Copying a specific TV show
-# ------------------------------------------
-# Source directory on the mounted share
-# recordings_src="$LOCAL_SHARE_PATH/Recorded TV Shows/Seinfeld (1989)"
-# Required disk space in MB to check before starting
-# required_space_seinfeld=2500
-# folder_sync "$recordings_src" "$required_space_seinfeld"
 
 # Example 2: Copying the entire recordings directory
 # ------------------------------------------
@@ -128,3 +125,4 @@ folder_sync "$recordings_src_all" "$required_space_all"
 # recordings_src_another="$LOCAL_SHARE_PATH/Recorded TV Shows/Another Show (2022)"
 # required_space_another=3000
 # folder_sync "$recordings_src_another" "$required_space_another"
+fi

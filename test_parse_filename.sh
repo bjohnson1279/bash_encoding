@@ -13,6 +13,25 @@ NC='\033[0m' # No Color
 FAILED_TESTS=0
 TOTAL_TESTS=0
 
+# Helper function to test cleanup_name
+run_cleanup_test() {
+    local input="$1"
+    local expected="$2"
+
+    ((TOTAL_TESTS++))
+
+    echo "Testing cleanup_name: '$input'"
+    local output
+    output=$(cleanup_name "$input")
+
+    if [ "$output" != "$expected" ]; then
+        echo -e "${RED}  FAIL: Expected '$expected', got '$output'${NC}"
+        ((FAILED_TESTS++))
+    else
+        echo -e "${GREEN}  PASS${NC}"
+    fi
+}
+
 # Helper function to run a test and assert JSON output
 run_test() {
     local filename="$1"
@@ -80,7 +99,39 @@ run_test() {
     fi
 }
 
+# Helper function to run a test for json_escape
+run_json_escape_test() {
+    local input="$1"
+    local expected_output="$2"
+
+    ((TOTAL_TESTS++))
+
+    echo "Testing json_escape: '$input'"
+
+    # Run the function and capture stdout
+    local output
+    output=$(json_escape "$input")
+
+    if [ "$output" != "$expected_output" ]; then
+        echo -e "${RED}  FAIL: Expected '$expected_output', got '$output'${NC}"
+        ((FAILED_TESTS++))
+    else
+        echo -e "${GREEN}  PASS${NC}"
+    fi
+}
+
 echo "Running tests for parse-filename.sh..."
+echo "----------------------------------------"
+
+echo "Testing cleanup_name function..."
+run_cleanup_test "My.Awesome.Show" "My Awesome Show"
+run_cleanup_test "Another_Show" "Another Show"
+run_cleanup_test "  Leading and trailing  " "Leading and trailing"
+run_cleanup_test "Multiple...Dots" "Multiple   Dots"
+run_cleanup_test ".Hidden.File" "Hidden File"
+run_cleanup_test "Show.Name_With.Both" "Show Name With Both"
+run_cleanup_test "  Leading_Trailing  " "Leading Trailing"
+run_cleanup_test "" ""
 echo "----------------------------------------"
 
 # run_test "filename" "expected_show" "expected_season" "expected_episode" "expected_title" "expected_exit_code"
@@ -103,6 +154,28 @@ run_test "Show.Name.S01E02.Title" "Show Name" "01" "02" "" # Title is incorrectl
 run_test "Unparseable Filename.mp4" "" "" "" "" 1
 run_test "This Is Not A TV Show.mp4" "" "" "" "" 1
 run_test "" "" "" "" "" 1
+
+# Missing argument test
+((TOTAL_TESTS++))
+echo "Testing: missing argument"
+output=$(parse_filename 2>&1)
+exit_code=$?
+if [ $exit_code -ne 1 ]; then
+    echo -e "${RED}  FAIL: Expected exit code 1 for missing argument, got $exit_code${NC}"
+    ((FAILED_TESTS++))
+elif [ "$output" != "Usage: parse_filename \"<filename>\"" ]; then
+    echo -e "${RED}  FAIL: Expected usage message, got '$output'${NC}"
+    ((FAILED_TESTS++))
+else
+    echo -e "${GREEN}  PASS (Failed as expected)${NC}"
+fi
+
+echo "----------------------------------------"
+echo "Running json_escape tests..."
+run_json_escape_test "Normal String" "Normal String"
+run_json_escape_test "String with \"quotes\"" "String with \\\"quotes\\\""
+run_json_escape_test 'String with \ backslash' 'String with \\ backslash'
+run_json_escape_test 'String with \"both\"' 'String with \\\"both\\\"'
 
 echo "----------------------------------------"
 echo "Test summary:"
