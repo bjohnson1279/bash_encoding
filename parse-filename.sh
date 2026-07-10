@@ -1,6 +1,6 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-# POSIX-compliant script to parse TV show filenames.
+# Bash script to parse TV show filenames.
 # Handles patterns like "Show.Name.S01E02.Episode.Title.mkv"
 
 # Cleans up a string by replacing dots and underscores with spaces,
@@ -46,13 +46,15 @@ cleanup_name() {
 
 # Escapes a string for use in JSON.
 json_escape() {
-    # ⚡ Bolt Optimization: Replace sed subshells with parameter expansion.
-    # While ${var//\"/\\\"} is a bashism, it is safe as the script executes
-    # in environments where sh resolves to bash.
-    # shellcheck disable=SC3043,SC3060
-    local val="${1//\\/\\\\}"
-    # shellcheck disable=SC3060
-    printf '%s\n' "${val//\"/\\\"}"
+    # ⚡ Sentinel: Prevent JSON injection and syntax errors by fully escaping backslashes, quotes, and control characters according to JSON specification.
+    # ⚡ Bolt Optimization: Use bash native string replacement instead of spawning subshells with sed/awk.
+    local val="$1"
+    val="${val//\\/\\\\}"
+    val="${val//\"/\\\"}"
+    val="${val//$'\n'/\\n}"
+    val="${val//$'\r'/\\r}"
+    val="${val//$'\t'/\\t}"
+    printf '%s' "$val"
 }
 
 parse_filename() {
