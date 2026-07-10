@@ -80,6 +80,27 @@ run_test() {
     fi
 }
 
+# Helper function to run a test for json_escape
+run_json_escape_test() {
+    local input="$1"
+    local expected_output="$2"
+
+    ((TOTAL_TESTS++))
+
+    echo "Testing json_escape: '$input'"
+
+    # Run the function and capture stdout
+    local output
+    output=$(json_escape "$input")
+
+    if [ "$output" != "$expected_output" ]; then
+        echo -e "${RED}  FAIL: Expected '$expected_output', got '$output'${NC}"
+        ((FAILED_TESTS++))
+    else
+        echo -e "${GREEN}  PASS${NC}"
+    fi
+}
+
 echo "Running tests for parse-filename.sh..."
 echo "----------------------------------------"
 
@@ -118,6 +139,13 @@ elif [ "$output" != "Usage: parse_filename \"<filename>\"" ]; then
 else
     echo -e "${GREEN}  PASS (Failed as expected)${NC}"
 fi
+
+echo "----------------------------------------"
+echo "Running json_escape tests..."
+run_json_escape_test "Normal String" "Normal String"
+run_json_escape_test "String with \"quotes\"" "String with \\\"quotes\\\""
+run_json_escape_test 'String with \ backslash' 'String with \\ backslash'
+run_json_escape_test 'String with \"both\"' 'String with \\\"both\\\"'
 
 echo "----------------------------------------"
 echo "Test summary:"
