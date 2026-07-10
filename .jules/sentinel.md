@@ -32,3 +32,4 @@
 **Vulnerability:** Arbitrary JSON Injection
 **Learning:** When manually constructing JSON strings in bash using 'sed', only escaping quotes (") is insufficient. If a variable contains a backslash followed by a quote (e.g., \"), it escapes the injected quote escape, allowing an attacker to break out of the JSON string context.
 **Prevention:** Always escape backslashes first (s/\\/\\\\/g) before escaping quotes (s/"/\\"/g) when manually building JSON strings.
+Security convention: When looping through files found by 'find', use '-print0' and pipe to 'while IFS= read -r -d \'\' var' to prevent injection or breakage from filenames containing spaces, newlines, or other special characters.
