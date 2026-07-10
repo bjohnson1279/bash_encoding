@@ -13,7 +13,7 @@ PRESET="veryslow"
 QUALITY=21
 
 # Find and loop through all .m4v files in the current directory
-find . -type f -name "*.m4v" | while read -r i; do
+find . -type f -name "*.m4v" -print0 | while IFS= read -r -d '' i; do
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
