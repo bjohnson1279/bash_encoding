@@ -109,14 +109,6 @@ fi
 # --- Define Folders to Copy ---
 # Add more calls to folder_sync for each show or directory you want to copy.
 
-# Example 1: Copying a specific TV show
-# ------------------------------------------
-# Source directory on the mounted share
-# recordings_src="$LOCAL_SHARE_PATH/Recorded TV Shows/Seinfeld (1989)"
-# Required disk space in MB to check before starting
-# required_space_seinfeld=2500
-# folder_sync "$recordings_src" "$required_space_seinfeld"
-
 # Example 2: Copying the entire recordings directory
 # ------------------------------------------
 recordings_src_all="$LOCAL_SHARE_PATH/Recorded TV Shows"
