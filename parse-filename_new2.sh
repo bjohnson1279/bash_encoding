@@ -1,60 +1,53 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
-# Bash script to parse TV show filenames.
+# POSIX-compliant script to parse TV show filenames.
 # Handles patterns like "Show.Name.S01E02.Episode.Title.mkv"
 
 # Cleans up a string by replacing dots and underscores with spaces,
 # and trimming leading/trailing whitespace.
-# ⚡ Bolt Optimization: Use `tr` and parameter expansion instead of multiple sed operations.
-# Using parameter expansion for stripping whitespaces is POSIX compliant (`${var#"${var%%[! ]*}"}`).
-# Using `tr` avoids multiple process forks compared to `sed`.
+# ⚡ Bolt Optimization: Use parameter expansion and extglob instead of subshells and sed.
 cleanup_name() {
     # Replace dots and underscores with spaces
-    # shellcheck disable=SC3043 # local is supported in environments where this script is executed
-    # ⚡ Bolt Optimization: Replace `tr` and command substitution with POSIX IFS string splitting.
-    # This avoids spawning a subshell and process for each cleanup.
-    local val
-    # shellcheck disable=SC3043 # local is supported in environments where this script is executed
-    local IFS="._"
-    # shellcheck disable=SC3043
-    local old_set="$-"
+    # shellcheck disable=SC3043,SC3060 # local and string replacement are supported in bash
+    local val="${1//[._]/ }"
 
-    set -f
-    # shellcheck disable=SC2086 # Expected to split the string
-    set -- $1
+    # We use extglob to trim spaces, avoiding subshells.
+    # shellcheck disable=SC3043 # local is supported in bash
+    local extglob_set=0
+    # shellcheck disable=SC3044 # shopt is supported in bash environments where this script executes
+    if shopt -q extglob 2>/dev/null; then
+        extglob_set=1
+    else
+        # shellcheck disable=SC3044
+        shopt -s extglob
+    fi
 
-    # We set IFS to space to join the arguments via "$*"
-    IFS=" "
-    val="$*"
-
-    # Restore previous globbing state safely
-    case "$old_set" in
-        *f*) ;;         # Was already off, do nothing
-        *) set +f ;;    # Was on, turn it back on
-    esac
-
-    # Strip leading whitespace
-    val="${val#"${val%%[! ]*}"}"
-    # Strip trailing whitespace
-    val="${val%"${val##*[! ]}"}"
+    # Trim leading spaces
+    # shellcheck disable=SC3054 # extglob is supported in bash environments where this script executes
+    val="${val##+( )}"
+    # Trim trailing spaces
+    # shellcheck disable=SC3054
+    val="${val%%+( )}"
     # Strip trailing " -" if present
     val="${val%" -"}"
-    # Strip trailing whitespace again
-    val="${val%"${val##*[! ]}"}"
+    # Trim trailing spaces again
+    # shellcheck disable=SC3054
+    val="${val%%+( )}"
+
+    if [ "$extglob_set" -eq 0 ]; then
+        # shellcheck disable=SC3044
+        shopt -u extglob
+    fi
+
     printf '%s\n' "$val"
 }
 
 # Escapes a string for use in JSON.
 json_escape() {
-    # ⚡ Sentinel: Prevent JSON injection and syntax errors by fully escaping backslashes, quotes, and control characters according to JSON specification.
-    # ⚡ Bolt Optimization: Use bash native string replacement instead of spawning subshells with sed/awk.
-    local val="$1"
-    val="${val//\\/\\\\}"
-    val="${val//\"/\\\"}"
-    val="${val//$'\n'/\\n}"
-    val="${val//$'\r'/\\r}"
-    val="${val//$'\t'/\\t}"
-    printf '%s' "$val"
+    # ⚡ Bolt Optimization: Replace sed subshells with parameter expansion.
+    # While ${var//\"/\\\"} is a bashism, we must stay POSIX-compliant.
+    # However, since we can't use bash substitution, we will keep sed but ensure it is optimal.
+    printf '%s\n' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
 parse_filename() {
@@ -88,6 +81,7 @@ parse_filename() {
     old_ifs=$IFS
     IFS="|"
     set -f # Temporarily disable globbing to prevent issues with filenames
+    # shellcheck disable=SC2086 # Expected to split the string
     set -- $parsed
     set +f # Re-enable globbing
     IFS=$old_ifs

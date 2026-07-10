@@ -44,13 +44,11 @@ parseFilename() {
     SHOW_NAME="${SHOW_NAME##*( )}"
     SHOW_NAME="${SHOW_NAME%%*( )}"
     shopt -u extglob
-    # echo "Show Name: '$SHOW_NAME'"
     
     YEAR_PREMIERED=${FILE//${SHOW_NAME} /}
     YEAR_PREMIERED=${YEAR_PREMIERED%\) *}
     YEAR_PREMIERED=${YEAR_PREMIERED//[^0-9]}
     YEAR_PREMIERED=${YEAR_PREMIERED:0:4}
-    # echo "Year Premiered: '$YEAR_PREMIERED'"
     
     DATE_TIME=""
     DATE_TIME=${FILE//${SHOW_NAME} /}
@@ -62,7 +60,6 @@ parseFilename() {
     DATE_TIME=${DATE_TIME##*( )}
     DATE_TIME=${DATE_TIME%%*( )}
     shopt -u extglob
-    # echo "Date/Time: '$DATE_TIME'"
     
     DATE=""
     DATE=${DATE_TIME// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
@@ -70,20 +67,16 @@ parseFilename() {
     DATE=${DATE##*( )}
     DATE=${DATE%%*( )}
     shopt -u extglob
-    # echo "Date: '$DATE'"
     
     NUM_DATE=${DATE//-/}
-    # echo "Num Date: $NUM_DATE"
     
     YEAR=${DATE:0:4}
-    # echo "Year: $YEAR"
     
     TIME=""
     TIME=${DATE_TIME//$DATE/}
     shopt -s extglob
     TIME=${TIME##*( )}
     TIME=${TIME%%*( )}
-    # echo "Time: '$TIME'"
     
     # Simply Remaining Data Extraction By Removing From $FILE variable
     FILE=${FILE//${TIME}/}
@@ -96,7 +89,6 @@ parseFilename() {
     SEASON=${SEASON%E*}
     SEASON=${SEASON//[^0-9]}
     SEASON=${SEASON:0:4}
-    # echo "Season: $SEASON"
     
     EPISODE=${FILE//${SHOW_NAME}/}
     EPISODE=${EPISODE//\(${YEAR_PREMIERED}\)/}
@@ -107,7 +99,6 @@ parseFilename() {
         EPISODE=${EPISODE// S${SEASON}E/}
         EPISODE=${EPISODE//[^0-9]}
     fi
-    # echo "Episode: ${EPISODE}"
     
     EPISODE_TITLE=${FILE//${SHOW_NAME} /}
     EPISODE_TITLE=${EPISODE_TITLE//\(${YEAR_PREMIERED}\)/}
@@ -122,7 +113,6 @@ parseFilename() {
     EPISODE_TITLE=${EPISODE_TITLE##*( )}
     EPISODE_TITLE=${EPISODE_TITLE%%*( )}
     shopt -u extglob
-    # echo "Episode Title: '${EPISODE_TITLE}'"
     
     # ⚡ Bolt Optimization: Use printf and native bash parameter expansion instead of jq subshell
     # This significantly improves performance in busy loops by avoiding process overhead
