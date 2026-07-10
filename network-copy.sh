@@ -76,7 +76,7 @@ folder_sync() {
     local avail_mb=$(get_avail_mb)
     echo "Available disk space: ${avail_mb}MB"
 
-    if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$required_space" ]; then
+    if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
         echo "Insufficient disk space to start copy from '$src_folder'."
         echo "Required: ${required_space}MB, Available: ${avail_mb:-Unknown}MB"
         return 1
@@ -86,7 +86,7 @@ folder_sync() {
     local folder_size_mb=$(get_folder_size_mb "$src_folder")
     echo "Source folder size: ${folder_size_mb}MB"
 
-    if [ -z "$avail_mb" ] || [ -z "$folder_size_mb" ] || [ "$avail_mb" -lt "$folder_size_mb" ]; then
+    if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
         echo "Insufficient disk space to copy '$src_folder'."
         echo "Required: ${folder_size_mb}MB, Available: ${avail_mb}MB"
         return 1
@@ -101,7 +101,7 @@ folder_sync() {
 
 # Check initial disk space
 avail_mb=$(get_avail_mb)
-if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
+if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
     echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
     exit 1
 fi
