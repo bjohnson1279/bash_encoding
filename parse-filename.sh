@@ -14,6 +14,7 @@ cleanup_name() {
     # ⚡ Bolt Optimization: Replace `tr` and command substitution with POSIX IFS string splitting.
     # This avoids spawning a subshell and process for each cleanup.
     local val
+    local out_ref_name="$2"
     # shellcheck disable=SC3043 # local is supported in environments where this script is executed
     local IFS="._"
     # shellcheck disable=SC3043
@@ -41,7 +42,12 @@ cleanup_name() {
     val="${val%" -"}"
     # Strip trailing whitespace again
     val="${val%"${val##*[! ]}"}"
-    printf '%s\n' "$val"
+
+    if [ -n "$out_ref_name" ]; then
+        eval "$out_ref_name=\"\$val\""
+    else
+        printf '%s\n' "$val"
+    fi
 }
 
 # Escapes a string for use in JSON.
@@ -54,7 +60,11 @@ json_escape() {
     val="${val//$'\n'/\\n}"
     val="${val//$'\r'/\\r}"
     val="${val//$'\t'/\\t}"
-    printf '%s' "$val"
+    if [ -n "$2" ]; then
+        eval "$2=\"\$val\""
+    else
+        printf '%s' "$val"
+    fi
 }
 
 parse_filename() {
@@ -89,11 +99,13 @@ parse_filename() {
     old_ifs=$IFS
     IFS="|"
     set -f # Temporarily disable globbing to prevent issues with filenames
+    # shellcheck disable=SC2086 # Intentionally using word splitting
     set -- $parsed
     set +f # Re-enable globbing
     IFS=$old_ifs
 
-    show_name=$(cleanup_name "$1")
+    local show_name episode_title show_name_esc episode_title_esc
+    cleanup_name "$1" show_name
     # ⚡ Bolt Optimization: Replace subshells and sed with native POSIX parameter expansion to remove leading zeros
     season_stripped="${2#"${2%%[!0]*}"}"
     episode_stripped="${3#"${3%%[!0]*}"}"
@@ -112,17 +124,17 @@ parse_filename() {
     else
         episode_num="$episode_stripped"
     fi
-    episode_title=$(cleanup_name "$4")
+    cleanup_name "$4" episode_title
+
+    json_escape "$show_name" show_name_esc
+    json_escape "$episode_title" episode_title_esc
 
     # Output JSON
-    cat <<JSON
-{
-  "show_name": "$(json_escape "$show_name")",
-  "season": "$season_num",
-  "episode": "$episode_num",
-  "title": "$(json_escape "$episode_title")"
-}
-JSON
+    printf '{\n  "show_name": "%s",\n  "season": "%s",\n  "episode": "%s",\n  "title": "%s"\n}\n' \
+        "$show_name_esc" \
+        "$season_num" \
+        "$episode_num" \
+        "$episode_title_esc"
 
     return 0
 }
