@@ -10,6 +10,30 @@ setup() {
     source network-copy.sh
 }
 
+@test "get_avail_mb returns 1 for invalid directory" {
+    # Provide a clearly non-existent directory
+    run get_avail_mb "/path/does/not/exist/123456789"
+    [ "$status" -eq 1 ]
+    [ "$output" = "" ]
+}
+
+@test "get_avail_mb calculates available MB correctly" {
+    # Mock df to output 2048 1K-blocks (which is exactly 2 MB)
+    df() {
+        echo "Filesystem     1024-blocks   Used Available Capacity Mounted on"
+        echo "/dev/sda1          1000000 500000      2048      50% /mock/path"
+    }
+
+    # Create a dummy directory to pass the directory check
+    mkdir -p /tmp/mock_dir
+
+    result=$(get_avail_mb "/tmp/mock_dir")
+    [ "$result" -eq 2 ]
+
+    # Cleanup
+    rm -rf /tmp/mock_dir
+}
+
 @test "get_folder_size_mb calculates standard MB correctly" {
     # Mock du to output 1024 1K-blocks (which is exactly 1 MB)
     du() {
