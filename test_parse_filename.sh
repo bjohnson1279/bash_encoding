@@ -176,6 +176,7 @@ run_json_escape_test "Normal String" "Normal String"
 run_json_escape_test "String with \"quotes\"" "String with \\\"quotes\\\""
 run_json_escape_test 'String with \ backslash' 'String with \\ backslash'
 run_json_escape_test 'String with \"both\"' 'String with \\\"both\\\"'
+run_json_escape_test "" ""
 
 echo "----------------------------------------"
 echo "Test summary:"
