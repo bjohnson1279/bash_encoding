@@ -204,7 +204,7 @@ if [ -d "$RECORDING_PATH" ]; then
                                     # ⚡ Bolt Optimization: Pass 'episode_data' as a nameref instead of using a subshell `episode_data=$(...)`.
                                     # Spawning subshells in a busy loop carries a large overhead; namerefs skip the subshell entirely.
                                     parseFilename "${i}" episode_data
-                                    echo "Episode Data: ${episode_data}"
+                                    printf 'Episode Data: %s\n' "${episode_data}"
                                     if [[ "$episode_data" =~ \"show\":\"(([^\"\\]|\\.)*)\" ]]; then
                                         SHOW_NAME="${BASH_REMATCH[1]}"
                                         SHOW_NAME="${SHOW_NAME//\\\"/\"}"
@@ -237,7 +237,7 @@ if [ -d "$RECORDING_PATH" ]; then
                                     fi
                                     new_file=${new_file##*( )}
                                     new_file=${new_file%%*( )}
-echo "New File: ${new_file}"
+printf 'New File: %s\n' "${new_file}"
                                     new_file_full="${DESTINATION_PATH}${new_file}.mp4"
 
                                     # Validate existience of file
@@ -314,7 +314,7 @@ fi
 # than nested loops and `cd`.
 find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0' ts_file; do
     echo "--------------------------------------------------"
-    echo "Processing file: $ts_file"
+    printf 'Processing file: %s\n' "$ts_file"
 
     # Parse filename to get metadata
     # This function is from the sourced parse-filename.sh script.
@@ -338,21 +338,21 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
     new_filename="${new_filename//[\/\\\\?%*:|\"<>]/_}"
     new_file_full="$DESTINATION_PATH/$new_filename"
 
-    echo "  Show: $show_name"
-    echo "  Season: $season, Episode: $episode"
-    echo "  Title: $title"
-    echo "  Output file: $new_file_full"
+    printf '  Show: %s\n' "$show_name"
+    printf '  Season: %s, Episode: %s\n' "$season" "$episode"
+    printf '  Title: %s\n' "$title"
+    printf '  Output file: %s\n' "$new_file_full"
 
     # Skip if the encoded file already exists
     if [ -f "$new_file_full" ]; then
-        echo "Warning: Destination file '$new_file_full' already exists. Skipping."
+        printf "Warning: Destination file '%s' already exists. Skipping.\n" "$new_file_full"
         continue
     fi
 
     # --- Pre-flight check on the source file ---
     echo "Verifying source file integrity with ffprobe..."
     if ! ffprobe -v error -i "$ts_file" >/dev/null 2>&1; then
-        echo "Error: Source file '$ts_file' appears to be corrupt or unreadable by ffprobe. Skipping."
+        printf "Error: Source file '%s' appears to be corrupt or unreadable by ffprobe. Skipping.\n" "$ts_file"
         continue
     fi
 
@@ -381,7 +381,7 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
     # is from ffmpeg, not from tee.
     set -o pipefail
     if ! ffmpeg "${ffmpeg_args[@]}" "$new_file_full" 2>&1 | tee "${new_file_full}.log"; then
-        echo "Error: Encoding failed. See log for details: ${new_file_full}.log"
+        printf "Error: Encoding failed. See log for details: %s.log\n" "${new_file_full}"
         set +o pipefail # Unset pipefail
         continue # Move to the next file
     fi
@@ -402,7 +402,7 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
             if (( $(echo "$duration_diff < 1.0" | bc -l) )); then
                 echo "Encoding successful. Durations match."
                 if [ "$DEL_ORIG" -eq 1 ]; then
-                    echo "Deleting original file: $ts_file"
+                    printf "Deleting original file: %s\n" "$ts_file"
                     rm -- "$ts_file"
                 fi
             else
@@ -411,7 +411,7 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
         fi
     else
         # This case should now be caught by the ! ffmpeg ... check above, but we leave it as a safeguard.
-        echo "Error: Encoding failed. Output file not found. See log for details: ${new_file_full}.log"
+        printf "Error: Encoding failed. Output file not found. See log for details: %s.log\n" "${new_file_full}"
     fi
 done
 
