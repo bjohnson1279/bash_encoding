@@ -68,16 +68,17 @@ parse_filename() {
     base_name="${1##*/}"
     base_name="${base_name%.*}"
 
-    # Use sed to capture parts of the filename.
+    # Use native Bash regex to capture parts of the filename to avoid subshell overhead.
     # The pattern looks for "S<season>E<episode>" and captures the parts around it.
     # It handles variations in separators (., _, -, space).
-    # ⚡ Bolt Optimization: Combine sequential sed operations into a single invocation
-    # using `-e` and the conditional branch command `t` to prevent the second substitution
-    # if the first one succeeds. This cuts process spawning overhead in half for date-based fallbacks.
-    parsed=$(printf '%s\n' "$base_name" | sed -n \
-        -e 's/^\(.*\)[ ._-][Ss]\([0-9]\{1,2\}\)[ ._-]*[Ee]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p' \
-        -e 't' \
-        -e 's/^\(.*\)[ ._-]\([0-9]\{4\}\)[ ._-]\([0-9]\{1,2\}\)[ ._-]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p')
+    # ⚡ Bolt Optimization: Replace sed subshell with native bash regex matching for better performance.
+    if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
+        parsed="${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}|${BASH_REMATCH[4]}"
+    elif [[ "$base_name" =~ ^(.*)[._\ -]([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2})(.*)$ ]]; then
+        parsed="${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}|${BASH_REMATCH[4]}"
+    else
+        parsed=""
+    fi
 
     if [ -z "$parsed" ]; then
         printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
