@@ -70,7 +70,7 @@ folder_sync() {
 
     # Check if source directory exists
     if [ ! -d "$src_folder" ]; then
-        echo "Directory '$src_folder' not available."
+        printf "Directory '%s' not available.\n" "$src_folder"
         echo "Please ensure the network share is mounted correctly."
         echo "Example for Linux (Debian/Alpine): sudo mount -t cifs //SERVER/SHARE '$MNT_SHARE_PATH' -o username=USER,password=PASS"
         echo "Example for macOS: sudo mount -t smbfs //USER@SERVER/SHARE '$MNT_SHARE_PATH'"
@@ -81,22 +81,22 @@ folder_sync() {
     echo "Available disk space: ${avail_mb}MB"
 
     if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
-        echo "Insufficient disk space to start copy from '$src_folder'."
+        printf "Insufficient disk space to start copy from '%s'.\n" "$src_folder"
         echo "Required: ${required_space}MB, Available: ${avail_mb:-Unknown}MB"
         return 1
     fi
 
-    echo "Calculating size of '$src_folder'..."
+    printf "Calculating size of '%s'...\n" "$src_folder"
     local folder_size_mb=$(get_folder_size_mb "$src_folder")
     echo "Source folder size: ${folder_size_mb}MB"
 
     if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
-        echo "Insufficient disk space to copy '$src_folder'."
+        printf "Insufficient disk space to copy '%s'.\n" "$src_folder"
         echo "Required: ${folder_size_mb}MB, Available: ${avail_mb}MB"
         return 1
     fi
 
-    echo "Starting copy from '$src_folder' to '$RECORDING_PATH'..."
+    printf "Starting copy from '%s' to '%s'...\n" "$src_folder" "$RECORDING_PATH"
     rsync -avzh --progress -- "$src_folder/" "$RECORDING_PATH"
     echo "Copy complete."
 }
