@@ -30,7 +30,3 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Bash regex parsing vs sed
 **Learning:** Using `sed` wrapped inside a `$(...)` command substitution spawns a subshell process for every invocation. When parsing lots of text or files in Bash, native regular expression extraction using `[[ $str =~ $regex ]]` with the `${BASH_REMATCH}` array is dramatically faster as it operates entirely within the main shell process.
 **Action:** When working in a shell with `#!/usr/bin/env bash` (which implies Bash extensions are allowed), strictly prefer the native `[[ ... =~ ... ]]` operator over external matching binaries like `sed` or `grep` combined with subshells to avoid major performance overhead. Ensure spaces within character classes are escaped (`[._\ -]`) to avoid syntax errors.
-
-## 2024-10-31 - Overwriting IFS array parsing in bash
-**Learning:** `IFS` string splitting into positional parameters (e.g., `set -- $var`) or serializing matches into a delimited string just to unpack them later (e.g. `parsed="match1|match2"`) adds unnecessary parsing overhead.
-**Action:** When using bash regexes `[[ $var =~ $regex ]]`, assign the capture groups from `${BASH_REMATCH}` directly into local variables instead of joining and splitting them. This is faster and avoids edge cases with delimiter characters in the content (e.g. `|` in titles).
