@@ -11,28 +11,10 @@
 cleanup_name() {
     # Replace dots and underscores with spaces
     # shellcheck disable=SC3043 # local is supported in environments where this script is executed
-    # ⚡ Bolt Optimization: Replace `tr` and command substitution with POSIX IFS string splitting.
-    # This avoids spawning a subshell and process for each cleanup.
-    local val
+    # ⚡ Bolt Optimization: Replace IFS string splitting with native bash parameter expansion.
+    # This avoids process forking and makes the cleanup significantly faster.
+    local val="${1//[._]/ }"
     local out_ref_name="$2"
-    # shellcheck disable=SC3043 # local is supported in environments where this script is executed
-    local IFS="._"
-    # shellcheck disable=SC3043
-    local old_set="$-"
-
-    set -f
-    # shellcheck disable=SC2086 # Expected to split the string
-    set -- $1
-
-    # We set IFS to space to join the arguments via "$*"
-    IFS=" "
-    val="$*"
-
-    # Restore previous globbing state safely
-    case "$old_set" in
-        *f*) ;;         # Was already off, do nothing
-        *) set +f ;;    # Was on, turn it back on
-    esac
 
     # Strip leading whitespace
     val="${val#"${val%%[! ]*}"}"
@@ -44,6 +26,7 @@ cleanup_name() {
     val="${val%"${val##*[! ]}"}"
 
     if [ -n "$out_ref_name" ]; then
+        # ⚡ Bolt Optimization: Use printf -v instead of eval to prevent command injection and subshell overhead
         printf -v "$out_ref_name" "%s" "$val"
     else
         printf '%s\n' "$val"
@@ -61,6 +44,7 @@ json_escape() {
     val="${val//$'\r'/\\r}"
     val="${val//$'\t'/\\t}"
     if [ -n "$2" ]; then
+        # ⚡ Bolt Optimization: Use printf -v instead of eval to prevent command injection and subshell overhead
         printf -v "$2" "%s" "$val"
     else
         printf '%s' "$val"
@@ -82,33 +66,28 @@ parse_filename() {
     # The pattern looks for "S<season>E<episode>" and captures the parts around it.
     # It handles variations in separators (., _, -, space).
     # ⚡ Bolt Optimization: Replace sed subshell with native bash regex matching for better performance.
+    local show_raw season_raw episode_raw title_raw
     if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
-        parsed="${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}|${BASH_REMATCH[4]}"
+        show_raw="${BASH_REMATCH[1]}"
+        season_raw="${BASH_REMATCH[2]}"
+        episode_raw="${BASH_REMATCH[3]}"
+        title_raw="${BASH_REMATCH[4]}"
     elif [[ "$base_name" =~ ^(.*)[._\ -]([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2})(.*)$ ]]; then
-        parsed="${BASH_REMATCH[1]}|${BASH_REMATCH[2]}|${BASH_REMATCH[3]}|${BASH_REMATCH[4]}"
+        show_raw="${BASH_REMATCH[1]}"
+        season_raw="${BASH_REMATCH[2]}"
+        episode_raw="${BASH_REMATCH[3]}"
+        title_raw="${BASH_REMATCH[4]}"
     else
-        parsed=""
-    fi
-
-    if [ -z "$parsed" ]; then
         printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
         return 1
     fi
 
-    # Use IFS to split the parsed string into variables
-    old_ifs=$IFS
-    IFS="|"
-    set -f # Temporarily disable globbing to prevent issues with filenames
-    # shellcheck disable=SC2086 # Intentionally using word splitting
-    set -- $parsed
-    set +f # Re-enable globbing
-    IFS=$old_ifs
-
     local show_name episode_title show_name_esc episode_title_esc
-    cleanup_name "$1" show_name
+    cleanup_name "$show_raw" show_name
+
     # ⚡ Bolt Optimization: Replace subshells and sed with native POSIX parameter expansion to remove leading zeros
-    season_stripped="${2#"${2%%[!0]*}"}"
-    episode_stripped="${3#"${3%%[!0]*}"}"
+    season_stripped="${season_raw#"${season_raw%%[!0]*}"}"
+    episode_stripped="${episode_raw#"${episode_raw%%[!0]*}"}"
     season_stripped="${season_stripped:-0}"
     episode_stripped="${episode_stripped:-0}"
 
@@ -124,7 +103,7 @@ parse_filename() {
     else
         episode_num="$episode_stripped"
     fi
-    cleanup_name "$4" episode_title
+    cleanup_name "$title_raw" episode_title
 
     json_escape "$show_name" show_name_esc
     json_escape "$episode_title" episode_title_esc
