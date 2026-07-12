@@ -44,7 +44,7 @@ cleanup_name() {
     val="${val%"${val##*[! ]}"}"
 
     if [ -n "$out_ref_name" ]; then
-        eval "$out_ref_name=\"\$val\""
+        printf -v "$out_ref_name" "%s" "$val"
     else
         printf '%s\n' "$val"
     fi
@@ -61,7 +61,7 @@ json_escape() {
     val="${val//$'\r'/\\r}"
     val="${val//$'\t'/\\t}"
     if [ -n "$2" ]; then
-        eval "$2=\"\$val\""
+        printf -v "$2" "%s" "$val"
     else
         printf '%s' "$val"
     fi
