@@ -33,3 +33,7 @@
 **Learning:** When manually constructing JSON strings in bash using 'sed', only escaping quotes (") is insufficient. If a variable contains a backslash followed by a quote (e.g., \"), it escapes the injected quote escape, allowing an attacker to break out of the JSON string context.
 **Prevention:** Always escape backslashes first (s/\\/\\\\/g) before escaping quotes (s/"/\\"/g) when manually building JSON strings.
 Security convention: When looping through files found by 'find', use '-print0' and pipe to 'while IFS= read -r -d \'\' var' to prevent injection or breakage from filenames containing spaces, newlines, or other special characters.
+## 2024-11-20 - [CRITICAL] Prevent Privilege Escalation via rsync
+**Vulnerability:** Preserving SUID/Device files from untrusted network shares
+**Learning:** Using `rsync -a` (archive mode) to copy files from a network share (e.g., in `network-copy.sh`) preserves device files, special files, file ownership, and file permissions, including SUID/SGID bits. This creates a critical local privilege escalation risk if the remote share is compromised or malicious.
+**Prevention:** Always use explicit, restrictive flags like `rsync -rltvzh` instead of `-a` when syncing from untrusted sources to drop dangerous properties (-D, -p, -o, -g).

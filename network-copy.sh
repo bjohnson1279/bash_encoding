@@ -97,7 +97,8 @@ folder_sync() {
     fi
 
     printf "Starting copy from '%s' to '%s'...\n" "$src_folder" "$RECORDING_PATH"
-    rsync -avzh --progress -- "$src_folder/" "$RECORDING_PATH"
+    # 🛡️ Sentinel: Avoid -a (archive) flag to prevent preserving malicious device files (-D) or suid bits (-p) from network shares
+    rsync -rltvzh --progress -- "$src_folder/" "$RECORDING_PATH"
     echo "Copy complete."
 }
 
