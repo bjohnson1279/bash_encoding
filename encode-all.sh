@@ -396,10 +396,40 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
             echo "Warning: Duration could not be reliably determined. Original file kept."
         else
-            # Compare durations (allowing for small floating point differences)
-            duration_diff=$(echo "d = $src_duration - $dest_duration; if (d < 0) d = -d; d" | bc)
+            # ⚡ Bolt Optimization: Replace subshells spawning `bc` with native bash fixed-point math.
+            # This avoids expensive process forks, significantly speeding up the duration matching logic.
 
-            if (( $(echo "$duration_diff < 1.0" | bc -l) )); then
+            # Extract fractional parts and pad to 6 decimal places
+            src_frac="${src_duration#*.}"
+            [ "$src_frac" = "$src_duration" ] && src_frac=""
+            src_frac="${src_frac}000000"
+            src_frac="${src_frac:0:6}"
+
+            dest_frac="${dest_duration#*.}"
+            [ "$dest_frac" = "$dest_duration" ] && dest_frac=""
+            dest_frac="${dest_frac}000000"
+            dest_frac="${dest_frac:0:6}"
+
+            # Extract integer parts
+            src_int="${src_duration%.*}"
+            dest_int="${dest_duration%.*}"
+
+            # Concatenate for fixed-point representation
+            src_val="$src_int$src_frac"
+            dest_val="$dest_int$dest_frac"
+
+            # Strip leading zeros to avoid octal interpretation, default to 0 if empty
+            src_val="${src_val#"${src_val%%[!0]*}"}"
+            dest_val="${dest_val#"${dest_val%%[!0]*}"}"
+            src_val="${src_val:-0}"
+            dest_val="${dest_val:-0}"
+
+            # Calculate absolute difference
+            duration_diff=$(( src_val - dest_val ))
+            duration_diff="${duration_diff#-}"
+
+            # Compare difference (< 1000000 is < 1.0)
+            if [ "$duration_diff" -lt 1000000 ]; then
                 echo "Encoding successful. Durations match."
                 if [ "$DEL_ORIG" -eq 1 ]; then
                     printf "Deleting original file: %s\n" "$ts_file"
