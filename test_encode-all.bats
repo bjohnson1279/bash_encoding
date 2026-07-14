@@ -9,18 +9,18 @@ setup() {
     source encode-all.sh
 }
 
-@test "getDuration parses typical ffmpeg duration correctly" {
+@test "getDuration parses typical ffmpeg format duration correctly" {
     ffprobe() {
-        echo "05:43.50"
+        echo 'format.duration="05:43.50"'
     }
 
     result=$(getDuration "dummy.ts")
     [ "$result" = "05:43.50" ]
 }
 
-@test "getDuration parses duration with non-zero hours correctly" {
+@test "getDuration parses typical ffmpeg stream duration correctly" {
     ffprobe() {
-        echo "01:05:43.50"
+        echo 'streams.stream.0.duration="01:05:43.50"'
     }
 
     result=$(getDuration "dummy.ts")
@@ -36,9 +36,10 @@ setup() {
     [ -z "$result" ]
 }
 
-@test "getDuration parses duration without leading zero hours correctly" {
+@test "getDuration parses format duration without leading zero hours correctly over stream" {
     ffprobe() {
-        echo "02:30:15.00"
+        echo 'streams.stream.0.duration="02:30:16.00"'
+        echo 'format.duration="02:30:15.00"'
     }
 
     result=$(getDuration "dummy.ts")

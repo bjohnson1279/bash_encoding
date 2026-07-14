@@ -34,3 +34,11 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - [Avoid Expensive bc/awk Process Spawning in Tight Loops]
 **Learning:** In `encode-all.sh`, the logic to compare video durations used `bc` and `bc -l` inside multiple command substitution subshells for every file processed. This process spawning is extremely expensive in bash tight loops. We found that spawning awk or bc for a simple floating-point difference (`< 1.0`) is magnitudes slower than manipulating strings and using pure integer math.
 **Action:** When performing simple floating-point comparisons (e.g., `< 1.0`) in a busy loop in bash, avoid `bc` and `awk`. Instead, use pure bash fixed-point arithmetic: split the strings into integer and fractional parts, pad the fractions to a common length (e.g., 6 digits), concatenate them, strip leading zeros, and then use native bash integer subtraction `(( src_val - dest_val ))`.
+
+## 2024-11-20 - Reducing process spawns with ffprobe flat output
+**Learning:** `ffprobe` process spawning was found to be a major bottleneck. The script was spawning `ffprobe` sequentially multiple times to fallback from a format duration to a stream duration. We can fetch both durations simultaneously in one invocation using `-show_entries format=duration:stream=duration -of flat`.
+**Action:** When gathering multiple metadata points from `ffprobe`, combine them into a single call and use `-of flat` alongside bash regex `[[ ... =~ ... ]]` to extract variables natively without spawning extra fallback processes.
+
+## 2024-11-20 - Micro-optimizations vs Readability
+**Learning:** Replacing clean bash `extglob` syntax (like `${var##*( )}`) with strictly POSIX-compliant nested parameter expansion (`${var#"${var%%[! ]*}"}`) is slightly faster but significantly hurts code readability for negligible real-world impact.
+**Action:** Do not sacrifice code readability to apply string manipulation micro-optimizations. Focus strictly on architectural and process-level bottlenecks (like looping external binary spawns).
