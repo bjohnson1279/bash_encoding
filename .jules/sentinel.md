@@ -37,3 +37,7 @@ Security convention: When looping through files found by 'find', use '-print0' a
 **Vulnerability:** Preserving SUID/Device files from untrusted network shares
 **Learning:** Using `rsync -a` (archive mode) to copy files from a network share (e.g., in `network-copy.sh`) preserves device files, special files, file ownership, and file permissions, including SUID/SGID bits. This creates a critical local privilege escalation risk if the remote share is compromised or malicious.
 **Prevention:** Always use explicit, restrictive flags like `rsync -rltvzh` instead of `-a` when syncing from untrusted sources to drop dangerous properties (-D, -p, -o, -g).
+## 2024-05-21 - [MEDIUM] Prevent Logic Bypass in Bash Conditionals
+**Vulnerability:** Bypass of logic (fail-open or fail-closed) driven by unquoted variable expansion syntax errors.
+**Learning:** `encode-all.sh` used unquoted variables within test conditionals (e.g., `if [ $DEL_ORIG == 1 ]; then` and `if [ $VF != "" ]; then`). If these variables were empty or unset, the shell threw a `unary operator expected` syntax error. Bash treats syntax errors in conditionals as a `false` evaluation, which can inadvertently bypass critical logic checks or security constraints.
+**Prevention:** Always quote variables within test conditionals (e.g., `[ "$VAR" == 1 ]` or `[ -n "$VAR" ]`) to ensure safe expansion and prevent syntax-error driven logic bypassing.
