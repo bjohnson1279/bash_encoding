@@ -18,10 +18,23 @@ DEL_ORIG=1
 
 # Function to obtain length of video
 getDuration() {
-    local dur
-    dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -i "${1}")
-    if [ "${dur}" = "N/A" ] || [ -z "${dur}" ]; then
-        dur=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 -i "${1}")
+    local dur format_dur stream_dur output
+
+    # ⚡ Bolt Optimization: Fetch both format and stream durations in a single ffprobe call.
+    # This halves process spawning overhead for files missing format duration (or returning N/A).
+    output=$(ffprobe -v error -select_streams v:0 -show_entries format=duration:stream=duration -of flat -i "${1}" 2>/dev/null || true)
+
+    if [[ "$output" =~ format\.duration=\"([^\"]+)\" ]]; then
+        format_dur="${BASH_REMATCH[1]}"
+    fi
+    if [[ "$output" =~ streams\.stream\.0\.duration=\"([^\"]+)\" ]]; then
+        stream_dur="${BASH_REMATCH[1]}"
+    fi
+
+    if [ -n "$format_dur" ] && [ "$format_dur" != "N/A" ]; then
+        dur="$format_dur"
+    elif [ -n "$stream_dur" ] && [ "$stream_dur" != "N/A" ]; then
+        dur="$stream_dur"
     fi
 
     # ⚡ Bolt Optimization: Support nameref for direct variable assignment, avoiding subshells
