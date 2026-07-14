@@ -92,7 +92,7 @@ parseFilename() {
     
     EPISODE=${FILE//${SHOW_NAME}/}
     EPISODE=${EPISODE//\(${YEAR_PREMIERED}\)/}
-    if [ $SEASON == $YEAR ]; then
+    if [ "$SEASON" == "$YEAR" ]; then
         EPISODE=${NUM_DATE//${SEASON}/}
     else
         EPISODE=${EPISODE//${TIME}/}
@@ -167,7 +167,7 @@ if [ -d "$RECORDING_PATH" ]; then
     files=(*)
     file_count=${#files[@]}
     shopt -u nullglob dotglob
-    if [ $file_count != 0 ]; then
+    if [ "$file_count" != 0 ]; then
         # Iterate through all directories in folder containing your recordings
         for dir in */; do
             printf '%s\n' "${dir}"
@@ -183,7 +183,7 @@ if [ -d "$RECORDING_PATH" ]; then
                 shopt -u nullglob dotglob
                 printf '%s\n' "$dir directory file count: ${dir_file_count}"
 
-                if [ $dir_file_count != 0 ]; then
+                if [ "$dir_file_count" != 0 ]; then
                     # Iterate through Season folders
                     for season in */; do
                         printf '%s\n' "${season}"
@@ -197,7 +197,7 @@ if [ -d "$RECORDING_PATH" ]; then
                             shopt -u nullglob
                             printf '%s\n' "${season} ts file count: ${ts_dir_file_count}"
 
-                            if [ $ts_dir_file_count != 0 ]; then
+                            if [ "$ts_dir_file_count" != 0 ]; then
                                 for i in *.ts; do
                                     printf '%s\n' "${i}"
 
@@ -245,7 +245,7 @@ printf 'New File: %s\n' "${new_file}"
                                         # Skip if encoded file already exists, encode if not
                                         if [ ! -f "$new_file_full" ]; then
                                             # Check for optional video filter
-                                            if [ $VF != "" ]; then
+                                            if [ "$VF" != "" ]; then
                                                 ffmpeg -i "$i" \
                                                     -vf $VF \
                                                     -c:v $ENC_TYPE -c:a copy \
@@ -271,7 +271,7 @@ printf 'New File: %s\n' "${new_file}"
 
                                         # OPTIONAL: Delete source (ts) file when new file (mp4) is created, for space saving purposes
                                         # Set DEL_ORIG value to 0 above if you don't want this to happen
-                                        if [ $DEL_ORIG == 1 ]; then
+                                        if [ "$DEL_ORIG" == 1 ]; then
                                             # Get video duration of encoding source
                                             # ⚡ Bolt Optimization: Replace subshells with nameref for performance
                                             getDuration "${i}" src_duration
