@@ -42,3 +42,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Micro-optimizations vs Readability
 **Learning:** Replacing clean bash `extglob` syntax (like `${var##*( )}`) with strictly POSIX-compliant nested parameter expansion (`${var#"${var%%[! ]*}"}`) is slightly faster but significantly hurts code readability for negligible real-world impact.
 **Action:** Do not sacrifice code readability to apply string manipulation micro-optimizations. Focus strictly on architectural and process-level bottlenecks (like looping external binary spawns).
+
+## 2024-11-20 - Eliminate external awk process spawning for simple parsing
+**Learning:** In strictly POSIX-compliant shell scripts where native bash substitutions are unavailable, piping command outputs (like `df` or `du`) into `awk` creates significant process overhead. By piping the command output into a native shell `read` command blocks, we can extract positional columnar data entirely within the shell process. For example, `df -P | { read -r _; read -r _ _ _ avail _; echo $(( avail / 1024 )); }` runs much faster than using `awk`.
+**Action:** When extracting columns or performing simple math on command output in POSIX scripts, use pipe to `{ read ...; }` and shell arithmetic expansion `$(( ... ))` rather than spawning external `awk` processes.
