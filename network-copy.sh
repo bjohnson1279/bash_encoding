@@ -14,7 +14,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 clear
 
 # Dependency check
-for cmd in rsync awk df du mount.cifs; do
+for cmd in rsync df du mount.cifs; do
     # For mount.cifs, it might not be in the standard PATH for non-root users, so check /sbin explicitly
     if ! command -v "$cmd" >/dev/null 2>&1 && [ ! -x "/sbin/$cmd" ] && [ ! -x "/usr/sbin/$cmd" ]; then
         echo "Error: Required command '$cmd' is not installed." >&2
@@ -47,8 +47,13 @@ get_avail_mb() {
         return 1
     fi
     # df -P -> POSIX standard, reliable output
-    # awk -> extract the available space (4th column), convert from 1K-blocks to MB
-    df -P -- "$target_dir" | awk 'NR==2 { print int($4 / 1024) }'
+    # ⚡ Bolt Optimization: Replace awk process with native shell `read` and arithmetic
+    # This avoids external process spawning and runs significantly faster
+    df -P -- "$target_dir" | {
+        read -r _
+        read -r _ _ _ avail _
+        echo $(( avail / 1024 ))
+    }
 }
 
 # Gets folder size in Megabytes.
@@ -56,8 +61,12 @@ get_avail_mb() {
 get_folder_size_mb() {
     # $1: folder path
     # du -sk -> POSIX standard, size in 1K-blocks
-    # awk -> extract the size, convert from 1K-blocks to MB
-    du -sk -- "$1" | awk '{ print int($1 / 1024) }'
+    # ⚡ Bolt Optimization: Replace awk process with native shell `read` and arithmetic
+    # This avoids external process spawning and runs significantly faster
+    du -sk -- "$1" | {
+        read -r size _
+        echo $(( size / 1024 ))
+    }
 }
 
 # Syncs a folder if there is enough disk space.
