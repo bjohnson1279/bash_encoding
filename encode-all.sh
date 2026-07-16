@@ -408,6 +408,9 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
 
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
             echo "Warning: Duration could not be reliably determined. Original file kept."
+        elif ! [[ "$src_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$dest_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+            # 🛡️ Sentinel: Validate duration formats to prevent arithmetic expression injection during calculation
+            echo "Warning: Duration formats are invalid. Expected numeric formats. Original file kept."
         else
             # ⚡ Bolt Optimization: Replace subshells spawning `bc` with native bash fixed-point math.
             # This avoids expensive process forks, significantly speeding up the duration matching logic.
