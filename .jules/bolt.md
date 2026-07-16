@@ -46,3 +46,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Eliminate external awk process spawning for simple parsing
 **Learning:** In strictly POSIX-compliant shell scripts where native bash substitutions are unavailable, piping command outputs (like `df` or `du`) into `awk` creates significant process overhead. By piping the command output into a native shell `read` command blocks, we can extract positional columnar data entirely within the shell process. For example, `df -P | { read -r _; read -r _ _ _ avail _; echo $(( avail / 1024 )); }` runs much faster than using `awk`.
 **Action:** When extracting columns or performing simple math on command output in POSIX scripts, use pipe to `{ read ...; }` and shell arithmetic expansion `$(( ... ))` rather than spawning external `awk` processes.
+
+## 2024-11-20 - Skip Expensive Output Formatting in Tight Loops
+**Learning:** In `encode-all.sh`, the script was executing `parse_filename` inside a busy loop reading thousands of files. `parse_filename` originally formatted and printed a JSON string on every invocation, but `encode-all.sh` only consumed the raw `PARSED_*` environment variables, ignoring the JSON. The unnecessary string formatting and escaping of JSON added significant overhead.
+**Action:** When a bash function generates expensive formatted output (like JSON) but is called in a busy loop that only requires the raw variable values, introduce a flag (e.g., `--no-json`) to skip the expensive formatting and escaping operations.

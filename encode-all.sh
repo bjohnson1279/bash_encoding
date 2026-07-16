@@ -332,7 +332,8 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
     # Parse filename to get metadata
     # This function is from the sourced parse-filename.sh script.
     # It returns a status code and sets PARSED_* variables.
-    if ! parse_filename "$ts_file"; then
+    # ⚡ Bolt Optimization: Pass --no-json to prevent expensive JSON escaping/formatting since we only read PARSED_* variables
+    if ! parse_filename "$ts_file" --no-json; then
         echo "Warning: Could not parse metadata from '$ts_file'. Skipping."
         continue
     fi

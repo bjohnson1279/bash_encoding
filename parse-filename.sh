@@ -83,7 +83,10 @@ parse_filename() {
     fi
 
     local show_name episode_title show_name_esc episode_title_esc
-    cleanup_name "$show_raw" show_name
+
+    # ⚡ Bolt Optimization: Export PARSED_ variables so caller can use them directly without JSON
+    cleanup_name "$show_raw" PARSED_SHOW_NAME
+    show_name="$PARSED_SHOW_NAME"
 
     # ⚡ Bolt Optimization: Replace subshells and sed with native POSIX parameter expansion to remove leading zeros
     season_stripped="${season_raw#"${season_raw%%[!0]*}"}"
@@ -97,23 +100,30 @@ parse_filename() {
     else
         season_num="$season_stripped"
     fi
+    PARSED_SEASON_NUM="$season_num"
 
     if [ ${#episode_stripped} -eq 1 ]; then
         episode_num="0$episode_stripped"
     else
         episode_num="$episode_stripped"
     fi
-    cleanup_name "$title_raw" episode_title
+    PARSED_EPISODE_NUM="$episode_num"
 
-    json_escape "$show_name" show_name_esc
-    json_escape "$episode_title" episode_title_esc
+    cleanup_name "$title_raw" PARSED_EPISODE_TITLE
+    episode_title="$PARSED_EPISODE_TITLE"
 
-    # Output JSON
-    printf '{\n  "show_name": "%s",\n  "season": "%s",\n  "episode": "%s",\n  "title": "%s"\n}\n' \
-        "$show_name_esc" \
-        "$season_num" \
-        "$episode_num" \
-        "$episode_title_esc"
+    # ⚡ Bolt Optimization: Skip expensive JSON escaping and formatting if --no-json is passed.
+    if [ "$2" != "--no-json" ]; then
+        json_escape "$show_name" show_name_esc
+        json_escape "$episode_title" episode_title_esc
+
+        # Output JSON
+        printf '{\n  "show_name": "%s",\n  "season": "%s",\n  "episode": "%s",\n  "title": "%s"\n}\n' \
+            "$show_name_esc" \
+            "$season_num" \
+            "$episode_num" \
+            "$episode_title_esc"
+    fi
 
     return 0
 }
