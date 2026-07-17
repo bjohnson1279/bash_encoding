@@ -20,7 +20,7 @@ find . -type f -name "*.mkv" -print0 | while IFS= read -r -d '' i; do
     echo "Encoding '$i' to '$new_file'..."
 
     # Construct and execute the ffmpeg command
-    ffmpeg -i "$i" \
+    ffmpeg -nostdin -i "$i" \
         -vf "$VF" \
         -c:v "$ENC_TYPE" \
         -preset "$PRESET" \

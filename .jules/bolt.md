@@ -50,3 +50,6 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Skip Expensive Output Formatting in Tight Loops
 **Learning:** In `encode-all.sh`, the script was executing `parse_filename` inside a busy loop reading thousands of files. `parse_filename` originally formatted and printed a JSON string on every invocation, but `encode-all.sh` only consumed the raw `PARSED_*` environment variables, ignoring the JSON. The unnecessary string formatting and escaping of JSON added significant overhead.
 **Action:** When a bash function generates expensive formatted output (like JSON) but is called in a busy loop that only requires the raw variable values, introduce a flag (e.g., `--no-json`) to skip the expensive formatting and escaping operations.
+## 2024-11-20 - Prevent `ffmpeg` from consuming stdin in `while read` loop
+**Learning:** When using `ffmpeg` inside a `find ... | while read ...` loop, `ffmpeg` will consume the standard input passed into the loop if `-nostdin` is not provided. This causes the loop to terminate prematurely after processing the first item, as the stdin stream is exhausted.
+**Action:** Always append the `-nostdin` flag to `ffmpeg` invocations when executed inside a piped `while read` loop to ensure it does not swallow the standard input.
