@@ -259,7 +259,7 @@ printf 'New File: %s\n' "${new_file}"
                                         if [ ! -f "$new_file_full" ]; then
                                             # Check for optional video filter
                                             if [ "$VF" != "" ]; then
-                                                ffmpeg -i "$i" \
+                                                ffmpeg -nostdin -i "$i" \
                                                     -vf $VF \
                                                     -c:v $ENC_TYPE -c:a copy \
                                                     -pix_fmt yuv420p \
@@ -270,7 +270,7 @@ printf 'New File: %s\n' "${new_file}"
                                                     -crf $QUALITY \
                                                     "${new_file_full}"
                                             else
-                                                ffmpeg -i "${i}" \
+                                                ffmpeg -nostdin -i "${i}" \
                                                     -c:v $ENC_TYPE -c:a copy \
                                                     -pix_fmt yuv420p \
                                                     -tune film \
@@ -373,6 +373,7 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
 
     # Construct ffmpeg command using a bash array for safety and clarity
     ffmpeg_args=(
+        -nostdin
         -i "$ts_file"
         -c:v "$ENC_TYPE" -c:a copy -pix_fmt yuv420p
     )
