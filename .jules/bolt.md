@@ -53,3 +53,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Prevent `ffmpeg` from consuming stdin in `while read` loop
 **Learning:** When using `ffmpeg` inside a `find ... | while read ...` loop, `ffmpeg` will consume the standard input passed into the loop if `-nostdin` is not provided. This causes the loop to terminate prematurely after processing the first item, as the stdin stream is exhausted.
 **Action:** Always append the `-nostdin` flag to `ffmpeg` invocations when executed inside a piped `while read` loop to ensure it does not swallow the standard input.
+
+## 2024-11-20 - Replace Sequential Parameter Expansion Loops with Regex matching
+**Learning:** In Bash, using a fixed-iteration `for` loop (e.g., `for j in {0..9}; do str="${str//${j}E/${j} E}"; done`) to perform string manipulation introduces significant overhead in a busy script because Bash evaluates the sequence and iterates the loop logic multiple times, even if no replacements are made.
+**Action:** When performing sequential, pattern-based string substitutions that can't be handled by simple parameter expansion, prefer a native `while [[ "$str" =~ (.*[0-9])E(.*) ]]; do` loop with `BASH_REMATCH`. This regex runs mostly in C, processes the string backwards safely, and entirely skips loop iterations when the pattern isn't present, leading to measurable performance gains in tight loops.
