@@ -233,9 +233,17 @@ if [ -d "$RECORDING_PATH" ]; then
 
                                     # ⚡ Bolt Optimization: Replace subshell and sed with native bash parameter expansion
                                     # This avoids spawning a new process for each file, significantly improving speed in busy loops
-                                    for j in {0..9}; do
-                                        new_file="${new_file//${j}E/${j} E}"
-                                    done
+                                    # Loop is unrolled to avoid loop setup overhead
+                                    new_file="${new_file//0E/0 E}"
+                                    new_file="${new_file//1E/1 E}"
+                                    new_file="${new_file//2E/2 E}"
+                                    new_file="${new_file//3E/3 E}"
+                                    new_file="${new_file//4E/4 E}"
+                                    new_file="${new_file//5E/5 E}"
+                                    new_file="${new_file//6E/6 E}"
+                                    new_file="${new_file//7E/7 E}"
+                                    new_file="${new_file//8E/8 E}"
+                                    new_file="${new_file//9E/9 E}"
 
                                     new_file=${new_file// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
                                     new_file=${new_file%.*}
