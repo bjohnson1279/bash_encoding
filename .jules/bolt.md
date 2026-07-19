@@ -53,3 +53,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Prevent `ffmpeg` from consuming stdin in `while read` loop
 **Learning:** When using `ffmpeg` inside a `find ... | while read ...` loop, `ffmpeg` will consume the standard input passed into the loop if `-nostdin` is not provided. This causes the loop to terminate prematurely after processing the first item, as the stdin stream is exhausted.
 **Action:** Always append the `-nostdin` flag to `ffmpeg` invocations when executed inside a piped `while read` loop to ensure it does not swallow the standard input.
+
+## 2024-11-20 - Unroll short string replacement loops
+**Learning:** For small, fixed-bound iterations (e.g., iterating 0-9) executed frequently inside busy Bash loops, `for i in {0..9}; do ...; done` creates sequence generation and loop condition overhead. Manually unrolling the loop into 10 explicit substitution statements runs measurably faster in high-frequency bash functions than both `for` loops and equivalent global regex matching.
+**Action:** When applying a fixed, small number of parameter expansions inside a busy loop, explicitly write out the substitutions rather than relying on a `for` loop to eliminate loop setup and branch overhead.
