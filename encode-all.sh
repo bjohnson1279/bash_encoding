@@ -260,24 +260,24 @@ printf 'New File: %s\n' "${new_file}"
                                             # Check for optional video filter
                                             if [ "$VF" != "" ]; then
                                                 ffmpeg -nostdin -i "$i" \
-                                                    -vf $VF \
-                                                    -c:v $ENC_TYPE -c:a copy \
+                                                    -vf "$VF" \
+                                                    -c:v "$ENC_TYPE" -c:a copy \
                                                     -pix_fmt yuv420p \
                                                     -tune film \
                                                     -movflags faststart \
                                                     -metadata show="$SHOW_NAME" \
-                                                    -preset $PRESET \
-                                                    -crf $QUALITY \
+                                                    -preset "$PRESET" \
+                                                    -crf "$QUALITY" \
                                                     "${new_file_full}"
                                             else
                                                 ffmpeg -nostdin -i "${i}" \
-                                                    -c:v $ENC_TYPE -c:a copy \
+                                                    -c:v "$ENC_TYPE" -c:a copy \
                                                     -pix_fmt yuv420p \
                                                     -tune film \
                                                     -movflags faststart \
                                                     -metadata show="$SHOW_NAME" \
-                                                    -preset $PRESET \
-                                                    -crf $QUALITY \
+                                                    -preset "$PRESET" \
+                                                    -crf "$QUALITY" \
                                                     "${new_file_full}"
                                             fi
                                         fi
