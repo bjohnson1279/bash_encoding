@@ -49,3 +49,8 @@ Security convention: When looping through files found by 'find', use '-print0' a
 **Vulnerability:** Widespread use of `echo "$var"` when printing untrusted user input, such as filenames (`$i`, `$new_file`).
 **Learning:** In Bash, variables parsed via `echo "$var"` are susceptible to option injection if the content starts with hyphens (e.g., `-n`, `-e`). For instance, a malicious or poorly formatted filename like `-e malicious_content` can manipulate `echo`'s behavior unexpectedly.
 **Prevention:** Always use `printf '%s\n' "$var"` instead of `echo "$var"` to safely output variable contents, as `printf` is not vulnerable to option injection and explicitly treats the subsequent argument as literal string data.
+## 2024-05-18 - [CRITICAL] Prevent Arithmetic Expression Injection
+
+**Vulnerability:** Arithmetic Expression Injection via untrusted input in `$(( ... ))`
+**Learning:** In POSIX/Bash scripts, executing variable values directly within an arithmetic context like `$(( val / 1024 ))` is extremely dangerous if the variable's value is derived from an untrusted source, such as `df` or `du` output that could be manipulated via malicious FUSE mounts or paths. An attacker could craft the output to contain command substitutions embedded in array indices (e.g., `a[$(id)]`), which bash will execute when attempting to parse the arithmetic expression.
+**Prevention:** In POSIX compliant shell scripts where native bash regex (`[[ ... =~ ... ]]`) is not available or safe to use, use `case` pattern globbing (e.g., `case "${val#-}" in ''|*[!0-9]*) echo 0 ;; *) echo $(( val / 1024 )) ;; esac`) to strictly validate that input is numeric before utilizing it in an arithmetic expression context.
