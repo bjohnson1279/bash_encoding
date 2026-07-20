@@ -52,7 +52,11 @@ get_avail_mb() {
     df -P -- "$target_dir" | {
         read -r _
         read -r _ _ _ avail _
-        echo $(( avail / 1024 ))
+        # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
+        case "${avail#-}" in
+            ''|*[!0-9]*) echo 0 ;;
+            *) echo $(( avail / 1024 )) ;;
+        esac
     }
 }
 
@@ -65,7 +69,11 @@ get_folder_size_mb() {
     # This avoids external process spawning and runs significantly faster
     du -sk -- "$1" | {
         read -r size _
-        echo $(( size / 1024 ))
+        # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
+        case "${size#-}" in
+            ''|*[!0-9]*) echo 0 ;;
+            *) echo $(( size / 1024 )) ;;
+        esac
     }
 }
 
