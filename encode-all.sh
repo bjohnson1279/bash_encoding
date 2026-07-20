@@ -231,19 +231,11 @@ if [ -d "$RECORDING_PATH" ]; then
                                     new_file=${i//\(*\) /}}
                                     new_file=${new_file//- /}}
 
-                                    # ⚡ Bolt Optimization: Replace subshell and sed with native bash parameter expansion
-                                    # This avoids spawning a new process for each file, significantly improving speed in busy loops
-                                    # Loop is unrolled to avoid loop setup overhead
-                                    new_file="${new_file//0E/0 E}"
-                                    new_file="${new_file//1E/1 E}"
-                                    new_file="${new_file//2E/2 E}"
-                                    new_file="${new_file//3E/3 E}"
-                                    new_file="${new_file//4E/4 E}"
-                                    new_file="${new_file//5E/5 E}"
-                                    new_file="${new_file//6E/6 E}"
-                                    new_file="${new_file//7E/7 E}"
-                                    new_file="${new_file//8E/8 E}"
-                                    new_file="${new_file//9E/9 E}"
+                                    # ⚡ Bolt Optimization: Replace 10-iteration for-loop with a native bash regex match
+                                    # This executes entirely within the shell process and significantly improves speed in busy loops
+                                    while [[ "$new_file" =~ (.*[0-9])E(.*) ]]; do
+                                        new_file="${BASH_REMATCH[1]} E${BASH_REMATCH[2]}"
+                                    done
 
                                     new_file=${new_file// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
                                     new_file=${new_file%.*}

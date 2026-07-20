@@ -50,13 +50,19 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Skip Expensive Output Formatting in Tight Loops
 **Learning:** In `encode-all.sh`, the script was executing `parse_filename` inside a busy loop reading thousands of files. `parse_filename` originally formatted and printed a JSON string on every invocation, but `encode-all.sh` only consumed the raw `PARSED_*` environment variables, ignoring the JSON. The unnecessary string formatting and escaping of JSON added significant overhead.
 **Action:** When a bash function generates expensive formatted output (like JSON) but is called in a busy loop that only requires the raw variable values, introduce a flag (e.g., `--no-json`) to skip the expensive formatting and escaping operations.
+
 ## 2024-11-20 - Prevent `ffmpeg` from consuming stdin in `while read` loop
 **Learning:** When using `ffmpeg` inside a `find ... | while read ...` loop, `ffmpeg` will consume the standard input passed into the loop if `-nostdin` is not provided. This causes the loop to terminate prematurely after processing the first item, as the stdin stream is exhausted.
 **Action:** Always append the `-nostdin` flag to `ffmpeg` invocations when executed inside a piped `while read` loop to ensure it does not swallow the standard input.
 
+## 2024-11-20 - Replace Sequential Parameter Expansion Loops with Regex matching
+**Learning:** In Bash, using a fixed-iteration `for` loop (e.g., `for j in {0..9}; do str="${str//${j}E/${j} E}"; done`) to perform string manipulation introduces significant overhead in a busy script because Bash evaluates the sequence and iterates the loop logic multiple times, even if no replacements are made.
+**Action:** When performing sequential, pattern-based string substitutions that can't be handled by simple parameter expansion, prefer a native `while [[ "$str" =~ (.*[0-9])E(.*) ]]; do` loop with `BASH_REMATCH`. This regex runs mostly in C, processes the string backwards safely, and entirely skips loop iterations when the pattern isn't present, leading to measurable performance gains in tight loops.
+
 ## 2024-11-20 - Unroll short string replacement loops
 **Learning:** For small, fixed-bound iterations (e.g., iterating 0-9) executed frequently inside busy Bash loops, `for i in {0..9}; do ...; done` creates sequence generation and loop condition overhead. Manually unrolling the loop into 10 explicit substitution statements runs measurably faster in high-frequency bash functions than both `for` loops and equivalent global regex matching.
 **Action:** When applying a fixed, small number of parameter expansions inside a busy loop, explicitly write out the substitutions rather than relying on a `for` loop to eliminate loop setup and branch overhead.
+
 ## 2024-11-20 - [Redundant JSON construction for variable passing]
 **Learning:** In bash, generating a complex JSON string via `printf` and parameter substitutions just to immediately regex-parse it back into shell variables in the calling script loop is extremely slow and redundant. A significant performance bottleneck was found where `parseFilename` set global environment variables (e.g., `SHOW_NAME`) but still built a JSON string that the caller then uselessly regex-parsed.
 **Action:** When a function populates global variables, pass a `--no-json` flag to skip the expensive formatting overhead in the function, and remove the redundant regex extraction in the caller's loop to use the global variables directly.
