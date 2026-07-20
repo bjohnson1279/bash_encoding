@@ -13,14 +13,14 @@ PRESET="veryslow"
 QUALITY=21
 
 # Find and loop through all .mov files in the current directory
-find . -type f -name "*.mov" | while read -r i; do
+find . -type f -name "*.mov" -print0 | while IFS= read -r -d '' i; do
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
-    echo "Encoding '$i' to '$new_file'..."
+    printf "Encoding '%s' to '%s'...\n" "$i" "$new_file"
 
     # Construct and execute the ffmpeg command
-    ffmpeg -i "$i" \
+    ffmpeg -nostdin -i "$i" \
         -vf "$VF" \
         -c:v "$ENC_TYPE" \
         -preset "$PRESET" \
@@ -31,4 +31,4 @@ find . -type f -name "*.mov" | while read -r i; do
         -y "$new_file"
 done
 
-echo "Done."
+printf "Done.\n"
