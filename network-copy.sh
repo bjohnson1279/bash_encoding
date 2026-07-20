@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# shellcheck disable=SC3040,SC3043,SC3047
 
 # Exit on error, pipe failure
 set -eo pipefail
@@ -10,20 +11,22 @@ fi
 
 # Copy Plex recordings from a network location
 
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-clear
 
-# Dependency check
-for cmd in rsync df du mount.cifs; do
-    # For mount.cifs, it might not be in the standard PATH for non-root users, so check /sbin explicitly
-    if ! command -v "$cmd" >/dev/null 2>&1 && [ ! -x "/sbin/$cmd" ] && [ ! -x "/usr/sbin/$cmd" ]; then
-        echo "Error: Required command '$cmd' is not installed." >&2
-        if [ "$cmd" = "mount.cifs" ]; then
-            echo "  Please install cifs-utils (e.g., 'sudo apk add cifs-utils' on Alpine or 'sudo apt install cifs-utils' on Debian)." >&2
+if [ -z "${BATS_VERSION:-}" ]; then
+    clear
+
+    # Dependency check
+    for cmd in rsync awk df du mount.cifs; do
+        # For mount.cifs, it might not be in the standard PATH for non-root users, so check /sbin explicitly
+        if ! command -v "$cmd" >/dev/null 2>&1 && [ ! -x "/sbin/$cmd" ] && [ ! -x "/usr/sbin/$cmd" ]; then
+            echo "Error: Required command '$cmd' is not installed." >&2
+            if [ "$cmd" = "mount.cifs" ]; then
+                echo "  Please install cifs-utils (e.g., 'sudo apk add cifs-utils' on Alpine or 'sudo apt install cifs-utils' on Debian)." >&2
+            fi
+            exit 1
         fi
-        exit 1
-    fi
-done
+    done
+fi
 
 fi
 # Enter your mount path for network share
@@ -40,6 +43,7 @@ REQUIRED_DISK_AMOUNT=1000
 
 # Gets available disk space in Megabytes.
 # POSIX-compliant alternative to 'df -BM --output=avail'
+# shellcheck disable=SC2120
 get_avail_mb() {
     local target_dir="${1:-.}"
     # Verify the target directory exists first
@@ -94,7 +98,9 @@ folder_sync() {
         return 1
     fi
 
-    local avail_mb=$(get_avail_mb)
+    local avail_mb
+    # shellcheck disable=SC2119
+    avail_mb="$(get_avail_mb)"
     echo "Available disk space: ${avail_mb}MB"
 
     if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
@@ -103,8 +109,9 @@ folder_sync() {
         return 1
     fi
 
-    printf "Calculating size of '%s'...\n" "$src_folder"
-    local folder_size_mb=$(get_folder_size_mb "$src_folder")
+    echo "Calculating size of '$src_folder'..."
+    local folder_size_mb
+    folder_size_mb="$(get_folder_size_mb "$src_folder")"
     echo "Source folder size: ${folder_size_mb}MB"
 
     if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
@@ -122,25 +129,35 @@ folder_sync() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 # --- Main Script ---
 
-# Check initial disk space
-avail_mb=$(get_avail_mb)
-if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
-    echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
-    exit 1
-fi
+if [ -z "${BATS_VERSION:-}" ]; then
+    # Check initial disk space
+    # shellcheck disable=SC2119
+    avail_mb="$(get_avail_mb)"
+    if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
+        echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
+        exit 1
+    fi
 
-# --- Define Folders to Copy ---
-# Add more calls to folder_sync for each show or directory you want to copy.
+    # --- Define Folders to Copy ---
+    # Add more calls to folder_sync for each show or directory you want to copy.
 
-# Example 2: Copying the entire recordings directory
-# ------------------------------------------
-recordings_src_all="$LOCAL_SHARE_PATH/Recorded TV Shows"
-required_space_all=5000 # 5 GB
-folder_sync "$recordings_src_all" "$required_space_all"
+    # Example 1: Copying a specific TV show
+    # ------------------------------------------
+    # Source directory on the mounted share
+    # recordings_src="$LOCAL_SHARE_PATH/Recorded TV Shows/Seinfeld (1989)"
+    # Required disk space in MB to check before starting
+    # required_space_seinfeld=2500
+    # folder_sync "$recordings_src" "$required_space_seinfeld"
 
-# Example 3: Another show
-# ------------------------------------------
-# recordings_src_another="$LOCAL_SHARE_PATH/Recorded TV Shows/Another Show (2022)"
-# required_space_another=3000
-# folder_sync "$recordings_src_another" "$required_space_another"
+    # Example 2: Copying the entire recordings directory
+    # ------------------------------------------
+    recordings_src_all="$LOCAL_SHARE_PATH/Recorded TV Shows"
+    required_space_all=5000 # 5 GB
+    folder_sync "$recordings_src_all" "$required_space_all"
+
+    # Example 3: Another show
+    # ------------------------------------------
+    # recordings_src_another="$LOCAL_SHARE_PATH/Recorded TV Shows/Another Show (2022)"
+    # required_space_another=3000
+    # folder_sync "$recordings_src_another" "$required_space_another"
 fi
