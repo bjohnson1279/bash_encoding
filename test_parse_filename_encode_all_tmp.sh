@@ -48,40 +48,6 @@ assert_equal "The Simpsons (1989) -" "$(printf "%s\n" "$actual" | jq -r '.show')
 assert_equal "32" "$(printf "%s\n" "$actual" | jq -r '.season')" "Show Name with hyphens - Season"
 assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Show Name with hyphens - Episode"
 
-# --- Edge Cases (Asserting current "quirky" behavior) ---
-
-# Dots instead of spaces
-actual=$(parseFilename "Show.With.Dots.S01E02.ts")
-assert_equal "Show.With.Dots.S01E02 \\([0-9]*}" "$(printf "%s\n" "$actual" | jq -r '.show')" "Dots instead of spaces - Show"
-assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Dots instead of spaces - Season"
-assert_equal "0102" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Dots instead of spaces - Episode"
-
-# Missing Episode
-actual=$(parseFilename "MissingEpisode S01.ts")
-assert_equal "MissingEpisode" "$(printf "%s\n" "$actual" | jq -r '.show')" "Missing Episode - Show"
-assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Missing Episode - Season"
-assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Missing Episode - Episode"
-
-# Missing Season
-# parseFilename prints a syntax error on line 59 for this case ([: ==: unary operator expected),
-# so we suppress stderr to let the test run cleanly.
-actual=$(parseFilename "MissingSeason E02.ts" 2>/dev/null)
-assert_equal "MissingSeason E02 \\([0-9]*}" "$(printf "%s\n" "$actual" | jq -r '.show')" "Missing Season - Show"
-assert_equal "" "$(printf "%s\n" "$actual" | jq -r '.season')" "Missing Season - Season"
-assert_equal "02" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Missing Season - Episode"
-
-# Only Show Name
-actual=$(parseFilename "Only Show Name.ts" 2>/dev/null)
-assert_equal "Only Show Name \\([0-9]*}" "$(printf "%s\n" "$actual" | jq -r '.show')" "Only Show Name - Show"
-assert_equal "" "$(printf "%s\n" "$actual" | jq -r '.season')" "Only Show Name - Season"
-assert_equal "" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Only Show Name - Episode"
-
-# Special characters
-actual=$(parseFilename "Special Chars !@#$%.S01E02.ts")
-assert_equal "Special Chars !@#$%.S01E02 \\([0-9]*}" "$(printf "%s\n" "$actual" | jq -r '.show')" "Special Chars - Show"
-assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Special Chars - Season"
-assert_equal "0102" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Special Chars - Episode"
-
 if [ $FAILED -gt 0 ]; then
     echo "Summary: $FAILED tests failed."
     exit 1

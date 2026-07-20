@@ -5,7 +5,9 @@
 set -eo pipefail
 
 # Error handler trap
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 trap 'echo "An unexpected error occurred at line $LINENO. Exiting." >&2' ERR
+fi
 
 # Copy Plex recordings from a network location
 
@@ -26,6 +28,7 @@ if [ -z "${BATS_VERSION:-}" ]; then
     done
 fi
 
+fi
 # Enter your mount path for network share
 MNT_SHARE_PATH=""
 
@@ -48,8 +51,17 @@ get_avail_mb() {
         return 1
     fi
     # df -P -> POSIX standard, reliable output
-    # awk -> extract the available space (4th column), convert from 1K-blocks to MB
-    df -P -- "$target_dir" | awk 'NR==2 { print int($4 / 1024) }'
+    # ⚡ Bolt Optimization: Replace awk process with native shell `read` and arithmetic
+    # This avoids external process spawning and runs significantly faster
+    df -P -- "$target_dir" | {
+        read -r _
+        read -r _ _ _ avail _
+        # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
+        case "${avail#-}" in
+            ''|*[!0-9]*) echo 0 ;;
+            *) echo $(( avail / 1024 )) ;;
+        esac
+    }
 }
 
 # Gets folder size in Megabytes.
@@ -57,8 +69,16 @@ get_avail_mb() {
 get_folder_size_mb() {
     # $1: folder path
     # du -sk -> POSIX standard, size in 1K-blocks
-    # awk -> extract the size, convert from 1K-blocks to MB
-    du -sk -- "$1" | awk '{ print int($1 / 1024) }'
+    # ⚡ Bolt Optimization: Replace awk process with native shell `read` and arithmetic
+    # This avoids external process spawning and runs significantly faster
+    du -sk -- "$1" | {
+        read -r size _
+        # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
+        case "${size#-}" in
+            ''|*[!0-9]*) echo 0 ;;
+            *) echo $(( size / 1024 )) ;;
+        esac
+    }
 }
 
 # Syncs a folder if there is enough disk space.
@@ -71,7 +91,7 @@ folder_sync() {
 
     # Check if source directory exists
     if [ ! -d "$src_folder" ]; then
-        echo "Directory '$src_folder' not available."
+        printf "Directory '%s' not available.\n" "$src_folder"
         echo "Please ensure the network share is mounted correctly."
         echo "Example for Linux (Debian/Alpine): sudo mount -t cifs //SERVER/SHARE '$MNT_SHARE_PATH' -o username=USER,password=PASS"
         echo "Example for macOS: sudo mount -t smbfs //USER@SERVER/SHARE '$MNT_SHARE_PATH'"
@@ -83,8 +103,8 @@ folder_sync() {
     avail_mb="$(get_avail_mb)"
     echo "Available disk space: ${avail_mb}MB"
 
-    if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$required_space" ]; then
-        echo "Insufficient disk space to start copy from '$src_folder'."
+    if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
+        printf "Insufficient disk space to start copy from '%s'.\n" "$src_folder"
         echo "Required: ${required_space}MB, Available: ${avail_mb:-Unknown}MB"
         return 1
     fi
@@ -94,17 +114,19 @@ folder_sync() {
     folder_size_mb="$(get_folder_size_mb "$src_folder")"
     echo "Source folder size: ${folder_size_mb}MB"
 
-    if [ -z "$avail_mb" ] || [ -z "$folder_size_mb" ] || [ "$avail_mb" -lt "$folder_size_mb" ]; then
-        echo "Insufficient disk space to copy '$src_folder'."
+    if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
+        printf "Insufficient disk space to copy '%s'.\n" "$src_folder"
         echo "Required: ${folder_size_mb}MB, Available: ${avail_mb}MB"
         return 1
     fi
 
-    echo "Starting copy from '$src_folder' to '$RECORDING_PATH'..."
-    rsync -avzh --progress -- "$src_folder/" "$RECORDING_PATH"
+    printf "Starting copy from '%s' to '%s'...\n" "$src_folder" "$RECORDING_PATH"
+    # 🛡️ Sentinel: Avoid -a (archive) flag to prevent preserving malicious device files (-D) or suid bits (-p) from network shares
+    rsync -rltvzh --progress -- "$src_folder/" "$RECORDING_PATH"
     echo "Copy complete."
 }
 
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 # --- Main Script ---
 
 if [ -z "${BATS_VERSION:-}" ]; then

@@ -18,10 +18,23 @@ DEL_ORIG=1
 
 # Function to obtain length of video
 getDuration() {
-    local dur
-    dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -i "${1}")
-    if [ "${dur}" = "N/A" ] || [ -z "${dur}" ]; then
-        dur=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 -i "${1}")
+    local dur format_dur stream_dur output
+
+    # ⚡ Bolt Optimization: Fetch both format and stream durations in a single ffprobe call.
+    # This halves process spawning overhead for files missing format duration (or returning N/A).
+    output=$(ffprobe -v error -select_streams v:0 -show_entries format=duration:stream=duration -of flat -i "${1}" 2>/dev/null || true)
+
+    if [[ "$output" =~ format\.duration=\"([^\"]+)\" ]]; then
+        format_dur="${BASH_REMATCH[1]}"
+    fi
+    if [[ "$output" =~ streams\.stream\.0\.duration=\"([^\"]+)\" ]]; then
+        stream_dur="${BASH_REMATCH[1]}"
+    fi
+
+    if [ -n "$format_dur" ] && [ "$format_dur" != "N/A" ]; then
+        dur="$format_dur"
+    elif [ -n "$stream_dur" ] && [ "$stream_dur" != "N/A" ]; then
+        dur="$stream_dur"
     fi
 
     # ⚡ Bolt Optimization: Support nameref for direct variable assignment, avoiding subshells
@@ -44,13 +57,11 @@ parseFilename() {
     SHOW_NAME="${SHOW_NAME##*( )}"
     SHOW_NAME="${SHOW_NAME%%*( )}"
     shopt -u extglob
-    # echo "Show Name: '$SHOW_NAME'"
     
     YEAR_PREMIERED=${FILE//${SHOW_NAME} /}
     YEAR_PREMIERED=${YEAR_PREMIERED%\) *}
     YEAR_PREMIERED=${YEAR_PREMIERED//[^0-9]}
     YEAR_PREMIERED=${YEAR_PREMIERED:0:4}
-    # echo "Year Premiered: '$YEAR_PREMIERED'"
     
     DATE_TIME=""
     DATE_TIME=${FILE//${SHOW_NAME} /}
@@ -62,7 +73,6 @@ parseFilename() {
     DATE_TIME=${DATE_TIME##*( )}
     DATE_TIME=${DATE_TIME%%*( )}
     shopt -u extglob
-    # echo "Date/Time: '$DATE_TIME'"
     
     DATE=""
     DATE=${DATE_TIME// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
@@ -70,20 +80,16 @@ parseFilename() {
     DATE=${DATE##*( )}
     DATE=${DATE%%*( )}
     shopt -u extglob
-    # echo "Date: '$DATE'"
     
     NUM_DATE=${DATE//-/}
-    # echo "Num Date: $NUM_DATE"
     
     YEAR=${DATE:0:4}
-    # echo "Year: $YEAR"
     
     TIME=""
     TIME=${DATE_TIME//$DATE/}
     shopt -s extglob
     TIME=${TIME##*( )}
     TIME=${TIME%%*( )}
-    # echo "Time: '$TIME'"
     
     # Simply Remaining Data Extraction By Removing From $FILE variable
     FILE=${FILE//${TIME}/}
@@ -96,18 +102,16 @@ parseFilename() {
     SEASON=${SEASON%E*}
     SEASON=${SEASON//[^0-9]}
     SEASON=${SEASON:0:4}
-    # echo "Season: $SEASON"
     
     EPISODE=${FILE//${SHOW_NAME}/}
     EPISODE=${EPISODE//\(${YEAR_PREMIERED}\)/}
-    if [ $SEASON == $YEAR ]; then
+    if [ "$SEASON" == "$YEAR" ]; then
         EPISODE=${NUM_DATE//${SEASON}/}
     else
         EPISODE=${EPISODE//${TIME}/}
         EPISODE=${EPISODE// S${SEASON}E/}
         EPISODE=${EPISODE//[^0-9]}
     fi
-    # echo "Episode: ${EPISODE}"
     
     EPISODE_TITLE=${FILE//${SHOW_NAME} /}
     EPISODE_TITLE=${EPISODE_TITLE//\(${YEAR_PREMIERED}\)/}
@@ -122,7 +126,6 @@ parseFilename() {
     EPISODE_TITLE=${EPISODE_TITLE##*( )}
     EPISODE_TITLE=${EPISODE_TITLE%%*( )}
     shopt -u extglob
-    # echo "Episode Title: '${EPISODE_TITLE}'"
     
     # ⚡ Bolt Optimization: Use printf and native bash parameter expansion instead of jq subshell
     # This significantly improves performance in busy loops by avoiding process overhead
@@ -177,7 +180,7 @@ if [ -d "$RECORDING_PATH" ]; then
     files=(*)
     file_count=${#files[@]}
     shopt -u nullglob dotglob
-    if [ $file_count != 0 ]; then
+    if [ "$file_count" != 0 ]; then
         # Iterate through all directories in folder containing your recordings
         for dir in */; do
             printf '%s\n' "${dir}"
@@ -193,7 +196,7 @@ if [ -d "$RECORDING_PATH" ]; then
                 shopt -u nullglob dotglob
                 printf '%s\n' "$dir directory file count: ${dir_file_count}"
 
-                if [ $dir_file_count != 0 ]; then
+                if [ "$dir_file_count" != 0 ]; then
                     # Iterate through Season folders
                     for season in */; do
                         printf '%s\n' "${season}"
@@ -207,14 +210,14 @@ if [ -d "$RECORDING_PATH" ]; then
                             shopt -u nullglob
                             printf '%s\n' "${season} ts file count: ${ts_dir_file_count}"
 
-                            if [ $ts_dir_file_count != 0 ]; then
+                            if [ "$ts_dir_file_count" != 0 ]; then
                                 for i in *.ts; do
                                     printf '%s\n' "${i}"
 
                                     # ⚡ Bolt Optimization: Pass 'episode_data' as a nameref instead of using a subshell `episode_data=$(...)`.
                                     # Spawning subshells in a busy loop carries a large overhead; namerefs skip the subshell entirely.
                                     parseFilename "${i}" episode_data
-                                    echo "Episode Data: ${episode_data}"
+                                    printf 'Episode Data: %s\n' "${episode_data}"
                                     if [[ "$episode_data" =~ \"show\":\"(([^\"\\]|\\.)*)\" ]]; then
                                         SHOW_NAME="${BASH_REMATCH[1]}"
                                         SHOW_NAME="${SHOW_NAME//\\\"/\"}"
@@ -228,10 +231,10 @@ if [ -d "$RECORDING_PATH" ]; then
                                     new_file=${i//\(*\) /}}
                                     new_file=${new_file//- /}}
 
-                                    # ⚡ Bolt Optimization: Replace subshell and sed with native bash parameter expansion
-                                    # This avoids spawning a new process for each file, significantly improving speed in busy loops
-                                    for j in {0..9}; do
-                                        new_file="${new_file//${j}E/${j} E}"
+                                    # ⚡ Bolt Optimization: Replace 10-iteration for-loop with a native bash regex match
+                                    # This executes entirely within the shell process and significantly improves speed in busy loops
+                                    while [[ "$new_file" =~ (.*[0-9])E(.*) ]]; do
+                                        new_file="${BASH_REMATCH[1]} E${BASH_REMATCH[2]}"
                                     done
 
                                     new_file=${new_file// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
@@ -247,7 +250,7 @@ if [ -d "$RECORDING_PATH" ]; then
                                     fi
                                     new_file=${new_file##*( )}
                                     new_file=${new_file%%*( )}
-echo "New File: ${new_file}"
+printf 'New File: %s\n' "${new_file}"
                                     new_file_full="${DESTINATION_PATH}${new_file}.mp4"
 
                                     # Validate existience of file
@@ -255,33 +258,33 @@ echo "New File: ${new_file}"
                                         # Skip if encoded file already exists, encode if not
                                         if [ ! -f "$new_file_full" ]; then
                                             # Check for optional video filter
-                                            if [ $VF != "" ]; then
-                                                ffmpeg -i "$i" \
-                                                    -vf $VF \
-                                                    -c:v $ENC_TYPE -c:a copy \
+                                            if [ "$VF" != "" ]; then
+                                                ffmpeg -nostdin -i "$i" \
+                                                    -vf "$VF" \
+                                                    -c:v "$ENC_TYPE" -c:a copy \
                                                     -pix_fmt yuv420p \
                                                     -tune film \
                                                     -movflags faststart \
                                                     -metadata show="$SHOW_NAME" \
-                                                    -preset $PRESET \
-                                                    -crf $QUALITY \
+                                                    -preset "$PRESET" \
+                                                    -crf "$QUALITY" \
                                                     "${new_file_full}"
                                             else
-                                                ffmpeg -i "${i}" \
-                                                    -c:v $ENC_TYPE -c:a copy \
+                                                ffmpeg -nostdin -i "${i}" \
+                                                    -c:v "$ENC_TYPE" -c:a copy \
                                                     -pix_fmt yuv420p \
                                                     -tune film \
                                                     -movflags faststart \
                                                     -metadata show="$SHOW_NAME" \
-                                                    -preset $PRESET \
-                                                    -crf $QUALITY \
+                                                    -preset "$PRESET" \
+                                                    -crf "$QUALITY" \
                                                     "${new_file_full}"
                                             fi
                                         fi
 
                                         # OPTIONAL: Delete source (ts) file when new file (mp4) is created, for space saving purposes
                                         # Set DEL_ORIG value to 0 above if you don't want this to happen
-                                        if [ $DEL_ORIG == 1 ]; then
+                                        if [ "$DEL_ORIG" == 1 ]; then
                                             # Get video duration of encoding source
                                             # ⚡ Bolt Optimization: Replace subshells with nameref for performance
                                             getDuration "${i}" src_duration
@@ -324,12 +327,13 @@ fi
 # than nested loops and `cd`.
 find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0' ts_file; do
     echo "--------------------------------------------------"
-    echo "Processing file: $ts_file"
+    printf 'Processing file: %s\n' "$ts_file"
 
     # Parse filename to get metadata
     # This function is from the sourced parse-filename.sh script.
     # It returns a status code and sets PARSED_* variables.
-    if ! parse_filename "$ts_file"; then
+    # ⚡ Bolt Optimization: Pass --no-json to prevent expensive JSON escaping/formatting since we only read PARSED_* variables
+    if ! parse_filename "$ts_file" --no-json; then
         echo "Warning: Could not parse metadata from '$ts_file'. Skipping."
         continue
     fi
@@ -348,27 +352,28 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
     new_filename="${new_filename//[\/\\\\?%*:|\"<>]/_}"
     new_file_full="$DESTINATION_PATH/$new_filename"
 
-    echo "  Show: $show_name"
-    echo "  Season: $season, Episode: $episode"
-    echo "  Title: $title"
-    echo "  Output file: $new_file_full"
+    printf '  Show: %s\n' "$show_name"
+    printf '  Season: %s, Episode: %s\n' "$season" "$episode"
+    printf '  Title: %s\n' "$title"
+    printf '  Output file: %s\n' "$new_file_full"
 
     # Skip if the encoded file already exists
     if [ -f "$new_file_full" ]; then
-        echo "Warning: Destination file '$new_file_full' already exists. Skipping."
+        printf "Warning: Destination file '%s' already exists. Skipping.\n" "$new_file_full"
         continue
     fi
 
     # --- Pre-flight check on the source file ---
     echo "Verifying source file integrity with ffprobe..."
     if ! ffprobe -v error -i "$ts_file" >/dev/null 2>&1; then
-        echo "Error: Source file '$ts_file' appears to be corrupt or unreadable by ffprobe. Skipping."
+        printf "Error: Source file '%s' appears to be corrupt or unreadable by ffprobe. Skipping.\n" "$ts_file"
         continue
     fi
 
 
     # Construct ffmpeg command using a bash array for safety and clarity
     ffmpeg_args=(
+        -nostdin
         -i "$ts_file"
         -c:v "$ENC_TYPE" -c:a copy -pix_fmt yuv420p
     )
@@ -391,7 +396,7 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
     # is from ffmpeg, not from tee.
     set -o pipefail
     if ! ffmpeg "${ffmpeg_args[@]}" "$new_file_full" 2>&1 | tee "${new_file_full}.log"; then
-        echo "Error: Encoding failed. See log for details: ${new_file_full}.log"
+        printf "Error: Encoding failed. See log for details: %s.log\n" "${new_file_full}"
         set +o pipefail # Unset pipefail
         continue # Move to the next file
     fi
@@ -405,14 +410,47 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
 
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
             echo "Warning: Duration could not be reliably determined. Original file kept."
+        elif ! [[ "$src_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$dest_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+            # 🛡️ Sentinel: Validate duration formats to prevent arithmetic expression injection during calculation
+            echo "Warning: Duration formats are invalid. Expected numeric formats. Original file kept."
         else
-            # Compare durations (allowing for small floating point differences)
-            duration_diff=$(echo "d = $src_duration - $dest_duration; if (d < 0) d = -d; d" | bc)
+            # ⚡ Bolt Optimization: Replace subshells spawning `bc` with native bash fixed-point math.
+            # This avoids expensive process forks, significantly speeding up the duration matching logic.
 
-            if (( $(echo "$duration_diff < 1.0" | bc -l) )); then
+            # Extract fractional parts and pad to 6 decimal places
+            src_frac="${src_duration#*.}"
+            [ "$src_frac" = "$src_duration" ] && src_frac=""
+            src_frac="${src_frac}000000"
+            src_frac="${src_frac:0:6}"
+
+            dest_frac="${dest_duration#*.}"
+            [ "$dest_frac" = "$dest_duration" ] && dest_frac=""
+            dest_frac="${dest_frac}000000"
+            dest_frac="${dest_frac:0:6}"
+
+            # Extract integer parts
+            src_int="${src_duration%.*}"
+            dest_int="${dest_duration%.*}"
+
+            # Concatenate for fixed-point representation
+            src_val="$src_int$src_frac"
+            dest_val="$dest_int$dest_frac"
+
+            # Strip leading zeros to avoid octal interpretation, default to 0 if empty
+            src_val="${src_val#"${src_val%%[!0]*}"}"
+            dest_val="${dest_val#"${dest_val%%[!0]*}"}"
+            src_val="${src_val:-0}"
+            dest_val="${dest_val:-0}"
+
+            # Calculate absolute difference
+            duration_diff=$(( src_val - dest_val ))
+            duration_diff="${duration_diff#-}"
+
+            # Compare difference (< 1000000 is < 1.0)
+            if [ "$duration_diff" -lt 1000000 ]; then
                 echo "Encoding successful. Durations match."
                 if [ "$DEL_ORIG" -eq 1 ]; then
-                    echo "Deleting original file: $ts_file"
+                    printf "Deleting original file: %s\n" "$ts_file"
                     rm -- "$ts_file"
                 fi
             else
@@ -421,7 +459,7 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
         fi
     else
         # This case should now be caught by the ! ffmpeg ... check above, but we leave it as a safeguard.
-        echo "Error: Encoding failed. Output file not found. See log for details: ${new_file_full}.log"
+        printf "Error: Encoding failed. Output file not found. See log for details: %s.log\n" "${new_file_full}"
     fi
 done
 
