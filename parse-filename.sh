@@ -35,26 +35,23 @@ cleanup_name() {
 
 # Escapes a string for use in JSON.
 json_escape() {
-    # ⚡ Bolt Optimization: Replace sed subshells with parameter expansion string replacement.
-    # While ${var//\"/\\\"} is a bashism, we must stay POSIX-compliant.
-    # POSIX compliant string replacement for escaping double quotes to avoid subshell process fork overhead.
+    # ⚡ Bolt Optimization: Replace slow sequential block-matching while loops with native bash parameter expansion.
+    # Because this file is a bash script (#!/usr/bin/env bash), we can safely use bashisms to perform
+    # instantaneous, C-level string replacements without spawning subshells or evaluating loop conditions.
     # shellcheck disable=SC3043
     local val="$1"
-    # shellcheck disable=SC3043
-    local escaped=""
-    while [ -n "$val" ]; do
-        case "$val" in
-            *\"*)
-                escaped="${escaped}${val%%\"*}\\\""
-                val="${val#*\"}"
-                ;;
-            *)
-                escaped="${escaped}${val}"
-                val=""
-                ;;
-        esac
-    done
-    printf '%s\n' "$escaped"
+    local out_ref_name="$2"
+
+    # Escape backslashes first, then double quotes
+    local escaped="${val//\\/\\\\}"
+    escaped="${escaped//\"/\\\"}"
+
+    if [ -n "$out_ref_name" ]; then
+        # ⚡ Bolt Optimization: Use printf -v to prevent command injection and subshell overhead
+        printf -v "$out_ref_name" "%s" "$escaped"
+    else
+        printf '%s\n' "$escaped"
+    fi
 }
 
 parse_filename() {
