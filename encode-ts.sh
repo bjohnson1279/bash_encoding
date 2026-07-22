@@ -18,7 +18,7 @@ find . -type f -name "*.ts" -print0 | while IFS= read -r -d '' i; do
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
-    echo "Encoding '$i' to '$new_file'..."
+    printf "Encoding '%s' to '%s'...\n" "$i" "$new_file"
 
     # Construct and execute the ffmpeg command
     ffmpeg -nostdin -i "$i" \
@@ -32,4 +32,4 @@ find . -type f -name "*.ts" -print0 | while IFS= read -r -d '' i; do
         -y "$new_file"
 done
 
-echo "Done."
+printf "Done.\n"
