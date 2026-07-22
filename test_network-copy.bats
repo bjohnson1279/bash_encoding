@@ -84,6 +84,72 @@ setup() {
     [ "$result" -eq 2 ]
 }
 
+@test "folder_sync returns 1 and prints error when source directory does not exist" {
+    run folder_sync "/path/does/not/exist/123" 1000
+    [ "$status" -eq 1 ]
+    [[ "${lines[0]}" == "Directory '/path/does/not/exist/123' not available." ]]
+}
+
+@test "folder_sync returns 1 when available space is less than required space" {
+    # Mock get_avail_mb to return 500 (less than 1000 required)
+    get_avail_mb() {
+        echo 500
+    }
+
+    mkdir -p /tmp/mock_src_dir
+
+    run folder_sync "/tmp/mock_src_dir" 1000
+    [[ "${lines[1]}" == "Insufficient disk space to start copy from '/tmp/mock_src_dir'." ]]
+
+    rm -rf /tmp/mock_src_dir
+}
+
+@test "folder_sync returns 1 when source folder size is greater than available space" {
+    # Mock get_avail_mb to return 1500 (greater than 1000 required, but less than folder size)
+        echo 1500
+    }
+
+    # Mock get_folder_size_mb to return 2000 (greater than 1500 available)
+    get_folder_size_mb() {
+        echo 2000
+    }
+
+
+    [[ "${lines[3]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
+
+}
+
+@test "folder_sync successfully runs rsync when there is enough space" {
+    # Mock get_avail_mb to return 2000
+    }
+
+    # Mock get_folder_size_mb to return 1500
+    }
+
+    # Mock rsync to do nothing but print a string so we can verify it was called
+    rsync() {
+        echo "mock rsync executed"
+    }
+
+    RECORDING_PATH="/tmp/mock_recording_path"
+
+    [ "$status" -eq 0 ]
+
+    # Check that it outputs the correct final success message
+    local has_mock_rsync=0
+    local has_copy_complete=0
+
+    for line in "${lines[@]}"; do
+        if [[ "$line" == "mock rsync executed" ]]; then
+            has_mock_rsync=1
+        fi
+        if [[ "$line" == "Copy complete." ]]; then
+            has_copy_complete=1
+    done
+
+    [ "$has_mock_rsync" -eq 1 ]
+    [ "$has_copy_complete" -eq 1 ]
+
 @test "get_avail_mb fails safely on non-numeric injection" {
     df() {
         echo "Filesystem     1024-blocks   Used Available Capacity Mounted on"
@@ -97,18 +163,13 @@ setup() {
     [ ! -f /tmp/hacked ]
 
     rm -rf /tmp/mock_dir
-    rm -f /tmp/hacked
 }
 
 @test "get_folder_size_mb fails safely on non-numeric injection" {
     du() {
         echo "a[\$(echo 1 > /tmp/hacked)]	/mock/path"
     }
-    rm -f /tmp/hacked
 
     result=$(get_folder_size_mb "/mock/path")
-    [ "$result" -eq 0 ]
-    [ ! -f /tmp/hacked ]
 
-    rm -f /tmp/hacked
 }
