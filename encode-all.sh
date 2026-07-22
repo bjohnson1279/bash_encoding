@@ -231,10 +231,10 @@ if [ -d "$RECORDING_PATH" ]; then
                                     new_file=${i//\(*\) /}}
                                     new_file=${new_file//- /}}
 
-                                    # ⚡ Bolt Optimization: Replace subshell and sed with native bash parameter expansion
-                                    # This avoids spawning a new process for each file, significantly improving speed in busy loops
-                                    for j in {0..9}; do
-                                        new_file="${new_file//${j}E/${j} E}"
+                                    # ⚡ Bolt Optimization: Replace 10-iteration for-loop with a native bash regex match
+                                    # This executes entirely within the shell process and significantly improves speed in busy loops
+                                    while [[ "$new_file" =~ (.*[0-9])E(.*) ]]; do
+                                        new_file="${BASH_REMATCH[1]} E${BASH_REMATCH[2]}"
                                     done
 
                                     new_file=${new_file// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
@@ -260,24 +260,24 @@ printf 'New File: %s\n' "${new_file}"
                                             # Check for optional video filter
                                             if [ "$VF" != "" ]; then
                                                 ffmpeg -nostdin -i "$i" \
-                                                    -vf $VF \
-                                                    -c:v $ENC_TYPE -c:a copy \
+                                                    -vf "$VF" \
+                                                    -c:v "$ENC_TYPE" -c:a copy \
                                                     -pix_fmt yuv420p \
                                                     -tune film \
                                                     -movflags faststart \
                                                     -metadata show="$SHOW_NAME" \
-                                                    -preset $PRESET \
-                                                    -crf $QUALITY \
+                                                    -preset "$PRESET" \
+                                                    -crf "$QUALITY" \
                                                     "${new_file_full}"
                                             else
                                                 ffmpeg -nostdin -i "${i}" \
-                                                    -c:v $ENC_TYPE -c:a copy \
+                                                    -c:v "$ENC_TYPE" -c:a copy \
                                                     -pix_fmt yuv420p \
                                                     -tune film \
                                                     -movflags faststart \
                                                     -metadata show="$SHOW_NAME" \
-                                                    -preset $PRESET \
-                                                    -crf $QUALITY \
+                                                    -preset "$PRESET" \
+                                                    -crf "$QUALITY" \
                                                     "${new_file_full}"
                                             fi
                                         fi

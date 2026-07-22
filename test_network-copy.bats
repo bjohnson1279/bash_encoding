@@ -27,8 +27,7 @@ setup() {
     # Create a dummy directory to pass the directory check
     mkdir -p /tmp/mock_dir
 
-    local result=""
-    get_avail_mb "/tmp/mock_dir" "result"
+    result=$(get_avail_mb "/tmp/mock_dir")
     [ "$result" -eq 2 ]
 
     # Cleanup
@@ -41,8 +40,7 @@ setup() {
         echo "1024	/mock/path"
     }
 
-    local result=""
-    get_folder_size_mb "/mock/path" "result"
+    result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 1 ]
 }
 
@@ -52,8 +50,7 @@ setup() {
         echo "1500	/mock/path"
     }
 
-    local result=""
-    get_folder_size_mb "/mock/path" "result"
+    result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 1 ]
 }
 
@@ -63,8 +60,7 @@ setup() {
         echo "500	/mock/path"
     }
 
-    local result=""
-    get_folder_size_mb "/mock/path" "result"
+    result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 0 ]
 }
 
@@ -74,8 +70,7 @@ setup() {
         echo "1048576	/mock/path"
     }
 
-    local result=""
-    get_folder_size_mb "/mock/path" "result"
+    result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 1024 ]
 }
 
@@ -85,7 +80,35 @@ setup() {
         echo "2048	/mock/path with spaces"
     }
 
-    local result=""
-    get_folder_size_mb "/mock/path with spaces" "result"
+    result=$(get_folder_size_mb "/mock/path with spaces")
     [ "$result" -eq 2 ]
+}
+
+@test "get_avail_mb fails safely on non-numeric injection" {
+    df() {
+        echo "Filesystem     1024-blocks   Used Available Capacity Mounted on"
+        echo "/dev/sda1          1000000 500000      a[\$(echo 1 > /tmp/hacked)]      50% /mock/path"
+    }
+    mkdir -p /tmp/mock_dir
+    rm -f /tmp/hacked
+
+    result=$(get_avail_mb "/tmp/mock_dir")
+    [ "$result" -eq 0 ]
+    [ ! -f /tmp/hacked ]
+
+    rm -rf /tmp/mock_dir
+    rm -f /tmp/hacked
+}
+
+@test "get_folder_size_mb fails safely on non-numeric injection" {
+    du() {
+        echo "a[\$(echo 1 > /tmp/hacked)]	/mock/path"
+    }
+    rm -f /tmp/hacked
+
+    result=$(get_folder_size_mb "/mock/path")
+    [ "$result" -eq 0 ]
+    [ ! -f /tmp/hacked ]
+
+    rm -f /tmp/hacked
 }
