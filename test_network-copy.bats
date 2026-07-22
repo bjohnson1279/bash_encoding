@@ -27,7 +27,8 @@ setup() {
     # Create a dummy directory to pass the directory check
     mkdir -p /tmp/mock_dir
 
-    result=$(get_avail_mb "/tmp/mock_dir")
+    local result=""
+    get_avail_mb "/tmp/mock_dir" "result"
     [ "$result" -eq 2 ]
 
     # Cleanup
@@ -40,7 +41,8 @@ setup() {
         echo "1024	/mock/path"
     }
 
-    result=$(get_folder_size_mb "/mock/path")
+    local result=""
+    get_folder_size_mb "/mock/path" "result"
     [ "$result" -eq 1 ]
 }
 
@@ -50,7 +52,8 @@ setup() {
         echo "1500	/mock/path"
     }
 
-    result=$(get_folder_size_mb "/mock/path")
+    local result=""
+    get_folder_size_mb "/mock/path" "result"
     [ "$result" -eq 1 ]
 }
 
@@ -60,7 +63,8 @@ setup() {
         echo "500	/mock/path"
     }
 
-    result=$(get_folder_size_mb "/mock/path")
+    local result=""
+    get_folder_size_mb "/mock/path" "result"
     [ "$result" -eq 0 ]
 }
 
@@ -70,7 +74,8 @@ setup() {
         echo "1048576	/mock/path"
     }
 
-    result=$(get_folder_size_mb "/mock/path")
+    local result=""
+    get_folder_size_mb "/mock/path" "result"
     [ "$result" -eq 1024 ]
 }
 
@@ -80,6 +85,7 @@ setup() {
         echo "2048	/mock/path with spaces"
     }
 
-    result=$(get_folder_size_mb "/mock/path with spaces")
+    local result=""
+    get_folder_size_mb "/mock/path with spaces" "result"
     [ "$result" -eq 2 ]
 }
