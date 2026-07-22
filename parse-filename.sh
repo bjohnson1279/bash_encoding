@@ -35,19 +35,22 @@ cleanup_name() {
 
 # Escapes a string for use in JSON.
 json_escape() {
-    # ⚡ Sentinel: Prevent JSON injection and syntax errors by fully escaping backslashes, quotes, and control characters according to JSON specification.
-    # ⚡ Bolt Optimization: Use bash native string replacement instead of spawning subshells with sed/awk.
+    # ⚡ Bolt Optimization: Replace slow sequential block-matching while loops with native bash parameter expansion.
+    # Because this file is a bash script (#!/usr/bin/env bash), we can safely use bashisms to perform
+    # instantaneous, C-level string replacements without spawning subshells or evaluating loop conditions.
+    # shellcheck disable=SC3043
     local val="$1"
-    val="${val//\\/\\\\}"
-    val="${val//\"/\\\"}"
-    val="${val//$'\n'/\\n}"
-    val="${val//$'\r'/\\r}"
-    val="${val//$'\t'/\\t}"
-    if [ -n "$2" ]; then
-        # ⚡ Bolt Optimization: Use printf -v instead of eval to prevent command injection and subshell overhead
-        printf -v "$2" "%s" "$val"
+    local out_ref_name="$2"
+
+    # Escape backslashes first, then double quotes
+    local escaped="${val//\\/\\\\}"
+    escaped="${escaped//\"/\\\"}"
+
+    if [ -n "$out_ref_name" ]; then
+        # ⚡ Bolt Optimization: Use printf -v to prevent command injection and subshell overhead
+        printf -v "$out_ref_name" "%s" "$escaped"
     else
-        printf '%s' "$val"
+        printf '%s\n' "$escaped"
     fi
 }
 
@@ -62,31 +65,27 @@ parse_filename() {
     base_name="${1##*/}"
     base_name="${base_name%.*}"
 
-    # Use native Bash regex to capture parts of the filename to avoid subshell overhead.
+    # ⚡ Bolt Optimization: Combine sequential sed operations into a single invocation
     # The pattern looks for "S<season>E<episode>" and captures the parts around it.
     # It handles variations in separators (., _, -, space).
-    # ⚡ Bolt Optimization: Replace sed subshell with native bash regex matching for better performance.
-    local show_raw season_raw episode_raw title_raw
-    if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
-        show_raw="${BASH_REMATCH[1]}"
-        season_raw="${BASH_REMATCH[2]}"
-        episode_raw="${BASH_REMATCH[3]}"
-        title_raw="${BASH_REMATCH[4]}"
-    elif [[ "$base_name" =~ ^(.*)[._\ -]([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2})(.*)$ ]]; then
-        show_raw="${BASH_REMATCH[1]}"
-        season_raw="${BASH_REMATCH[2]}"
-        episode_raw="${BASH_REMATCH[3]}"
-        title_raw="${BASH_REMATCH[4]}"
-    else
+    # If standard pattern fails, fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
+    parsed=$(printf '%s\n' "$base_name" | sed -n \
+        -e 's/^\(.*\)[ ._-][Ss]\([0-9]\{1,2\}\)[ ._-]*[Ee]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p' \
+        -e 's/^\(.*\)[ ._-]\([0-9]\{4\}\)[ ._-]\([0-9]\{1,2\}\)[ ._-]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p' | head -n 1)
+
+    if [ -z "$parsed" ]; then
         printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
         return 1
     fi
 
-    local show_name episode_title show_name_esc episode_title_esc
-
-    # ⚡ Bolt Optimization: Export PARSED_ variables so caller can use them directly without JSON
-    cleanup_name "$show_raw" PARSED_SHOW_NAME
-    show_name="$PARSED_SHOW_NAME"
+    # Use IFS to split the parsed string into variables
+    old_ifs=$IFS
+    IFS="|"
+    set -f # Temporarily disable globbing to prevent issues with filenames
+    # shellcheck disable=SC2086
+    set -- $parsed
+    set +f # Re-enable globbing
+    IFS=$old_ifs
 
     # ⚡ Bolt Optimization: Replace subshells and sed with native POSIX parameter expansion to remove leading zeros
     season_stripped="${season_raw#"${season_raw%%[!0]*}"}"

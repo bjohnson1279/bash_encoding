@@ -27,6 +27,14 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 **Learning:** When working in POSIX compliant shell scripts (e.g. `sh`), using `tr` combined with process substitution (like `$(printf '%s\n' "$1" | tr '._' '  ')`) adds significant overhead by creating subshells. It's much faster to use the native shell's Internal Field Separator (`IFS`) to split and parse the string without launching external commands.
 **Action:** When working in strict POSIX mode where bash extensions are not available, utilize `IFS` inside the shell for string splitting to avoid slow external processes in tight loops.
 
+## 2024-11-20 - POSIX String Replacement without Subshells
+**Learning:** In strictly POSIX-compliant scripts where native bash substitutions like `${var//pattern/repl}` are unavailable, calling external binaries like `sed` inside busy loops introduces severe process fork overhead.
+**Action:** Use a `while` loop combining POSIX parameter expansion (`${var%%pattern*}` and `${var#*pattern}`) for repeated string replacement (e.g. escaping quotes) to eliminate subshell process overhead.
+
+## 2024-11-20 - Consolidate Sequential `sed` Invocations
+**Learning:** Executing multiple `sed` commands sequentially (or piping them) spawns multiple processes.
+**Action:** Combine sequential `sed` operations into a single invocation using the `-e` flag or semicolons (e.g., `sed -e 's/pattern1/repl1/' -e 's/pattern2/repl2/'`) to halve the process spawning overhead.
+
 ## 2024-11-20 - Bash regex parsing vs sed
 **Learning:** Using `sed` wrapped inside a `$(...)` command substitution spawns a subshell process for every invocation. When parsing lots of text or files in Bash, native regular expression extraction using `[[ $str =~ $regex ]]` with the `${BASH_REMATCH}` array is dramatically faster as it operates entirely within the main shell process.
 **Action:** When working in a shell with `#!/usr/bin/env bash` (which implies Bash extensions are allowed), strictly prefer the native `[[ ... =~ ... ]]` operator over external matching binaries like `sed` or `grep` combined with subshells to avoid major performance overhead. Ensure spaces within character classes are escaped (`[._\ -]`) to avoid syntax errors.
@@ -50,6 +58,22 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Skip Expensive Output Formatting in Tight Loops
 **Learning:** In `encode-all.sh`, the script was executing `parse_filename` inside a busy loop reading thousands of files. `parse_filename` originally formatted and printed a JSON string on every invocation, but `encode-all.sh` only consumed the raw `PARSED_*` environment variables, ignoring the JSON. The unnecessary string formatting and escaping of JSON added significant overhead.
 **Action:** When a bash function generates expensive formatted output (like JSON) but is called in a busy loop that only requires the raw variable values, introduce a flag (e.g., `--no-json`) to skip the expensive formatting and escaping operations.
+
 ## 2024-11-20 - Prevent `ffmpeg` from consuming stdin in `while read` loop
 **Learning:** When using `ffmpeg` inside a `find ... | while read ...` loop, `ffmpeg` will consume the standard input passed into the loop if `-nostdin` is not provided. This causes the loop to terminate prematurely after processing the first item, as the stdin stream is exhausted.
 **Action:** Always append the `-nostdin` flag to `ffmpeg` invocations when executed inside a piped `while read` loop to ensure it does not swallow the standard input.
+
+## 2024-11-20 - Replace Sequential Parameter Expansion Loops with Regex matching
+**Learning:** In Bash, using a fixed-iteration `for` loop (e.g., `for j in {0..9}; do str="${str//${j}E/${j} E}"; done`) to perform string manipulation introduces significant overhead in a busy script because Bash evaluates the sequence and iterates the loop logic multiple times, even if no replacements are made.
+**Action:** When performing sequential, pattern-based string substitutions that can't be handled by simple parameter expansion, prefer a native `while [[ "$str" =~ (.*[0-9])E(.*) ]]; do` loop with `BASH_REMATCH`. This regex runs mostly in C, processes the string backwards safely, and entirely skips loop iterations when the pattern isn't present, leading to measurable performance gains in tight loops.
+
+## 2024-11-20 - Unroll short string replacement loops
+**Learning:** For small, fixed-bound iterations (e.g., iterating 0-9) executed frequently inside busy Bash loops, `for i in {0..9}; do ...; done` creates sequence generation and loop condition overhead. Manually unrolling the loop into 10 explicit substitution statements runs measurably faster in high-frequency bash functions than both `for` loops and equivalent global regex matching.
+**Action:** When applying a fixed, small number of parameter expansions inside a busy loop, explicitly write out the substitutions rather than relying on a `for` loop to eliminate loop setup and branch overhead.
+
+## 2024-11-20 - [Redundant JSON construction for variable passing]
+**Learning:** In bash, generating a complex JSON string via `printf` and parameter substitutions just to immediately regex-parse it back into shell variables in the calling script loop is extremely slow and redundant. A significant performance bottleneck was found where `parseFilename` set global environment variables (e.g., `SHOW_NAME`) but still built a JSON string that the caller then uselessly regex-parsed.
+**Action:** When a function populates global variables, pass a `--no-json` flag to skip the expensive formatting overhead in the function, and remove the redundant regex extraction in the caller's loop to use the global variables directly.
+## 2026-07-21 - Order of Operations in Bash Parameter Expansion Escaping
+**Learning:** When using native Bash parameter expansion (like `${var//pattern/repl}`) to escape multiple special characters (such as backslashes `\` and double quotes `"`), the order of execution is crucial. Escaping quotes first (`\"`) introduces new backslashes into the string. If backslashes are escaped second, it will unintentionally double the backslashes that were just added to escape the quotes, corrupting the string (e.g., resulting in `\\"` instead of `\"`).
+**Action:** Always escape backslashes FIRST before escaping any other special characters when chaining parameter expansions.

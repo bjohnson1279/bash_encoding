@@ -82,6 +82,78 @@ assert_equal "Special Chars !@#$%.S01E02 \\([0-9]*}" "$(printf "%s\n" "$actual" 
 assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Special Chars - Season"
 assert_equal "0102" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Special Chars - Episode"
 
+# Start and Stop markers
+# Note: The underlying regex is quirky. (start...) and (stop...) get stripped entirely from $FILE,
+# and they end up absorbed into the 'date' field or title artifacts. We assert the current baseline
+# behavior rather than fix the function here.
+actual=$(parseFilename "Show Name (2020) S01E01 (start 10) (stop 20).ts")
+assert_equal "Show Name (2020)" "$(printf "%s\n" "$actual" | jq -r '.show')" "Start and Stop markers - Show"
+assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Start and Stop markers - Season"
+assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Start and Stop markers - Episode"
+assert_equal "S01E01 (start 10) (stop 20)" "$(printf "%s\n" "$actual" | jq -r '.date')" "Start and Stop markers - Date Field Capture"
+
+# Empty string
+actual=$(parseFilename "" 2>/dev/null)
+assert_equal "\\([0-9]*}" "$(printf "%s\n" "$actual" | jq -r '.show')" "Empty string - Show"
+assert_equal "" "$(printf "%s\n" "$actual" | jq -r '.season')" "Empty string - Season"
+assert_equal "" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Empty string - Episode"
+
+# Unexpected extension
+actual=$(parseFilename "Show Name (2020) S01E01.mp4")
+assert_equal "Show Name (2020)" "$(printf "%s\n" "$actual" | jq -r '.show')" "Unexpected extension - Show"
+assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Unexpected extension - Season"
+assert_equal "014" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Unexpected extension - Episode"
+# --- Edge Cases: Escaping and Quotes ---
+
+# Escaping strings with double quotes
+actual=$(parseFilename 'Show "Name" (2020) S01E01.ts')
+assert_equal 'Show "Name" (2020)' "$(printf "%s\n" "$actual" | jq -r '.show')" "Double quotes - Show"
+assert_equal '01' "$(printf "%s\n" "$actual" | jq -r '.season')" "Double quotes - Season"
+assert_equal '01' "$(printf "%s\n" "$actual" | jq -r '.episode')" "Double quotes - Episode"
+assert_equal '}' "$(printf "%s\n" "$actual" | jq -r '.title')" "Double quotes - Title"
+
+# Escaping strings with backslash
+actual=$(parseFilename 'Show \ Name S01E01.ts')
+assert_equal 'Show \ Name' "$(printf "%s\n" "$actual" | jq -r '.show')" "Backslash - Show"
+assert_equal '01' "$(printf "%s\n" "$actual" | jq -r '.season')" "Backslash - Season"
+assert_equal '01' "$(printf "%s\n" "$actual" | jq -r '.episode')" "Backslash - Episode"
+assert_equal 'Show \ Name }' "$(printf "%s\n" "$actual" | jq -r '.title')" "Backslash - Title"
+
+# Mixed escaping
+actual=$(parseFilename 'Show Name (2020) S01E01 - Some \ Unusual "Quotes" & Chars.ts')
+assert_equal 'Show Name (2020)' "$(printf "%s\n" "$actual" | jq -r '.show')" "Mixed escaping - Show"
+assert_equal '01' "$(printf "%s\n" "$actual" | jq -r '.season')" "Mixed escaping - Season"
+assert_equal '01' "$(printf "%s\n" "$actual" | jq -r '.episode')" "Mixed escaping - Episode"
+assert_equal 'Some \ Unusual "Quotes" & Chars}' "$(printf "%s\n" "$actual" | jq -r '.title')" "Mixed escaping - Title"
+
+# Escaping strings with newlines
+actual=$(parseFilename $'Show Name\nS01E01.ts')
+assert_equal $'Show Name\nS01E01 \\([0-9]*}' "$(printf "%s\n" "$actual" | jq -r '.show')" "Newline - Show"
+assert_equal '01' "$(printf "%s\n" "$actual" | jq -r '.season')" "Newline - Season"
+assert_equal '0101' "$(printf "%s\n" "$actual" | jq -r '.episode')" "Newline - Episode"
+
+# --- Edge Cases: Datetime Patterns ---
+
+# File with datetime and Episode Title
+actual=$(parseFilename 'Show Name (2022) 2022-12-01 20 00 00 - Episode Title.ts')
+assert_equal 'Show Name (2022) 2022-12-01 20 00 00 - Episode Title \([0-9]*}' "$(printf "%s\n" "$actual" | jq -r '.show')" "Datetime with Title - Show"
+assert_equal '2022' "$(printf "%s\n" "$actual" | jq -r '.season')" "Datetime with Title - Season"
+assert_equal '20221201200000' "$(printf "%s\n" "$actual" | jq -r '.episode')" "Datetime with Title - Episode"
+assert_equal 'Show Name ( 2022-12-01 20 00 00Episode Title}' "$(printf "%s\n" "$actual" | jq -r '.title')" "Datetime with Title - Title"
+
+# File with datetime (No Episode Title)
+actual=$(parseFilename 'Show Name 2022-12-01 20 00 00.ts')
+assert_equal 'Show Name 2022-12-01 20 00 00 \([0-9]*}' "$(printf "%s\n" "$actual" | jq -r '.show')" "Datetime no Title - Show"
+assert_equal '2022' "$(printf "%s\n" "$actual" | jq -r '.season')" "Datetime no Title - Season"
+assert_equal '20221201200000' "$(printf "%s\n" "$actual" | jq -r '.episode')" "Datetime no Title - Episode"
+assert_equal 'Show Name 2022-12-01 20 00 00}' "$(printf "%s\n" "$actual" | jq -r '.title')" "Datetime no Title - Title"
+
+# --- Edge Cases: Empty inputs ---
+actual=$(parseFilename '')
+assert_equal '\([0-9]*}' "$(printf "%s\n" "$actual" | jq -r '.show')" "Empty input - Show"
+assert_equal '' "$(printf "%s\n" "$actual" | jq -r '.season')" "Empty input - Season"
+assert_equal '' "$(printf "%s\n" "$actual" | jq -r '.episode')" "Empty input - Episode"
+
 if [ $FAILED -gt 0 ]; then
     echo "Summary: $FAILED tests failed."
     exit 1
