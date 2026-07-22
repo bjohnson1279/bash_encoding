@@ -82,6 +82,27 @@ assert_equal "Special Chars !@#$%.S01E02 \\([0-9]*}" "$(printf "%s\n" "$actual" 
 assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Special Chars - Season"
 assert_equal "0102" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Special Chars - Episode"
 
+# Start and Stop markers
+# Note: The underlying regex is quirky. (start...) and (stop...) get stripped entirely from $FILE,
+# and they end up absorbed into the 'date' field or title artifacts. We assert the current baseline
+# behavior rather than fix the function here.
+actual=$(parseFilename "Show Name (2020) S01E01 (start 10) (stop 20).ts")
+assert_equal "Show Name (2020)" "$(printf "%s\n" "$actual" | jq -r '.show')" "Start and Stop markers - Show"
+assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Start and Stop markers - Season"
+assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Start and Stop markers - Episode"
+assert_equal "S01E01 (start 10) (stop 20)" "$(printf "%s\n" "$actual" | jq -r '.date')" "Start and Stop markers - Date Field Capture"
+
+# Empty string
+actual=$(parseFilename "" 2>/dev/null)
+assert_equal "\\([0-9]*}" "$(printf "%s\n" "$actual" | jq -r '.show')" "Empty string - Show"
+assert_equal "" "$(printf "%s\n" "$actual" | jq -r '.season')" "Empty string - Season"
+assert_equal "" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Empty string - Episode"
+
+# Unexpected extension
+actual=$(parseFilename "Show Name (2020) S01E01.mp4")
+assert_equal "Show Name (2020)" "$(printf "%s\n" "$actual" | jq -r '.show')" "Unexpected extension - Show"
+assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Unexpected extension - Season"
+assert_equal "014" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Unexpected extension - Episode"
 # --- Edge Cases: Escaping and Quotes ---
 
 # Escaping strings with double quotes
