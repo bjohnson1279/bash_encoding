@@ -43,19 +43,31 @@ REQUIRED_DISK_AMOUNT=1000
 
 # Gets available disk space in Megabytes.
 # POSIX-compliant alternative to 'df -BM --output=avail'
+# shellcheck disable=SC3001,SC3043,SC3045
 # shellcheck disable=SC2120
 get_avail_mb() {
     local target_dir="${1:-.}"
+    local out_ref="${2:-}"
+    local avail
+
     # Verify the target directory exists first
     if [ ! -d "$target_dir" ]; then
         return 1
     fi
+
     # df -P -> POSIX standard, reliable output
     # ⚡ Bolt Optimization: Replace awk process with native shell `read` and arithmetic
-    # This avoids external process spawning and runs significantly faster
-    df -P -- "$target_dir" | {
+    # Uses process substitution to avoid pipe subshell, allowing direct variable assignment.
+    {
         read -r _
         read -r _ _ _ avail _
+    } < <(df -P -- "$target_dir")
+
+    if [ -n "$out_ref" ]; then
+        printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
+    else
+        echo $(( avail / 1024 ))
+    fi
         # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
         case "${avail#-}" in
             ''|*[!0-9]*) echo 0 ;;
@@ -66,13 +78,25 @@ get_avail_mb() {
 
 # Gets folder size in Megabytes.
 # POSIX-compliant alternative to 'du -BM'
+# shellcheck disable=SC3001,SC3043,SC3045
 get_folder_size_mb() {
     # $1: folder path
+    local folder_path="$1"
+    local out_ref="${2:-}"
+    local size
+
     # du -sk -> POSIX standard, size in 1K-blocks
     # ⚡ Bolt Optimization: Replace awk process with native shell `read` and arithmetic
-    # This avoids external process spawning and runs significantly faster
-    du -sk -- "$1" | {
+    # Uses process substitution to avoid pipe subshell, allowing direct variable assignment.
+    {
         read -r size _
+    } < <(du -sk -- "$folder_path")
+
+    if [ -n "$out_ref" ]; then
+        printf -v "$out_ref" "%s" "$(( size / 1024 ))"
+    else
+        echo $(( size / 1024 ))
+    fi
         # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
         case "${size#-}" in
             ''|*[!0-9]*) echo 0 ;;
@@ -99,6 +123,7 @@ folder_sync() {
     fi
 
     local avail_mb
+    get_avail_mb "." "avail_mb"
     # shellcheck disable=SC2119
     avail_mb="$(get_avail_mb)"
     echo "Available disk space: ${avail_mb}MB"
@@ -109,8 +134,10 @@ folder_sync() {
         return 1
     fi
 
-    echo "Calculating size of '$src_folder'..."
+    printf "Calculating size of '%s'...\n" "$src_folder"
     local folder_size_mb
+    get_folder_size_mb "$src_folder" "folder_size_mb"
+    echo "Calculating size of '$src_folder'..."
     folder_size_mb="$(get_folder_size_mb "$src_folder")"
     echo "Source folder size: ${folder_size_mb}MB"
 
@@ -129,6 +156,13 @@ folder_sync() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 # --- Main Script ---
 
+# Check initial disk space
+avail_mb=""
+get_avail_mb "." "avail_mb"
+if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
+    echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
+    exit 1
+fi
 if [ -z "${BATS_VERSION:-}" ]; then
     # Check initial disk space
     # shellcheck disable=SC2119
