@@ -65,27 +65,22 @@ parse_filename() {
     base_name="${1##*/}"
     base_name="${base_name%.*}"
 
-    # ⚡ Bolt Optimization: Combine sequential sed operations into a single invocation
-    # The pattern looks for "S<season>E<episode>" and captures the parts around it.
-    # It handles variations in separators (., _, -, space).
-    # If standard pattern fails, fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
-    parsed=$(printf '%s\n' "$base_name" | sed -n \
-        -e 's/^\(.*\)[ ._-][Ss]\([0-9]\{1,2\}\)[ ._-]*[Ee]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p' \
-        -e 's/^\(.*\)[ ._-]\([0-9]\{4\}\)[ ._-]\([0-9]\{1,2\}\)[ ._-]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p' | head -n 1)
-
-    if [ -z "$parsed" ]; then
+    # ⚡ Bolt Optimization: Replace `sed` capture groups and string splitting with native Bash regex matching.
+    # Eliminates process forking and subshell overhead.
+    if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
+        show_raw="${BASH_REMATCH[1]}"
+        season_raw="${BASH_REMATCH[2]}"
+        episode_raw="${BASH_REMATCH[3]}"
+        title_raw="${BASH_REMATCH[4]}"
+    elif [[ "$base_name" =~ ^(.*)[._\ -]([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2})(.*)$ ]]; then
+        show_raw="${BASH_REMATCH[1]}"
+        season_raw="${BASH_REMATCH[2]}"
+        episode_raw="${BASH_REMATCH[3]}"
+        title_raw="${BASH_REMATCH[4]}"
+    else
         printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
         return 1
     fi
-
-    # Use IFS to split the parsed string into variables
-    old_ifs=$IFS
-    IFS="|"
-    set -f # Temporarily disable globbing to prevent issues with filenames
-    # shellcheck disable=SC2086
-    set -- $parsed
-    set +f # Re-enable globbing
-    IFS=$old_ifs
 
     # ⚡ Bolt Optimization: Replace subshells and sed with native POSIX parameter expansion to remove leading zeros
     season_stripped="${season_raw#"${season_raw%%[!0]*}"}"
@@ -110,6 +105,8 @@ parse_filename() {
 
     cleanup_name "$title_raw" PARSED_EPISODE_TITLE
     episode_title="$PARSED_EPISODE_TITLE"
+    cleanup_name "$show_raw" PARSED_SHOW_NAME
+    show_name="$PARSED_SHOW_NAME"
 
     # ⚡ Bolt Optimization: Skip expensive JSON escaping and formatting if --no-json is passed.
     if [ "$2" != "--no-json" ]; then
