@@ -72,3 +72,7 @@ Security convention: When looping through files found by 'find', use '-print0' a
 **Vulnerability:** Arithmetic Expression Injection via untrusted input in `$(( ... ))`
 **Learning:** In POSIX/Bash scripts, executing variable values directly within an arithmetic context like `$(( val / 1024 ))` is extremely dangerous if the variable's value is derived from an untrusted source, such as `df` or `du` output that could be manipulated via malicious FUSE mounts or paths. An attacker could craft the output to contain command substitutions embedded in array indices (e.g., `a[$(id)]`), which bash will execute when attempting to parse the arithmetic expression.
 **Prevention:** In POSIX compliant shell scripts where native bash regex (`[[ ... =~ ... ]]`) is not available or safe to use, use `case` pattern globbing (e.g., `case "${val#-}" in ''|*[!0-9]*) echo 0 ;; *) echo $(( val / 1024 )) ;; esac`) to strictly validate that input is numeric before utilizing it in an arithmetic expression context.
+## 2024-07-22 - [CRITICAL] Prevent Arithmetic Expression Injection in network-copy.sh
+**Vulnerability:** Arithmetic Expression Injection via unsanitized numerical input
+**Learning:** The script incorrectly performs arithmetic expansion `$(( avail / 1024 ))` and `$(( size / 1024 ))` *before* validating that the variables are numeric, rendering the validation check useless and creating an injection vulnerability if inputs are malicious.
+**Prevention:** Reorder the code so the `case` statement validates the inputs strictly *before* any arithmetic expansion occurs.
