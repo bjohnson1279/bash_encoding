@@ -20,7 +20,7 @@ run_cleanup_test() {
 
     ((TOTAL_TESTS++))
 
-    echo "Testing cleanup_name: '$input'"
+    printf "Testing cleanup_name: '%s'\n" "$input"
     local output
     output=$(cleanup_name "$input")
 
@@ -43,7 +43,7 @@ run_test() {
 
     ((TOTAL_TESTS++))
 
-    echo "Testing: $filename"
+    printf "Testing: %s\n" "$filename"
 
     # Run the function and capture stdout
     local output
@@ -106,7 +106,7 @@ run_json_escape_test() {
 
     ((TOTAL_TESTS++))
 
-    echo "Testing json_escape: '$input'"
+    printf "Testing json_escape: '%s'\n" "$input"
 
     # Run the function and capture stdout
     local output
