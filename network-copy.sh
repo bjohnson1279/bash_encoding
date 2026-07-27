@@ -75,7 +75,7 @@ get_avail_mb() {
     if [ -n "$out_ref" ]; then
         printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
     else
-        echo $(( avail / 1024 ))
+        printf '%s\n' "$(( avail / 1024 ))"
     fi
 }
 
@@ -108,7 +108,7 @@ get_folder_size_mb() {
     if [ -n "$out_ref" ]; then
         printf -v "$out_ref" "%s" "$(( size / 1024 ))"
     else
-        echo $(( size / 1024 ))
+        printf '%s\n' "$(( size / 1024 ))"
     fi
 }
 
