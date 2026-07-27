@@ -67,6 +67,7 @@ get_avail_mb() {
         ''|*[!0-9]*)
             avail=0
             ;;
+        ''|*[!0-9]*) avail=0 ;;
         *)
             # safe to do arithmetic
             ;;
@@ -100,6 +101,7 @@ get_folder_size_mb() {
         ''|*[!0-9]*)
             size=0
             ;;
+        ''|*[!0-9]*) size=0 ;;
         *)
             # safe to do arithmetic
             ;;
