@@ -77,6 +77,10 @@ Security convention: When looping through files found by 'find', use '-print0' a
 
 ## 2024-07-25 - [HIGH] Fix Option Injection in echo commands in test_parse_filename_encode_all.sh
 **Vulnerability:** Widespread use of `echo "$var"` when printing untrusted user input, such as expected and actual test output which could begin with hyphens.
+**Learning:** In Bash, variables parsed via `echo "$var"` are susceptible to option injection if the content starts with hyphens (e.g., `-n`, `-e`). For instance, a malicious or poorly formatted filename like `-e malicious_content` can manipulate `echo`'s behavior unexpectedly.
+**Prevention:** Always use `printf '%s\n' "$var"` instead of `echo "$var"` to safely output variable contents, as `printf` is not vulnerable to option injection and explicitly treats the subsequent argument as literal string data.
+- Security convention: To prevent Command Option Injection, never use `echo` to output un-prefixed dynamic variables or arithmetic results (e.g., negative numbers starting with `-` which mimic command-line flags). Always use `printf '%s\n' "$var"` for secure, predictable string output.
+
 
 ## Arithmetic Expression Injection
 In Bash, variables evaluated inside arithmetic contexts (e.g., `$(( var ))`) can lead to arbitrary command execution (Arithmetic Expression Injection) if the variable's contents are not strictly numeric. Always validate untrusted inputs using a strict numeric regex (e.g., `^[0-9]+(\.[0-9]+)?$`) or a pattern match `case` block before arithmetic evaluation.
