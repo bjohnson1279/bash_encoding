@@ -1,6 +1,15 @@
 #!/usr/bin/env sh
 
-# Encode all .ts files in a directory to .mp4
+# Encode all files of a specific extension in a directory to .mp4
+
+if [ -z "$1" ]; then
+    printf "Usage: %s <extension>\n" "$0" >&2
+    exit 1
+fi
+
+EXT="$1"
+# Remove leading dot if present
+EXT="${EXT#.}"
 
 # --- Configuration ---
 # FFMPEG encoder to be used
@@ -12,9 +21,9 @@ PRESET="veryslow"
 # Quality level, default is 21
 QUALITY=21
 
-# Find and loop through all .ts files in the current directory
 # shellcheck disable=SC3045
-find . -type f -name "*.ts" -print0 | while IFS= read -r -d '' i; do
+# Find and loop through all files with the given extension in the current directory
+find . -type f -name "*.$EXT" -print0 | while IFS= read -r -d '' i; do
     # Construct the output filename
     new_file="${i%.*}.mp4"
 

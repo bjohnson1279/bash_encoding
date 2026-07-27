@@ -10,7 +10,13 @@ teardown() {
     rm -rf "$TEST_TEMP_DIR"
 }
 
-@test "encode-mkv.sh encodes multiple .mkv files correctly" {
+@test "encode.sh exits with error if no extension provided" {
+    run bash "${BATS_TEST_DIRNAME}/encode.sh"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Usage:"* ]]
+}
+
+@test "encode.sh encodes multiple files correctly" {
     # Setup dummy files
     touch "$TEST_TEMP_DIR/file1.mkv"
     touch "$TEST_TEMP_DIR/file2.mkv"
@@ -25,8 +31,8 @@ teardown() {
         }
         export -f ffmpeg
 
-        # Source the script so it uses the mocked ffmpeg
-        source "${BATS_TEST_DIRNAME}/encode-mkv.sh"
+        # Run the script so it uses the mocked ffmpeg
+        bash "${BATS_TEST_DIRNAME}/encode.sh" mkv
     )
 
     # Verify that ffmpeg was called twice
@@ -49,7 +55,7 @@ teardown() {
     [[ "$output" == *"-y ./file2.mp4"* ]]
 }
 
-@test "encode-mkv.sh handles filenames with spaces correctly" {
+@test "encode.sh handles filenames with spaces correctly" {
     # Setup dummy file with spaces
     touch "$TEST_TEMP_DIR/file with spaces.mkv"
 
@@ -63,7 +69,7 @@ teardown() {
         }
         export -f ffmpeg
 
-        source "${BATS_TEST_DIRNAME}/encode-mkv.sh"
+        bash "${BATS_TEST_DIRNAME}/encode.sh" mkv
     )
 
     # Verify that ffmpeg was called
@@ -78,7 +84,7 @@ teardown() {
     [[ "$output" == *"-y ./file with spaces.mp4"* ]]
 }
 
-@test "encode-mkv.sh does not call ffmpeg when no .mkv files are present" {
+@test "encode.sh does not call ffmpeg when no matching files are present" {
     # Setup a dummy non-mkv file
     touch "$TEST_TEMP_DIR/file.txt"
 
@@ -91,7 +97,7 @@ teardown() {
         }
         export -f ffmpeg
 
-        source "${BATS_TEST_DIRNAME}/encode-mkv.sh"
+        bash "${BATS_TEST_DIRNAME}/encode.sh" mkv
     )
 
     # Verify that ffmpeg was not called (log file shouldn't exist)
