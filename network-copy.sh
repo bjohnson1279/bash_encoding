@@ -63,6 +63,15 @@ get_avail_mb() {
         read -r _ _ _ avail _
     } < <(df -P -- "$target_dir")
 
+    # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
+    case "${avail#-}" in
+        ''|*[!0-9]*)
+            avail=0
+            ;;
+        *)
+            # safe to do arithmetic
+    esac
+
     if [ -n "$out_ref" ]; then
         printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
     else
@@ -91,6 +100,15 @@ get_folder_size_mb() {
     {
         read -r size _
     } < <(du -sk -- "$folder_path")
+
+    # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
+    case "${size#-}" in
+        ''|*[!0-9]*)
+            size=0
+            ;;
+        *)
+            # safe to do arithmetic
+    esac
 
     if [ -n "$out_ref" ]; then
         printf -v "$out_ref" "%s" "$(( size / 1024 ))"
@@ -168,6 +186,7 @@ if [ -z "${BATS_VERSION:-}" ]; then
     # shellcheck disable=SC2119
     avail_mb="$(get_avail_mb)"
     if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
+    if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
         echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
         exit 1
     fi
@@ -194,4 +213,5 @@ if [ -z "${BATS_VERSION:-}" ]; then
     # recordings_src_another="$LOCAL_SHARE_PATH/Recorded TV Shows/Another Show (2022)"
     # required_space_another=3000
     # folder_sync "$recordings_src_another" "$required_space_another"
+fi
 fi
