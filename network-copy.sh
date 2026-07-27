@@ -75,7 +75,7 @@ get_avail_mb() {
     if [ -n "$out_ref" ]; then
         printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
     else
-        echo $(( avail / 1024 ))
+        printf '%s\n' "$(( avail / 1024 ))"
     fi
 }
 
@@ -108,7 +108,7 @@ get_folder_size_mb() {
     if [ -n "$out_ref" ]; then
         printf -v "$out_ref" "%s" "$(( size / 1024 ))"
     else
-        echo $(( size / 1024 ))
+        printf '%s\n' "$(( size / 1024 ))"
     fi
 }
 
@@ -175,9 +175,6 @@ if [ -z "${BATS_VERSION:-}" ]; then
     # shellcheck disable=SC2119
     avail_mb="$(get_avail_mb)"
     if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
-    avail_mb=""
-    get_avail_mb "." "avail_mb"
-    if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
         echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
         exit 1
     fi

@@ -208,12 +208,16 @@ teardown() {
     [ ! -f /tmp/hacked ]
 
     rm -rf /tmp/mock_dir
+
+    df() {
+        echo "Filesystem     1024-blocks   Used Available Capacity Mounted on"
         echo "/dev/sda1          1000000 500000      a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]      50% /mock/path"
     }
     mkdir -p "$TEST_TEMP_DIR/mock_dir"
     rm -f "$TEST_TEMP_DIR/hacked"
 
     result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
+    [ "$result" -eq 0 ]
     [ ! -f "$TEST_TEMP_DIR/hacked" ]
 
     rm -rf "$TEST_TEMP_DIR/mock_dir"
@@ -225,9 +229,14 @@ teardown() {
     }
 
     get_folder_size_mb "/mock/path" "result"
+    [ "$result" -eq 0 ]
+    [ ! -f /tmp/hacked ]
+
+    du() {
         echo "a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]	/mock/path"
     }
 
     result=$(get_folder_size_mb "/mock/path")
-
+    [ "$result" -eq 0 ]
+    [ ! -f "$TEST_TEMP_DIR/hacked" ]
 }
