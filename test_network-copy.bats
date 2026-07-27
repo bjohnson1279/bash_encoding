@@ -30,12 +30,17 @@ teardown() {
     }
 
     # Create a dummy directory to pass the directory check
-    mkdir -p "$TEST_TEMP_DIR/mock_dir"
+    mkdir -p /tmp/mock_dir
 
-    result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
+    get_avail_mb "/tmp/mock_dir" "result"
     [ "$result" -eq 2 ]
 
     # Cleanup
+    rm -rf /tmp/mock_dir
+    mkdir -p "$TEST_TEMP_DIR/mock_dir"
+
+    result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
+
     rm -rf "$TEST_TEMP_DIR/mock_dir"
 }
 
@@ -45,6 +50,7 @@ teardown() {
         echo "1024	/mock/path"
     }
 
+    get_folder_size_mb "/mock/path" "result"
     result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 1 ]
 }
@@ -55,6 +61,7 @@ teardown() {
         echo "1500	/mock/path"
     }
 
+    get_folder_size_mb "/mock/path" "result"
     result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 1 ]
 }
@@ -65,6 +72,7 @@ teardown() {
         echo "500	/mock/path"
     }
 
+    get_folder_size_mb "/mock/path" "result"
     result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 0 ]
 }
@@ -75,6 +83,7 @@ teardown() {
         echo "1048576	/mock/path"
     }
 
+    get_folder_size_mb "/mock/path" "result"
     result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 1024 ]
 }
@@ -85,6 +94,7 @@ teardown() {
         echo "2048	/mock/path with spaces"
     }
 
+    get_folder_size_mb "/mock/path with spaces" "result"
     result=$(get_folder_size_mb "/mock/path with spaces")
     [ "$result" -eq 2 ]
 }
@@ -101,6 +111,12 @@ teardown() {
         echo 500
     }
 
+    mkdir -p /tmp/mock_src_dir
+
+    run folder_sync "/tmp/mock_src_dir" 1000
+    [[ "${lines[2]}" == "Insufficient disk space to start copy from '/tmp/mock_src_dir'." ]]
+
+    rm -rf /tmp/mock_src_dir
     mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
 
     run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
@@ -120,6 +136,12 @@ teardown() {
         echo 2000
     }
 
+    mkdir -p /tmp/mock_src_dir
+    run folder_sync "/tmp/mock_src_dir" 1000
+
+    [[ "${lines[6]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
+
+    rm -rf /tmp/mock_src_dir
     mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
     run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
 
@@ -143,6 +165,10 @@ teardown() {
         echo "mock rsync executed"
     }
 
+    RECORDING_PATH="/tmp/mock_recording_path"
+
+    mkdir -p /tmp/mock_src_dir
+    run folder_sync "/tmp/mock_src_dir" 1000
     RECORDING_PATH="$TEST_TEMP_DIR/mock_recording_path"
     mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
     run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
@@ -164,19 +190,30 @@ teardown() {
 
     [ "$has_mock_rsync" -eq 1 ]
     [ "$has_copy_complete" -eq 1 ]
+
+    rm -rf /tmp/mock_src_dir
     rm -rf "$TEST_TEMP_DIR/mock_src_dir"
 }
 
 @test "get_avail_mb fails safely on non-numeric injection" {
     df() {
         echo "Filesystem     1024-blocks   Used Available Capacity Mounted on"
+        echo "/dev/sda1          1000000 500000      a[\$(echo 1 > /tmp/hacked)]      50% /mock/path"
+    }
+    mkdir -p /tmp/mock_dir
+    rm -f /tmp/hacked
+
+    get_avail_mb "/tmp/mock_dir" "result"
+    [ "$result" -eq 0 ]
+    [ ! -f /tmp/hacked ]
+
+    rm -rf /tmp/mock_dir
         echo "/dev/sda1          1000000 500000      a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]      50% /mock/path"
     }
     mkdir -p "$TEST_TEMP_DIR/mock_dir"
     rm -f "$TEST_TEMP_DIR/hacked"
 
     result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
-    [ "$result" -eq 0 ]
     [ ! -f "$TEST_TEMP_DIR/hacked" ]
 
     rm -rf "$TEST_TEMP_DIR/mock_dir"
@@ -184,6 +221,10 @@ teardown() {
 
 @test "get_folder_size_mb fails safely on non-numeric injection" {
     du() {
+        echo "a[\$(echo 1 > /tmp/hacked)]	/mock/path"
+    }
+
+    get_folder_size_mb "/mock/path" "result"
         echo "a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]	/mock/path"
     }
 
