@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
 setup() {
+    TEST_TEMP_DIR="$(mktemp -d)"
     # Provide dummy values to skip main execution logic of network-copy.sh
     # Not strictly necessary if we guarded it, but good practice
     MNT_SHARE_PATH="dummy_path"
@@ -8,6 +9,10 @@ setup() {
     RECORDING_PATH="dummy_rec"
 
     source network-copy.sh
+}
+
+teardown() {
+    rm -rf "$TEST_TEMP_DIR"
 }
 
 @test "get_avail_mb returns 1 for invalid directory" {
@@ -25,13 +30,13 @@ setup() {
     }
 
     # Create a dummy directory to pass the directory check
-    mkdir -p /tmp/mock_dir
+    mkdir -p "$TEST_TEMP_DIR/mock_dir"
 
-    result=$(get_avail_mb "/tmp/mock_dir")
+    result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
     [ "$result" -eq 2 ]
 
     # Cleanup
-    rm -rf /tmp/mock_dir
+    rm -rf "$TEST_TEMP_DIR/mock_dir"
 }
 
 @test "get_folder_size_mb calculates standard MB correctly" {
@@ -96,16 +101,17 @@ setup() {
         echo 500
     }
 
-    mkdir -p /tmp/mock_src_dir
+    mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
 
-    run folder_sync "/tmp/mock_src_dir" 1000
-    [[ "${lines[1]}" == "Insufficient disk space to start copy from '/tmp/mock_src_dir'." ]]
+    run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
+    [[ "${lines[2]}" == "Insufficient disk space to start copy from '$TEST_TEMP_DIR/mock_src_dir'." ]]
 
-    rm -rf /tmp/mock_src_dir
+    rm -rf "$TEST_TEMP_DIR/mock_src_dir"
 }
 
 @test "folder_sync returns 1 when source folder size is greater than available space" {
     # Mock get_avail_mb to return 1500 (greater than 1000 required, but less than folder size)
+    get_avail_mb() {
         echo 1500
     }
 
@@ -114,16 +120,22 @@ setup() {
         echo 2000
     }
 
+    mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
+    run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
 
-    [[ "${lines[3]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
-
+    [[ "${lines[6]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]]
+    rm -rf "$TEST_TEMP_DIR/mock_src_dir"
 }
 
 @test "folder_sync successfully runs rsync when there is enough space" {
     # Mock get_avail_mb to return 2000
+    get_avail_mb() {
+        echo 2000
     }
 
     # Mock get_folder_size_mb to return 1500
+    get_folder_size_mb() {
+        echo 1500
     }
 
     # Mock rsync to do nothing but print a string so we can verify it was called
@@ -131,7 +143,9 @@ setup() {
         echo "mock rsync executed"
     }
 
-    RECORDING_PATH="/tmp/mock_recording_path"
+    RECORDING_PATH="$TEST_TEMP_DIR/mock_recording_path"
+    mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
+    run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
 
     [ "$status" -eq 0 ]
 
@@ -145,29 +159,32 @@ setup() {
         fi
         if [[ "$line" == "Copy complete." ]]; then
             has_copy_complete=1
+        fi
     done
 
     [ "$has_mock_rsync" -eq 1 ]
     [ "$has_copy_complete" -eq 1 ]
+    rm -rf "$TEST_TEMP_DIR/mock_src_dir"
+}
 
 @test "get_avail_mb fails safely on non-numeric injection" {
     df() {
         echo "Filesystem     1024-blocks   Used Available Capacity Mounted on"
-        echo "/dev/sda1          1000000 500000      a[\$(echo 1 > /tmp/hacked)]      50% /mock/path"
+        echo "/dev/sda1          1000000 500000      a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]      50% /mock/path"
     }
-    mkdir -p /tmp/mock_dir
-    rm -f /tmp/hacked
+    mkdir -p "$TEST_TEMP_DIR/mock_dir"
+    rm -f "$TEST_TEMP_DIR/hacked"
 
-    result=$(get_avail_mb "/tmp/mock_dir")
+    result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
     [ "$result" -eq 0 ]
-    [ ! -f /tmp/hacked ]
+    [ ! -f "$TEST_TEMP_DIR/hacked" ]
 
-    rm -rf /tmp/mock_dir
+    rm -rf "$TEST_TEMP_DIR/mock_dir"
 }
 
 @test "get_folder_size_mb fails safely on non-numeric injection" {
     du() {
-        echo "a[\$(echo 1 > /tmp/hacked)]	/mock/path"
+        echo "a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]	/mock/path"
     }
 
     result=$(get_folder_size_mb "/mock/path")
