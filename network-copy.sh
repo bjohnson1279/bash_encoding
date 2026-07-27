@@ -65,11 +65,9 @@ get_avail_mb() {
     # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
     case "${avail#-}" in
         ''|*[!0-9]*) avail=0 ;;
-        ''|*[!0-9]*)
-            avail=0
-            ;;
         *)
             # safe to do arithmetic
+            ;;
     esac
 
     if [ -n "$out_ref" ]; then
@@ -98,11 +96,9 @@ get_folder_size_mb() {
     # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
     case "${size#-}" in
         ''|*[!0-9]*) size=0 ;;
-        ''|*[!0-9]*)
-            size=0
-            ;;
         *)
             # safe to do arithmetic
+            ;;
     esac
 
     if [ -n "$out_ref" ]; then
@@ -171,10 +167,6 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
     exit 1
 fi
 if [ -z "${BATS_VERSION:-}" ]; then
-    # Check initial disk space
-    # shellcheck disable=SC2119
-    avail_mb="$(get_avail_mb)"
-    if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
     avail_mb=""
     get_avail_mb "." "avail_mb"
     if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
