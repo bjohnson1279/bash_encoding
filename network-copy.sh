@@ -28,7 +28,6 @@ if [ -z "${BATS_VERSION:-}" ]; then
     done
 fi
 
-fi
 # Enter your mount path for network share
 MNT_SHARE_PATH=""
 
@@ -77,12 +76,6 @@ get_avail_mb() {
     else
         echo $(( avail / 1024 ))
     fi
-        # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
-        case "${avail#-}" in
-            ''|*[!0-9]*) echo 0 ;;
-            *) echo $(( avail / 1024 )) ;;
-        esac
-    }
 }
 
 # Gets folder size in Megabytes.
@@ -115,12 +108,6 @@ get_folder_size_mb() {
     else
         echo $(( size / 1024 ))
     fi
-        # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
-        case "${size#-}" in
-            ''|*[!0-9]*) echo 0 ;;
-            *) echo $(( size / 1024 )) ;;
-        esac
-    }
 }
 
 # Syncs a folder if there is enough disk space.
@@ -174,18 +161,10 @@ folder_sync() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 # --- Main Script ---
 
-# Check initial disk space
-avail_mb=""
-get_avail_mb "." "avail_mb"
-if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
-    echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
-    exit 1
-fi
 if [ -z "${BATS_VERSION:-}" ]; then
     # Check initial disk space
-    # shellcheck disable=SC2119
-    avail_mb="$(get_avail_mb)"
-    if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
+    avail_mb=""
+    get_avail_mb "." "avail_mb"
     if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
         echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
         exit 1
