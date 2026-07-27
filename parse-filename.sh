@@ -65,27 +65,23 @@ parse_filename() {
     base_name="${1##*/}"
     base_name="${base_name%.*}"
 
-    # ⚡ Bolt Optimization: Combine sequential sed operations into a single invocation
-    # The pattern looks for "S<season>E<episode>" and captures the parts around it.
-    # It handles variations in separators (., _, -, space).
-    # If standard pattern fails, fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
-    parsed=$(printf '%s\n' "$base_name" | sed -n \
-        -e 's/^\(.*\)[ ._-][Ss]\([0-9]\{1,2\}\)[ ._-]*[Ee]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p' \
-        -e 's/^\(.*\)[ ._-]\([0-9]\{4\}\)[ ._-]\([0-9]\{1,2\}\)[ ._-]\([0-9]\{1,2\}\)\(.*\)$/\1|\2|\3|\4/p' | head -n 1)
-
-    if [ -z "$parsed" ]; then
+    # ⚡ Bolt Optimization: Replace `sed` capture groups and IFS string parsing with native Bash regex matching.
+    # This avoids spawning a subshell and a `sed` process, and eliminates the need to join/split strings,
+    # performing significantly faster natively.
+    if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
+        show_name="${BASH_REMATCH[1]}"
+        season_raw="${BASH_REMATCH[2]}"
+        episode_raw="${BASH_REMATCH[3]}"
+        title_raw="${BASH_REMATCH[4]}"
+    elif [[ "$base_name" =~ ^(.*)[._\ -]([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2})(.*)$ ]]; then
+        show_name="${BASH_REMATCH[1]}"
+        season_raw="${BASH_REMATCH[2]}"
+        episode_raw="${BASH_REMATCH[3]}"
+        title_raw="${BASH_REMATCH[4]}"
+    else
         printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
         return 1
     fi
-
-    # Use IFS to split the parsed string into variables
-    old_ifs=$IFS
-    IFS="|"
-    set -f # Temporarily disable globbing to prevent issues with filenames
-    # shellcheck disable=SC2086
-    set -- $parsed
-    set +f # Re-enable globbing
-    IFS=$old_ifs
 
     # ⚡ Bolt Optimization: Replace subshells and sed with native POSIX parameter expansion to remove leading zeros
     season_stripped="${season_raw#"${season_raw%%[!0]*}"}"
@@ -99,6 +95,7 @@ parse_filename() {
     else
         season_num="$season_stripped"
     fi
+    # shellcheck disable=SC2034
     PARSED_SEASON_NUM="$season_num"
 
     if [ ${#episode_stripped} -eq 1 ]; then
@@ -106,8 +103,10 @@ parse_filename() {
     else
         episode_num="$episode_stripped"
     fi
+    # shellcheck disable=SC2034
     PARSED_EPISODE_NUM="$episode_num"
 
+    cleanup_name "$show_name" show_name
     cleanup_name "$title_raw" PARSED_EPISODE_TITLE
     episode_title="$PARSED_EPISODE_TITLE"
 
@@ -117,6 +116,7 @@ parse_filename() {
         json_escape "$episode_title" episode_title_esc
 
         # Output JSON
+        # shellcheck disable=SC2154
         printf '{\n  "show_name": "%s",\n  "season": "%s",\n  "episode": "%s",\n  "title": "%s"\n}\n' \
             "$show_name_esc" \
             "$season_num" \
