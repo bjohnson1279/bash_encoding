@@ -70,11 +70,22 @@ parse_filename() {
     # performing significantly faster natively.
     if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
         show_name="${BASH_REMATCH[1]}"
+    # ⚡ Bolt Optimization: Replace `sed` capture groups and string splitting with native Bash regex matching.
+    # Eliminates process forking and subshell overhead.
+    local show_raw season_raw episode_raw title_raw
+
+    # ⚡ Bolt Optimization: Replace subshell sed operations and IFS splitting with native bash regex.
+    # The pattern looks for "S<season>E<episode>" and captures the parts around it.
+    # It handles variations in separators (., _, -, space).
+    # Spaces inside character classes must be escaped (e.g. `[._\ -]`) to avoid syntax errors.
+    # If standard pattern fails, fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
+        show_raw="${BASH_REMATCH[1]}"
         season_raw="${BASH_REMATCH[2]}"
         episode_raw="${BASH_REMATCH[3]}"
         title_raw="${BASH_REMATCH[4]}"
     elif [[ "$base_name" =~ ^(.*)[._\ -]([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2})(.*)$ ]]; then
         show_name="${BASH_REMATCH[1]}"
+        show_raw="${BASH_REMATCH[1]}"
         season_raw="${BASH_REMATCH[2]}"
         episode_raw="${BASH_REMATCH[3]}"
         title_raw="${BASH_REMATCH[4]}"
@@ -109,6 +120,11 @@ parse_filename() {
     cleanup_name "$show_name" show_name
     cleanup_name "$title_raw" PARSED_EPISODE_TITLE
     episode_title="$PARSED_EPISODE_TITLE"
+    cleanup_name "$show_raw" PARSED_SHOW_NAME
+    show_name="$PARSED_SHOW_NAME"
+
+    cleanup_name "$show_raw" PARSED_SHOW_NAME
+    show_name="$PARSED_SHOW_NAME"
 
     # ⚡ Bolt Optimization: Skip expensive JSON escaping and formatting if --no-json is passed.
     if [ "$2" != "--no-json" ]; then
