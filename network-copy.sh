@@ -171,17 +171,6 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
     exit 1
 fi
 if [ -z "${BATS_VERSION:-}" ]; then
-    # Check initial disk space
-    # shellcheck disable=SC2119
-    avail_mb="$(get_avail_mb)"
-    if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
-    avail_mb=""
-    get_avail_mb "." "avail_mb"
-    if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
-        echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
-        exit 1
-    fi
-
     # --- Define Folders to Copy ---
     # Add more calls to folder_sync for each show or directory you want to copy.
 
