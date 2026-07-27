@@ -239,4 +239,7 @@ teardown() {
     result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 0 ]
     [ ! -f "$TEST_TEMP_DIR/hacked" ]
+    rm -f /tmp/hacked
+    [ ! -f /tmp/hacked ]
+
 }
