@@ -65,6 +65,8 @@ parse_filename() {
     base_name="${1##*/}"
     base_name="${base_name%.*}"
 
+    # ⚡ Bolt Optimization: Replace `sed` capture groups and string splitting with native Bash regex matching.
+    # Eliminates process forking and subshell overhead.
     local show_raw season_raw episode_raw title_raw
 
     # ⚡ Bolt Optimization: Replace subshell sed operations and IFS splitting with native bash regex.
@@ -110,6 +112,8 @@ parse_filename() {
 
     cleanup_name "$title_raw" PARSED_EPISODE_TITLE
     episode_title="$PARSED_EPISODE_TITLE"
+    cleanup_name "$show_raw" PARSED_SHOW_NAME
+    show_name="$PARSED_SHOW_NAME"
 
     cleanup_name "$show_raw" PARSED_SHOW_NAME
     show_name="$PARSED_SHOW_NAME"
