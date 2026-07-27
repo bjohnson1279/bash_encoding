@@ -73,7 +73,16 @@ get_avail_mb() {
     esac
 
     if [ -n "$out_ref" ]; then
-        printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
+        # 🛡️ Sentinel: Validate variable name to prevent command injection via printf -v
+        case "$out_ref" in
+            *[!a-zA-Z0-9_]*|[0-9]*)
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+            *)
+                printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
+                ;;
+        esac
     else
         echo $(( avail / 1024 ))
     fi
@@ -106,7 +115,16 @@ get_folder_size_mb() {
     esac
 
     if [ -n "$out_ref" ]; then
-        printf -v "$out_ref" "%s" "$(( size / 1024 ))"
+        # 🛡️ Sentinel: Validate variable name to prevent command injection via printf -v
+        case "$out_ref" in
+            *[!a-zA-Z0-9_]*|[0-9]*)
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+            *)
+                printf -v "$out_ref" "%s" "$(( size / 1024 ))"
+                ;;
+        esac
     else
         echo $(( size / 1024 ))
     fi
@@ -131,8 +149,6 @@ folder_sync() {
 
     local avail_mb
     get_avail_mb "." "avail_mb"
-    # shellcheck disable=SC2119
-    avail_mb="$(get_avail_mb)"
     echo "Available disk space: ${avail_mb}MB"
 
     if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
@@ -145,7 +161,6 @@ folder_sync() {
     local folder_size_mb
     get_folder_size_mb "$src_folder" "folder_size_mb"
     echo "Calculating size of '$src_folder'..."
-    folder_size_mb="$(get_folder_size_mb "$src_folder")"
     echo "Source folder size: ${folder_size_mb}MB"
 
     if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
@@ -172,8 +187,6 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
 fi
 if [ -z "${BATS_VERSION:-}" ]; then
     # Check initial disk space
-    # shellcheck disable=SC2119
-    avail_mb="$(get_avail_mb)"
     if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
         echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
         exit 1

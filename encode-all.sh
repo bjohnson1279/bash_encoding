@@ -39,8 +39,14 @@ getDuration() {
 
     # ⚡ Bolt Optimization: Support nameref for direct variable assignment, avoiding subshells
     if [[ -n "$2" ]]; then
-        local -n out_var="$2"
-        out_var="${dur}"
+        # 🛡️ Sentinel: Validate variable name to prevent command injection via nameref
+        if [[ "$2" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+            local -n out_var="$2"
+            out_var="${dur}"
+        else
+            echo "Error: Invalid output variable name." >&2
+            return 1
+        fi
     else
         printf '%s\n' "${dur}"
     fi
@@ -167,8 +173,14 @@ parseFilename() {
         "$esc_date"
 
     if [[ -n "$2" ]]; then
-        local -n out_var="$2"
-        out_var="$json_str"
+        # 🛡️ Sentinel: Validate variable name to prevent command injection via nameref
+        if [[ "$2" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+            local -n out_var="$2"
+            out_var="$json_str"
+        else
+            echo "Error: Invalid output variable name." >&2
+            return 1
+        fi
     else
         printf '%s\n' "$json_str"
     fi

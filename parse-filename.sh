@@ -27,7 +27,13 @@ cleanup_name() {
 
     if [ -n "$out_ref_name" ]; then
         # ⚡ Bolt Optimization: Use printf -v instead of eval to prevent command injection and subshell overhead
-        printf -v "$out_ref_name" "%s" "$val"
+        # 🛡️ Sentinel: Validate variable name to prevent command injection via printf -v
+        if [[ "$out_ref_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+            printf -v "$out_ref_name" "%s" "$val"
+        else
+            echo "Error: Invalid output variable name." >&2
+            return 1
+        fi
     else
         printf '%s\n' "$val"
     fi
@@ -48,7 +54,13 @@ json_escape() {
 
     if [ -n "$out_ref_name" ]; then
         # ⚡ Bolt Optimization: Use printf -v to prevent command injection and subshell overhead
-        printf -v "$out_ref_name" "%s" "$escaped"
+        # 🛡️ Sentinel: Validate variable name to prevent command injection via printf -v
+        if [[ "$out_ref_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+            printf -v "$out_ref_name" "%s" "$escaped"
+        else
+            echo "Error: Invalid output variable name." >&2
+            return 1
+        fi
     else
         printf '%s\n' "$escaped"
     fi
