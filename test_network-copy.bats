@@ -208,15 +208,6 @@ teardown() {
     [ ! -f /tmp/hacked ]
 
     rm -rf /tmp/mock_dir
-        echo "/dev/sda1          1000000 500000      a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]      50% /mock/path"
-    }
-    mkdir -p "$TEST_TEMP_DIR/mock_dir"
-    rm -f "$TEST_TEMP_DIR/hacked"
-
-    result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
-    [ ! -f "$TEST_TEMP_DIR/hacked" ]
-
-    rm -rf "$TEST_TEMP_DIR/mock_dir"
 }
 
 @test "get_folder_size_mb fails safely on non-numeric injection" {
@@ -225,9 +216,12 @@ teardown() {
     }
 
     get_folder_size_mb "/mock/path" "result"
-        echo "a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]	/mock/path"
-    }
+    [ "$result" -eq 0 ]
+    [ ! -f /tmp/hacked ]
 
+    rm -f /tmp/hacked
     result=$(get_folder_size_mb "/mock/path")
+    [ "$result" -eq 0 ]
+    [ ! -f /tmp/hacked ]
 
 }
