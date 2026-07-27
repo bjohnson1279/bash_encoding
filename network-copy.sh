@@ -28,7 +28,6 @@ if [ -z "${BATS_VERSION:-}" ]; then
     done
 fi
 
-fi
 # Enter your mount path for network share
 MNT_SHARE_PATH=""
 
@@ -63,17 +62,16 @@ get_avail_mb() {
         read -r _ _ _ avail _
     } < <(df -P -- "$target_dir")
 
+    # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
+    case "${avail#-}" in
+        ''|*[!0-9]*) avail=0 ;;
+    esac
+
     if [ -n "$out_ref" ]; then
         printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
     else
         echo $(( avail / 1024 ))
     fi
-        # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
-        case "${avail#-}" in
-            ''|*[!0-9]*) echo 0 ;;
-            *) echo $(( avail / 1024 )) ;;
-        esac
-    }
 }
 
 # Gets folder size in Megabytes.
@@ -92,17 +90,16 @@ get_folder_size_mb() {
         read -r size _
     } < <(du -sk -- "$folder_path")
 
+    # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
+    case "${size#-}" in
+        ''|*[!0-9]*) size=0 ;;
+    esac
+
     if [ -n "$out_ref" ]; then
         printf -v "$out_ref" "%s" "$(( size / 1024 ))"
     else
         echo $(( size / 1024 ))
     fi
-        # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
-        case "${size#-}" in
-            ''|*[!0-9]*) echo 0 ;;
-            *) echo $(( size / 1024 )) ;;
-        esac
-    }
 }
 
 # Syncs a folder if there is enough disk space.
@@ -194,4 +191,5 @@ if [ -z "${BATS_VERSION:-}" ]; then
     # recordings_src_another="$LOCAL_SHARE_PATH/Recorded TV Shows/Another Show (2022)"
     # required_space_another=3000
     # folder_sync "$recordings_src_another" "$required_space_another"
+fi
 fi

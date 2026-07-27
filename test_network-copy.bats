@@ -27,7 +27,7 @@ setup() {
     # Create a dummy directory to pass the directory check
     mkdir -p /tmp/mock_dir
 
-    result=$(get_avail_mb "/tmp/mock_dir")
+    get_avail_mb "/tmp/mock_dir" "result"
     [ "$result" -eq 2 ]
 
     # Cleanup
@@ -40,7 +40,7 @@ setup() {
         echo "1024	/mock/path"
     }
 
-    result=$(get_folder_size_mb "/mock/path")
+    get_folder_size_mb "/mock/path" "result"
     [ "$result" -eq 1 ]
 }
 
@@ -50,7 +50,7 @@ setup() {
         echo "1500	/mock/path"
     }
 
-    result=$(get_folder_size_mb "/mock/path")
+    get_folder_size_mb "/mock/path" "result"
     [ "$result" -eq 1 ]
 }
 
@@ -60,7 +60,7 @@ setup() {
         echo "500	/mock/path"
     }
 
-    result=$(get_folder_size_mb "/mock/path")
+    get_folder_size_mb "/mock/path" "result"
     [ "$result" -eq 0 ]
 }
 
@@ -70,7 +70,7 @@ setup() {
         echo "1048576	/mock/path"
     }
 
-    result=$(get_folder_size_mb "/mock/path")
+    get_folder_size_mb "/mock/path" "result"
     [ "$result" -eq 1024 ]
 }
 
@@ -80,7 +80,7 @@ setup() {
         echo "2048	/mock/path with spaces"
     }
 
-    result=$(get_folder_size_mb "/mock/path with spaces")
+    get_folder_size_mb "/mock/path with spaces" "result"
     [ "$result" -eq 2 ]
 }
 
@@ -99,13 +99,14 @@ setup() {
     mkdir -p /tmp/mock_src_dir
 
     run folder_sync "/tmp/mock_src_dir" 1000
-    [[ "${lines[1]}" == "Insufficient disk space to start copy from '/tmp/mock_src_dir'." ]]
+    [[ "${lines[2]}" == "Insufficient disk space to start copy from '/tmp/mock_src_dir'." ]]
 
     rm -rf /tmp/mock_src_dir
 }
 
 @test "folder_sync returns 1 when source folder size is greater than available space" {
     # Mock get_avail_mb to return 1500 (greater than 1000 required, but less than folder size)
+    get_avail_mb() {
         echo 1500
     }
 
@@ -114,16 +115,23 @@ setup() {
         echo 2000
     }
 
+    mkdir -p /tmp/mock_src_dir
+    run folder_sync "/tmp/mock_src_dir" 1000
 
-    [[ "${lines[3]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
+    [[ "${lines[6]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
 
+    rm -rf /tmp/mock_src_dir
 }
 
 @test "folder_sync successfully runs rsync when there is enough space" {
     # Mock get_avail_mb to return 2000
+    get_avail_mb() {
+        echo 2000
     }
 
     # Mock get_folder_size_mb to return 1500
+    get_folder_size_mb() {
+        echo 1500
     }
 
     # Mock rsync to do nothing but print a string so we can verify it was called
@@ -133,6 +141,8 @@ setup() {
 
     RECORDING_PATH="/tmp/mock_recording_path"
 
+    mkdir -p /tmp/mock_src_dir
+    run folder_sync "/tmp/mock_src_dir" 1000
     [ "$status" -eq 0 ]
 
     # Check that it outputs the correct final success message
@@ -145,10 +155,14 @@ setup() {
         fi
         if [[ "$line" == "Copy complete." ]]; then
             has_copy_complete=1
+        fi
     done
 
     [ "$has_mock_rsync" -eq 1 ]
     [ "$has_copy_complete" -eq 1 ]
+
+    rm -rf /tmp/mock_src_dir
+}
 
 @test "get_avail_mb fails safely on non-numeric injection" {
     df() {
@@ -158,7 +172,7 @@ setup() {
     mkdir -p /tmp/mock_dir
     rm -f /tmp/hacked
 
-    result=$(get_avail_mb "/tmp/mock_dir")
+    get_avail_mb "/tmp/mock_dir" "result"
     [ "$result" -eq 0 ]
     [ ! -f /tmp/hacked ]
 
@@ -170,6 +184,6 @@ setup() {
         echo "a[\$(echo 1 > /tmp/hacked)]	/mock/path"
     }
 
-    result=$(get_folder_size_mb "/mock/path")
+    get_folder_size_mb "/mock/path" "result"
 
 }
