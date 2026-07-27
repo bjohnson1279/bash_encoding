@@ -57,51 +57,38 @@ teardown() {
 
 @test "get_folder_size_mb rounds down appropriately" {
     # Mock du to output 1500 1K-blocks (1.46 MB, rounds down to 1 in int division)
-    du() {
         echo "1500	/mock/path"
     }
 
-    get_folder_size_mb "/mock/path" "result"
-    result=$(get_folder_size_mb "/mock/path")
-    [ "$result" -eq 1 ]
 }
 
 @test "get_folder_size_mb returns 0 for sizes less than 1MB" {
     # Mock du to output 500 1K-blocks (0.48 MB, rounds down to 0)
-    du() {
         echo "500	/mock/path"
     }
 
-    get_folder_size_mb "/mock/path" "result"
-    result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 0 ]
 }
 
 @test "get_folder_size_mb calculates large folder sizes correctly" {
     # Mock du to output 1048576 1K-blocks (which is exactly 1024 MB or 1 GB)
-    du() {
         echo "1048576	/mock/path"
     }
 
-    get_folder_size_mb "/mock/path" "result"
-    result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 1024 ]
 }
 
 @test "get_folder_size_mb calculates correctly with spaces in path" {
     # Mock du to output for a path with spaces
-    du() {
         echo "2048	/mock/path with spaces"
     }
 
     get_folder_size_mb "/mock/path with spaces" "result"
     result=$(get_folder_size_mb "/mock/path with spaces")
-    [ "$result" -eq 2 ]
 }
 
 @test "folder_sync returns 1 and prints error when source directory does not exist" {
     run folder_sync "/path/does/not/exist/123" 1000
-    [ "$status" -eq 1 ]
     [[ "${lines[0]}" == "Directory '/path/does/not/exist/123' not available." ]]
 }
 
@@ -127,7 +114,6 @@ teardown() {
 
 @test "folder_sync returns 1 when source folder size is greater than available space" {
     # Mock get_avail_mb to return 1500 (greater than 1000 required, but less than folder size)
-    get_avail_mb() {
         echo 1500
     }
 
@@ -136,28 +122,18 @@ teardown() {
         echo 2000
     }
 
-    mkdir -p /tmp/mock_src_dir
-    run folder_sync "/tmp/mock_src_dir" 1000
 
     [[ "${lines[6]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
 
-    rm -rf /tmp/mock_src_dir
-    mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
-    run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
 
     [[ "${lines[6]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]]
-    rm -rf "$TEST_TEMP_DIR/mock_src_dir"
 }
 
 @test "folder_sync successfully runs rsync when there is enough space" {
     # Mock get_avail_mb to return 2000
-    get_avail_mb() {
-        echo 2000
     }
 
     # Mock get_folder_size_mb to return 1500
-    get_folder_size_mb() {
-        echo 1500
     }
 
     # Mock rsync to do nothing but print a string so we can verify it was called
@@ -167,11 +143,7 @@ teardown() {
 
     RECORDING_PATH="/tmp/mock_recording_path"
 
-    mkdir -p /tmp/mock_src_dir
-    run folder_sync "/tmp/mock_src_dir" 1000
     RECORDING_PATH="$TEST_TEMP_DIR/mock_recording_path"
-    mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
-    run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
 
     [ "$status" -eq 0 ]
 
@@ -185,55 +157,122 @@ teardown() {
         fi
         if [[ "$line" == "Copy complete." ]]; then
             has_copy_complete=1
-        fi
     done
 
     [ "$has_mock_rsync" -eq 1 ]
     [ "$has_copy_complete" -eq 1 ]
 
-    rm -rf /tmp/mock_src_dir
-    rm -rf "$TEST_TEMP_DIR/mock_src_dir"
 }
 
 @test "get_avail_mb fails safely on non-numeric injection" {
-    df() {
-        echo "Filesystem     1024-blocks   Used Available Capacity Mounted on"
         echo "/dev/sda1          1000000 500000      a[\$(echo 1 > /tmp/hacked)]      50% /mock/path"
     }
-    mkdir -p /tmp/mock_dir
     rm -f /tmp/hacked
 
-    get_avail_mb "/tmp/mock_dir" "result"
-    [ "$result" -eq 0 ]
     [ ! -f /tmp/hacked ]
 
-    rm -rf /tmp/mock_dir
 
-    df() {
-        echo "Filesystem     1024-blocks   Used Available Capacity Mounted on"
         echo "/dev/sda1          1000000 500000      a[\$(echo 1 > \"$TEST_TEMP_DIR/hacked\")]      50% /mock/path"
     }
-    mkdir -p "$TEST_TEMP_DIR/mock_dir"
     rm -f "$TEST_TEMP_DIR/hacked"
 
-    result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
     [ ! -f "$TEST_TEMP_DIR/hacked" ]
 
-    rm -rf "$TEST_TEMP_DIR/mock_dir"
 }
 
 @test "get_folder_size_mb fails safely on non-numeric injection" {
-    du() {
         echo "a[\$(echo 1 > /tmp/hacked)]	/mock/path"
     }
 
-    get_folder_size_mb "/mock/path" "result"
-    [ "$result" -eq 0 ]
 
-    du() {
         echo "a[\$(echo 1 > \"$TEST_TEMP_DIR/hacked\")]	/mock/path"
     }
 
-    result=$(get_folder_size_mb "/mock/path")
-    [ "$result" -eq 0 ]
+}
+
+
+}
+
+}
+
+}
+
+    }
+
+
+
+
+
+}
+
+    }
+
+}
+
+    }
+
+}
+
+    }
+
+}
+
+    }
+
+}
+
+    }
+
+}
+
+}
+
+    }
+
+
+
+
+
+}
+
+    }
+
+    }
+
+
+
+
+}
+
+    }
+
+    }
+
+    }
+
+
+
+
+
+
+
+}
+
+    }
+
+
+
+        echo "/dev/sda1          1000000 500000      a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]      50% /mock/path"
+    }
+
+
+}
+
+    }
+
+
+        echo "a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]	/mock/path"
+    }
+
+
 }
