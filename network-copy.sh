@@ -145,7 +145,6 @@ folder_sync() {
     local folder_size_mb
     get_folder_size_mb "$src_folder" "folder_size_mb"
     echo "Calculating size of '$src_folder'..."
-    folder_size_mb="$(get_folder_size_mb "$src_folder")"
     echo "Source folder size: ${folder_size_mb}MB"
 
     if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
@@ -172,9 +171,6 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
 fi
 if [ -z "${BATS_VERSION:-}" ]; then
     # Check initial disk space
-    # shellcheck disable=SC2119
-    avail_mb="$(get_avail_mb)"
-    if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
     avail_mb=""
     get_avail_mb "." "avail_mb"
     if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then

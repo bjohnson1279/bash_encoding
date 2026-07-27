@@ -128,36 +128,36 @@ teardown() {
 @test "folder_sync returns 1 when source folder size is greater than available space" {
     # Mock get_avail_mb to return 1500 (greater than 1000 required, but less than folder size)
     get_avail_mb() {
-        echo 1500
+        local out_ref="${2:-}"; if [ -n "$out_ref" ]; then printf -v "$out_ref" "%s" "1500"; else echo 1500; fi
     }
 
     # Mock get_folder_size_mb to return 2000 (greater than 1500 available)
     get_folder_size_mb() {
-        echo 2000
+        local out_ref="${2:-}"; if [ -n "$out_ref" ]; then printf -v "$out_ref" "%s" "2000"; else echo 2000; fi
     }
 
     mkdir -p /tmp/mock_src_dir
     run folder_sync "/tmp/mock_src_dir" 1000
 
-    [[ "${lines[6]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
+    [[ "${lines[4]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
 
     rm -rf /tmp/mock_src_dir
     mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
     run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
 
-    [[ "${lines[6]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]]
+    [[ "${lines[4]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]]
     rm -rf "$TEST_TEMP_DIR/mock_src_dir"
 }
 
 @test "folder_sync successfully runs rsync when there is enough space" {
     # Mock get_avail_mb to return 2000
     get_avail_mb() {
-        echo 2000
+        local out_ref="${2:-}"; if [ -n "$out_ref" ]; then printf -v "$out_ref" "%s" "2000"; else echo 2000; fi
     }
 
     # Mock get_folder_size_mb to return 1500
     get_folder_size_mb() {
-        echo 1500
+        local out_ref="${2:-}"; if [ -n "$out_ref" ]; then printf -v "$out_ref" "%s" "1500"; else echo 1500; fi
     }
 
     # Mock rsync to do nothing but print a string so we can verify it was called
@@ -167,9 +167,6 @@ teardown() {
 
     RECORDING_PATH="/tmp/mock_recording_path"
 
-    mkdir -p /tmp/mock_src_dir
-    run folder_sync "/tmp/mock_src_dir" 1000
-    RECORDING_PATH="$TEST_TEMP_DIR/mock_recording_path"
     mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
     run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
 
@@ -191,7 +188,6 @@ teardown() {
     [ "$has_mock_rsync" -eq 1 ]
     [ "$has_copy_complete" -eq 1 ]
 
-    rm -rf /tmp/mock_src_dir
     rm -rf "$TEST_TEMP_DIR/mock_src_dir"
 }
 
@@ -208,26 +204,15 @@ teardown() {
     [ ! -f /tmp/hacked ]
 
     rm -rf /tmp/mock_dir
-        echo "/dev/sda1          1000000 500000      a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]      50% /mock/path"
-    }
-    mkdir -p "$TEST_TEMP_DIR/mock_dir"
-    rm -f "$TEST_TEMP_DIR/hacked"
-
-    result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
-    [ ! -f "$TEST_TEMP_DIR/hacked" ]
-
-    rm -rf "$TEST_TEMP_DIR/mock_dir"
 }
 
 @test "get_folder_size_mb fails safely on non-numeric injection" {
     du() {
         echo "a[\$(echo 1 > /tmp/hacked)]	/mock/path"
     }
+    rm -f /tmp/hacked
 
     get_folder_size_mb "/mock/path" "result"
-        echo "a[\$(echo 1 > "$TEST_TEMP_DIR/hacked")]	/mock/path"
-    }
-
-    result=$(get_folder_size_mb "/mock/path")
-
+    [ "$result" -eq 0 ]
+    [ ! -f /tmp/hacked ]
 }
