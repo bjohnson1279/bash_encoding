@@ -47,116 +47,123 @@ getDuration() {
 }
 
 # Extract Part of File Name Into JSON String To Use As Metadata
+# Utility functions for parsing
+cleanup_name() {
+    local val="${1//[._]/ }"
+    local out_ref_name="$2"
+
+    val="${val#"${val%%[! ]*}"}"
+    val="${val%"${val##*[! ]}"}"
+    val="${val%" -"}"
+    val="${val%"${val##*[! ]}"}"
+
+    if [ -n "$out_ref_name" ]; then
+        printf -v "$out_ref_name" "%s" "$val"
+    else
+        printf '%s\n' "$val"
+    fi
+}
+
+json_escape() {
+    local val="$1"
+    local out_ref_name="$2"
+
+    local escaped="${val//\\/\\\\}"
+    escaped="${escaped//\"/\\\"}"
+    escaped="${escaped//$'\n'/\\n}"
+
+    if [ -n "$out_ref_name" ]; then
+        printf -v "$out_ref_name" "%s" "$escaped"
+    else
+        printf '%s\n' "$escaped"
+    fi
+}
+
 parseFilename() {
     # $1 => File Name
-    FILE="${1%.ts}"
+    local base_name="${1%.ts}"
     
-    shopt -s extglob
-    SHOW_NAME="$FILE \([0-9]*}"
-    SHOW_NAME="${SHOW_NAME% S[0-9]*}"
-    SHOW_NAME="${SHOW_NAME##*( )}"
-    SHOW_NAME="${SHOW_NAME%%*( )}"
-    shopt -u extglob
-    
-    YEAR_PREMIERED=${FILE//${SHOW_NAME} /}
-    YEAR_PREMIERED=${YEAR_PREMIERED%\) *}
-    YEAR_PREMIERED=${YEAR_PREMIERED//[^0-9]}
-    YEAR_PREMIERED=${YEAR_PREMIERED:0:4}
-    
-    DATE_TIME=""
-    DATE_TIME=${FILE//${SHOW_NAME} /}
-    DATE_TIME=${DATE_TIME//\${YEAR_PREMIERED\) /}
-    DATE_TIME=${DATE_TIME//- /}
-    DATE_TIME=${DATE_TIME%% [A-Z]*}
-    DATE_TIME=${DATE_TIME#^[0-9][0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9] [0-9][0-9] [0-9][0-9] [0-9][0-9]}
-    shopt -s extglob
-    DATE_TIME=${DATE_TIME##*( )}
-    DATE_TIME=${DATE_TIME%%*( )}
-    shopt -u extglob
-    
-    DATE=""
-    DATE=${DATE_TIME// [0-9][0-9] [0-9][0-9] [0-9][0-9]/}
-    shopt -s extglob
-    DATE=${DATE##*( )}
-    DATE=${DATE%%*( )}
-    shopt -u extglob
-    
-    NUM_DATE=${DATE//-/}
-    
-    YEAR=${DATE:0:4}
-    
-    TIME=""
-    TIME=${DATE_TIME//$DATE/}
-    shopt -s extglob
-    TIME=${TIME##*( )}
-    TIME=${TIME%%*( )}
-    
-    # Simply Remaining Data Extraction By Removing From $FILE variable
-    FILE=${FILE//${TIME}/}
-    FILE=${FILE//${YEAR_PREMIERED}\)/}
-    FILE=${FILE//\(stop*/}
-    FILE=${FILE//\(start*/}
-    
-    SEASON=${FILE//${SHOW_NAME} \(/}
-    SEASON=${FILE//${SHOW_NAME}/}
-    SEASON=${SEASON%E*}
-    SEASON=${SEASON//[^0-9]}
-    SEASON=${SEASON:0:4}
-    
-    EPISODE=${FILE//${SHOW_NAME}/}
-    EPISODE=${EPISODE//\(${YEAR_PREMIERED}\)/}
-    if [ "$SEASON" == "$YEAR" ]; then
-        EPISODE=${NUM_DATE//${SEASON}/}
+    local show_raw=""
+    local season_raw=""
+    local episode_raw=""
+    local title_raw=""
+    local year_raw=""
+
+    # 1. Try to match: Show Name (Year) - S01E02 - Title (Date Time)
+    if [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]+(.*)\ \([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
+        show_raw="${BASH_REMATCH[1]}"
+        year_raw="${BASH_REMATCH[2]}"
+        season_raw="${BASH_REMATCH[3]}"
+        episode_raw="${BASH_REMATCH[4]}"
+        title_raw="${BASH_REMATCH[5]}"
+    # 2. Try to match: Show Name (Year) S01E02 Title (Date Time)
+    elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]+(.*)\ \([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
+        show_raw="${BASH_REMATCH[1]}"
+        year_raw="${BASH_REMATCH[2]}"
+        season_raw="${BASH_REMATCH[3]}"
+        episode_raw="${BASH_REMATCH[4]}"
+        title_raw="${BASH_REMATCH[5]}"
+    # 3. Try to match: Show Name (Year) S01E02 Title...
+    elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
+        show_raw="${BASH_REMATCH[1]}"
+        year_raw="${BASH_REMATCH[2]}"
+        season_raw="${BASH_REMATCH[3]}"
+        episode_raw="${BASH_REMATCH[4]}"
+        title_raw="${BASH_REMATCH[5]}"
+        # Strip trailing date if present
+        if [[ "$title_raw" =~ ^(.*)\ \([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
+            title_raw="${BASH_REMATCH[1]}"
+        fi
+    # 4. Try to match: Movie Name (Year)
+    elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)$ ]]; then
+        show_raw="${BASH_REMATCH[1]}"
+        year_raw="${BASH_REMATCH[2]}"
     else
-        EPISODE=${EPISODE//${TIME}/}
-        EPISODE=${EPISODE// S${SEASON}E/}
-        EPISODE=${EPISODE//[^0-9]}
+        # Fallback basic matching
+        if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
+            show_raw="${BASH_REMATCH[1]}"
+            season_raw="${BASH_REMATCH[2]}"
+            episode_raw="${BASH_REMATCH[3]}"
+            title_raw="${BASH_REMATCH[4]}"
+        fi
     fi
-    
-    EPISODE_TITLE=${FILE//${SHOW_NAME} /}
-    EPISODE_TITLE=${EPISODE_TITLE//\(${YEAR_PREMIERED}\)/}
-    EPISODE_TITLE=${EPISODE_TITLE// \- /}
-    EPISODE_TITLE=${EPISODE_TITLE//${TIME}/}
-    EPISODE_TITLE=${EPISODE_TITLE//S${SEASON}E${EPISODE}/}
-    EPISODE_TITLE=${EPISODE_TITLE%%${SHOW_NAME}}}
-    EPISODE_TITLE=${EPISODE_TITLE//\(stop*/}
-    EPISODE_TITLE=${EPISODE_TITLE//\(start*/}
-    EPISODE_TITLE=${EPISODE_TITLE//\([0-9]*/}
-    shopt -s extglob
-    EPISODE_TITLE=${EPISODE_TITLE##*( )}
-    EPISODE_TITLE=${EPISODE_TITLE%%*( )}
-    shopt -u extglob
-    
-    # ⚡ Bolt Optimization: Use printf and native bash parameter expansion instead of jq subshell
-    # This significantly improves performance in busy loops by avoiding process overhead
-    local esc_show="${SHOW_NAME//\\/\\\\}"
-    esc_show="${esc_show//\"/\\\"}"
-    esc_show="${esc_show//$'\n'/\\n}"
 
-    local esc_season="${SEASON//\\/\\\\}"
-    esc_season="${esc_season//\"/\\\"}"
-    esc_season="${esc_season//$'\n'/\\n}"
+    # Formatting season / episode
+    local season_num=""
+    local episode_num=""
 
-    local esc_episode="${EPISODE//\\/\\\\}"
-    esc_episode="${esc_episode//\"/\\\"}"
-    esc_episode="${esc_episode//$'\n'/\\n}"
+    if [ -n "$season_raw" ]; then
+        local season_stripped="${season_raw#"${season_raw%%[!0]*}"}"
+        season_stripped="${season_stripped:-0}"
+        if [ ${#season_stripped} -eq 1 ]; then
+            season_num="0$season_stripped"
+        else
+            season_num="$season_stripped"
+        fi
+    fi
 
-    local esc_title="${EPISODE_TITLE//\\/\\\\}"
-    esc_title="${esc_title//\"/\\\"}"
-    esc_title="${esc_title//$'\n'/\\n}"
+    if [ -n "$episode_raw" ]; then
+        local episode_stripped="${episode_raw#"${episode_raw%%[!0]*}"}"
+        episode_stripped="${episode_stripped:-0}"
+        if [ ${#episode_stripped} -eq 1 ]; then
+            episode_num="0$episode_stripped"
+        else
+            episode_num="$episode_stripped"
+        fi
+    fi
 
-    local esc_premiered="${YEAR_PREMIERED//\\/\\\\}"
-    esc_premiered="${esc_premiered//\"/\\\"}"
-    esc_premiered="${esc_premiered//$'\n'/\\n}"
+    local show_name episode_title
+    cleanup_name "$show_raw" show_name
+    cleanup_name "$title_raw" episode_title
 
-    local esc_date="${DATE//\\/\\\\}"
-    esc_date="${esc_date//\"/\\\"}"
-    esc_date="${esc_date//$'\n'/\\n}"
+    local esc_show esc_season esc_episode esc_title esc_premiered esc_date
+    json_escape "$show_name" esc_show
+    json_escape "$season_num" esc_season
+    json_escape "$episode_num" esc_episode
+    json_escape "$episode_title" esc_title
+    json_escape "$year_raw" esc_premiered
+    json_escape "" esc_date # We leave date empty for compatibility or further parsing if needed
 
-    # ⚡ Bolt Optimization: Accept a nameref (reference to a variable) as an optional argument.
-    # If the second argument is provided, write the JSON string directly into that variable.
-    # Otherwise, fallback to echo to maintain backward compatibility (e.g., for tests).
-    # This eliminates subshell overhead `$(parseFilename ...)` when used in busy loops.
     local json_str
     printf -v json_str '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
         "$esc_show" \
