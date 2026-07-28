@@ -126,7 +126,6 @@ folder_sync() {
     local folder_size_mb
     get_folder_size_mb "$src_folder" "folder_size_mb"
     echo "Calculating size of '$src_folder'..."
-    folder_size_mb="$(get_folder_size_mb "$src_folder")"
     echo "Source folder size: ${folder_size_mb}MB"
 
     if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
@@ -147,6 +146,12 @@ get_avail_mb "." "avail_mb"
 if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
     echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
     exit 1
+    # Check initial disk space
+    avail_mb=""
+    if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
+        echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
+        exit 1
+
     # --- Define Folders to Copy ---
     # Add more calls to folder_sync for each show or directory you want to copy.
 
@@ -183,6 +188,44 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
     {
 
 
+}
+
+
+    {
+
+
+}
+
+
+
+
+
+
+    folder_size_mb="$(get_folder_size_mb "$src_folder")"
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+
+
         printf '%s\n' "$(( avail / 1024 ))"
 }
 
@@ -203,12 +246,7 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
 }
 
 
-    # Check initial disk space
     if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
-    avail_mb=""
-    if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
-        echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
-        exit 1
 
 
 

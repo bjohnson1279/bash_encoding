@@ -114,19 +114,19 @@ teardown() {
 
 @test "folder_sync returns 1 when source folder size is greater than available space" {
     # Mock get_avail_mb to return 1500 (greater than 1000 required, but less than folder size)
-        echo 1500
+        local out_ref="${2:-}"; if [ -n "$out_ref" ]; then printf -v "$out_ref" "%s" "1500"; else echo 1500; fi
     }
 
     # Mock get_folder_size_mb to return 2000 (greater than 1500 available)
     get_folder_size_mb() {
-        echo 2000
+        local out_ref="${2:-}"; if [ -n "$out_ref" ]; then printf -v "$out_ref" "%s" "2000"; else echo 2000; fi
     }
 
 
-    [[ "${lines[6]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
+    [[ "${lines[4]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
 
 
-    [[ "${lines[6]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]]
+    [[ "${lines[4]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]]
 }
 
 @test "folder_sync successfully runs rsync when there is enough space" {
@@ -143,7 +143,6 @@ teardown() {
 
     RECORDING_PATH="/tmp/mock_recording_path"
 
-    RECORDING_PATH="$TEST_TEMP_DIR/mock_recording_path"
 
     [ "$status" -eq 0 ]
 
@@ -171,6 +170,90 @@ teardown() {
 
     [ ! -f /tmp/hacked ]
 
+}
+
+@test "get_folder_size_mb fails safely on non-numeric injection" {
+        echo "a[\$(echo 1 > /tmp/hacked)]	/mock/path"
+    }
+
+}
+
+
+}
+
+}
+
+}
+
+    }
+
+
+
+
+
+}
+
+    }
+
+}
+
+    }
+
+}
+
+    }
+
+}
+
+    }
+
+}
+
+    }
+
+}
+
+}
+
+    }
+
+
+
+
+
+}
+
+        echo 1500
+    }
+
+        echo 2000
+    }
+
+
+    [[ "${lines[6]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
+
+
+    [[ "${lines[6]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]]
+}
+
+    }
+
+    }
+
+    }
+
+
+    RECORDING_PATH="$TEST_TEMP_DIR/mock_recording_path"
+
+
+
+
+
+}
+
+    }
+
+
 
         echo "/dev/sda1          1000000 500000      a[\$(echo 1 > \"$TEST_TEMP_DIR/hacked\")]      50% /mock/path"
     }
@@ -180,8 +263,6 @@ teardown() {
 
 }
 
-@test "get_folder_size_mb fails safely on non-numeric injection" {
-        echo "a[\$(echo 1 > /tmp/hacked)]	/mock/path"
     }
 
 
