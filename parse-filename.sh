@@ -26,6 +26,10 @@ cleanup_name() {
     val="${val%"${val##*[! ]}"}"
 
     if [ -n "$out_ref_name" ]; then
+        if [[ ! "$out_ref_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+            echo "Error: Invalid output variable name." >&2
+            return 1
+        fi
         # ⚡ Bolt Optimization: Use printf -v instead of eval to prevent command injection and subshell overhead
         printf -v "$out_ref_name" "%s" "$val"
     else
@@ -47,6 +51,10 @@ json_escape() {
     escaped="${escaped//\"/\\\"}"
 
     if [ -n "$out_ref_name" ]; then
+        if [[ ! "$out_ref_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+            echo "Error: Invalid output variable name." >&2
+            return 1
+        fi
         # ⚡ Bolt Optimization: Use printf -v to prevent command injection and subshell overhead
         printf -v "$out_ref_name" "%s" "$escaped"
     else
