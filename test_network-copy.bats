@@ -1,7 +1,6 @@
 #!/usr/bin/env bats
 
 setup() {
-    TEST_TEMP_DIR="$(mktemp -d)"
     # Provide dummy values to skip main execution logic of network-copy.sh
     # Not strictly necessary if we guarded it, but good practice
     MNT_SHARE_PATH="dummy_path"
@@ -9,10 +8,6 @@ setup() {
     RECORDING_PATH="dummy_rec"
 
     source network-copy.sh
-}
-
-teardown() {
-    rm -rf "$TEST_TEMP_DIR"
 }
 
 @test "get_avail_mb returns 1 for invalid directory" {
@@ -32,16 +27,11 @@ teardown() {
     # Create a dummy directory to pass the directory check
     mkdir -p /tmp/mock_dir
 
-    get_avail_mb "/tmp/mock_dir" "result"
+    result=$(get_avail_mb "/tmp/mock_dir")
     [ "$result" -eq 2 ]
 
     # Cleanup
     rm -rf /tmp/mock_dir
-    mkdir -p "$TEST_TEMP_DIR/mock_dir"
-
-    result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
-
-    rm -rf "$TEST_TEMP_DIR/mock_dir"
 }
 
 @test "get_folder_size_mb calculates standard MB correctly" {
@@ -50,7 +40,6 @@ teardown() {
         echo "1024	/mock/path"
     }
 
-    get_folder_size_mb "/mock/path" "result"
     result=$(get_folder_size_mb "/mock/path")
     [ "$result" -eq 1 ]
 }
@@ -83,7 +72,6 @@ teardown() {
         echo "2048	/mock/path with spaces"
     }
 
-    get_folder_size_mb "/mock/path with spaces" "result"
     result=$(get_folder_size_mb "/mock/path with spaces")
 }
 
@@ -95,6 +83,7 @@ teardown() {
 @test "folder_sync returns 1 when available space is less than required space" {
     # Mock get_avail_mb to return 500 (less than 1000 required)
     get_avail_mb() {
+        eval "$2=500"
         echo 500
     }
 
@@ -104,21 +93,23 @@ teardown() {
     [[ "${lines[2]}" == "Insufficient disk space to start copy from '/tmp/mock_src_dir'." ]]
 
     rm -rf /tmp/mock_src_dir
-    mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
-
-    run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
-    [[ "${lines[2]}" == "Insufficient disk space to start copy from '$TEST_TEMP_DIR/mock_src_dir'." ]]
-
-    rm -rf "$TEST_TEMP_DIR/mock_src_dir"
 }
 
 @test "folder_sync returns 1 when source folder size is greater than available space" {
     # Mock get_avail_mb to return 1500 (greater than 1000 required, but less than folder size)
+        eval "$2=1500"
+        echo 1500
         local out_ref="${2:-}"; if [ -n "$out_ref" ]; then printf -v "$out_ref" "%s" "1500"; else echo 1500; fi
     }
 
     # Mock get_folder_size_mb to return 2000 (greater than 1500 available)
     get_folder_size_mb() {
+        eval "$2=2000"
+        echo 2000
+    }
+
+
+    [[ "${lines[6]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
         local out_ref="${2:-}"; if [ -n "$out_ref" ]; then printf -v "$out_ref" "%s" "2000"; else echo 2000; fi
     }
 
@@ -160,7 +151,6 @@ teardown() {
 
     [ "$has_mock_rsync" -eq 1 ]
     [ "$has_copy_complete" -eq 1 ]
-
 }
 
 @test "get_avail_mb fails safely on non-numeric injection" {
@@ -176,6 +166,15 @@ teardown() {
         echo "a[\$(echo 1 > /tmp/hacked)]	/mock/path"
     }
 
+
+}
+
+    TEST_TEMP_DIR="$(mktemp -d)"
+
+}
+
+teardown() {
+    rm -rf "$TEST_TEMP_DIR"
 }
 
 
@@ -188,6 +187,18 @@ teardown() {
     }
 
 
+    get_avail_mb "/tmp/mock_dir" "result"
+
+    mkdir -p "$TEST_TEMP_DIR/mock_dir"
+
+    result=$(get_avail_mb "$TEST_TEMP_DIR/mock_dir")
+
+    rm -rf "$TEST_TEMP_DIR/mock_dir"
+}
+
+    }
+
+    get_folder_size_mb "/mock/path" "result"
 
 
 
@@ -207,6 +218,7 @@ teardown() {
 
     }
 
+    get_folder_size_mb "/mock/path with spaces" "result"
 }
 
     }
@@ -217,6 +229,19 @@ teardown() {
 
     }
 
+
+
+    mkdir -p "$TEST_TEMP_DIR/mock_src_dir"
+
+    run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
+    [[ "${lines[2]}" == "Insufficient disk space to start copy from '$TEST_TEMP_DIR/mock_src_dir'." ]]
+
+    rm -rf "$TEST_TEMP_DIR/mock_src_dir"
+}
+
+    }
+
+    }
 
 
 

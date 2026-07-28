@@ -63,7 +63,6 @@ get_avail_mb() {
 
     # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
     case "${avail#-}" in
-        ''|*[!0-9]*) avail=0 ;;
         ''|*[!0-9]*)
             avail=0
             ;;
@@ -72,7 +71,15 @@ get_avail_mb() {
     esac
 
     if [ -n "$out_ref" ]; then
-        printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
+        # 🛡️ Sentinel: Validate variable name to prevent command injection via printf -v
+        case "$out_ref" in
+            *[!a-zA-Z0-9_]*|[0-9]*)
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+            *)
+                printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
+        esac
     else
         echo $(( avail / 1024 ))
 }
@@ -90,10 +97,9 @@ get_folder_size_mb() {
     } < <(du -sk -- "$folder_path")
 
     case "${size#-}" in
-        ''|*[!0-9]*) size=0 ;;
             size=0
 
-        printf -v "$out_ref" "%s" "$(( size / 1024 ))"
+                printf -v "$out_ref" "%s" "$(( size / 1024 ))"
         echo $(( size / 1024 ))
 }
 
@@ -114,8 +120,6 @@ folder_sync() {
 
     local avail_mb
     get_avail_mb "." "avail_mb"
-    # shellcheck disable=SC2119
-    avail_mb="$(get_avail_mb)"
     echo "Available disk space: ${avail_mb}MB"
 
     if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
@@ -172,6 +176,50 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
     # recordings_src_another="$LOCAL_SHARE_PATH/Recorded TV Shows/Another Show (2022)"
     # required_space_another=3000
     # folder_sync "$recordings_src_another" "$required_space_another"
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+
+        ''|*[!0-9]*) avail=0 ;;
+
+        printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
+}
+
+
+    {
+
+        ''|*[!0-9]*) size=0 ;;
+
+        printf -v "$out_ref" "%s" "$(( size / 1024 ))"
+}
+
+
+
+
+    # shellcheck disable=SC2119
+    avail_mb="$(get_avail_mb)"
+
+
+    folder_size_mb="$(get_folder_size_mb "$src_folder")"
+
+
+}
+
+
+
+
+
 
 
 
@@ -247,6 +295,7 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
 
 
     if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
+    avail_mb=""
 
 
 
