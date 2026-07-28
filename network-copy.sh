@@ -151,6 +151,7 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
     echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
     exit 1
     # Check initial disk space
+    avail_mb=""
     if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
         echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
         exit 1
@@ -208,6 +209,44 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
 
     # shellcheck disable=SC2119
     avail_mb="$(get_avail_mb)"
+
+
+    folder_size_mb="$(get_folder_size_mb "$src_folder")"
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+
+
+}
+
+
+    {
+
+
+}
+
+
+
+
 
 
     folder_size_mb="$(get_folder_size_mb "$src_folder")"

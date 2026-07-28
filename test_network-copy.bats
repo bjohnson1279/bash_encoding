@@ -99,6 +99,7 @@ setup() {
     # Mock get_avail_mb to return 1500 (greater than 1000 required, but less than folder size)
         eval "$2=1500"
         echo 1500
+        local out_ref="${2:-}"; if [ -n "$out_ref" ]; then printf -v "$out_ref" "%s" "1500"; else echo 1500; fi
     }
 
     # Mock get_folder_size_mb to return 2000 (greater than 1500 available)
@@ -109,6 +110,14 @@ setup() {
 
 
     [[ "${lines[6]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
+        local out_ref="${2:-}"; if [ -n "$out_ref" ]; then printf -v "$out_ref" "%s" "2000"; else echo 2000; fi
+    }
+
+
+    [[ "${lines[4]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
+
+
+    [[ "${lines[4]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]]
 }
 
 @test "folder_sync successfully runs rsync when there is enough space" {
@@ -124,6 +133,8 @@ setup() {
     }
 
     RECORDING_PATH="/tmp/mock_recording_path"
+
+
     [ "$status" -eq 0 ]
 
     # Check that it outputs the correct final success message
@@ -166,6 +177,11 @@ teardown() {
     rm -rf "$TEST_TEMP_DIR"
 }
 
+
+}
+
+}
+
 }
 
     }
@@ -183,6 +199,9 @@ teardown() {
     }
 
     get_folder_size_mb "/mock/path" "result"
+
+
+
 }
 
     }
@@ -200,6 +219,10 @@ teardown() {
     }
 
     get_folder_size_mb "/mock/path with spaces" "result"
+}
+
+    }
+
 }
 
 }
@@ -221,6 +244,18 @@ teardown() {
     }
 
 
+
+
+}
+
+        echo 1500
+    }
+
+        echo 2000
+    }
+
+
+    [[ "${lines[6]}" == "Insufficient disk space to copy '/tmp/mock_src_dir'." ]]
 
 
     [[ "${lines[6]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]]
