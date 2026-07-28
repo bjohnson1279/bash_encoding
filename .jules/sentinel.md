@@ -91,3 +91,8 @@ Ensure `case` statement branches always terminate properly with `;;` when they d
 - Learned that `df` and `du` outputs, while usually numeric, can be influenced by environment variables or manipulated outputs if a malicious user creates a file with a name that is evaluated in the shell context.
 - Fixed the vulnerability by correctly isolating and implementing a `case` block to catch and sanitize non-numeric inputs `''|*[!0-9]*)` to `0` before passing to `$(( ... ))`.
 - Ensured BATS tests assert that the script is safe against inputs like `a[$(echo 1 > /tmp/hacked)]`.
+
+## 2024-05-27 - Command Injection via Dynamic Variable Name Evaluation
+**Vulnerability:** Unvalidated dynamic variable names passed to bash functions were used as arguments for `printf -v` and `local -n`. This allowed for Command Injection by passing array elements with evaluated indexes (e.g. `a[$(malicious_command)]`), even without the use of `eval`.
+**Learning:** `printf -v` and `local -n` evaluate the name of the variable they're assigning to in an arithmetic context when it appears to be an array index, which executes command substitutions within the index. Subshell avoidance optimizations can introduce command injection if inputs are unsanitized.
+**Prevention:** Always validate dynamically provided variable names against a strict regex (e.g., `^[a-zA-Z_][a-zA-Z0-9_]*$`) before using them with `printf -v` or `local -n` reference assignments.
