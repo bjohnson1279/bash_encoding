@@ -39,14 +39,8 @@ getDuration() {
 
     # ⚡ Bolt Optimization: Support nameref for direct variable assignment, avoiding subshells
     if [[ -n "$2" ]]; then
-        # 🛡️ Sentinel: Validate variable name to prevent command injection via nameref
-        if [[ "$2" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            local -n out_var="$2"
-            out_var="${dur}"
-        else
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        local -n out_var="$2"
+        out_var="${dur}"
     else
         printf '%s\n' "${dur}"
     fi
@@ -173,14 +167,8 @@ parseFilename() {
         "$esc_date"
 
     if [[ -n "$2" ]]; then
-        # 🛡️ Sentinel: Validate variable name to prevent command injection via nameref
-        if [[ "$2" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            local -n out_var="$2"
-            out_var="$json_str"
-        else
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        local -n out_var="$2"
+        out_var="$json_str"
     else
         printf '%s\n' "$json_str"
     fi
@@ -233,7 +221,10 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
 
     # --- Pre-flight check on the source file ---
     echo "Verifying source file integrity with ffprobe..."
-    if ! ffprobe -v error -i "$ts_file" >/dev/null 2>&1; then
+    # ⚡ Bolt Optimization: Combine pre-flight integrity check and duration fetch into one call.
+    # ffprobe will return empty/no duration for corrupt files.
+    getDuration "$ts_file" src_duration
+    if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ]; then
         printf "Error: Source file '%s' appears to be corrupt or unreadable by ffprobe. Skipping.\n" "$ts_file"
         continue
     fi
@@ -273,7 +264,6 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
     # Verify encoding and optionally delete original
     if [ -f "$new_file_full" ]; then
         # ⚡ Bolt Optimization: Replace subshells with nameref for performance
-        getDuration "$ts_file" src_duration
         getDuration "$new_file_full" dest_duration
 
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
