@@ -4,7 +4,9 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TMP_FILE="$(mktemp -t tmp_parseFilename.XXXXXX.sh)"
 trap 'rm -f "$TMP_FILE"' EXIT
-sed -n '/^parseFilename() {/,/^}/p' "$SCRIPT_DIR/encode-all.sh" > "$TMP_FILE"
+sed -n '/^cleanup_name() {/,/^}/p' "$SCRIPT_DIR/encode-all.sh" > "$TMP_FILE"
+sed -n '/^json_escape() {/,/^}/p' "$SCRIPT_DIR/encode-all.sh" >> "$TMP_FILE"
+sed -n '/^parseFilename() {/,/^}/p' "$SCRIPT_DIR/encode-all.sh" >> "$TMP_FILE"
 source "$TMP_FILE"
 
 # Counter for failed tests
@@ -33,20 +35,20 @@ echo "Testing parseFilename function..."
 # The current code in encode-all.sh relies heavily on assumptions about filename format,
 # particularly Plex-style recordings "Show Name (2020) S01E01.ts" and similar.
 
-actual=$(parseFilename "Show Name (2020) S01E01.ts")
-assert_equal "Show Name (2020)" "$(printf "%s\n" "$actual" | jq -r '.show')" "Standard Show Name with Year and Season/Episode - Show"
-assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Standard Show Name with Year and Season/Episode - Season"
-assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Standard Show Name with Year and Season/Episode - Episode"
+parseFilename "Show Name (2020) S01E01.ts" --no-json
+assert_equal "Show Name" "$PARSED_SHOW_NAME" "Standard Show Name with Year and Season/Episode - Show"
+assert_equal "01" "$PARSED_SEASON_NUM" "Standard Show Name with Year and Season/Episode - Season"
+assert_equal "01" "$PARSED_EPISODE_NUM" "Standard Show Name with Year and Season/Episode - Episode"
 
-actual=$(parseFilename "Another Show S02E03.ts")
-assert_equal "Another Show" "$(printf "%s\n" "$actual" | jq -r '.show')" "Standard Show Name with Season/Episode - Show"
-assert_equal "02" "$(printf "%s\n" "$actual" | jq -r '.season')" "Standard Show Name with Season/Episode - Season"
-assert_equal "03" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Standard Show Name with Season/Episode - Episode"
+parseFilename "Another Show S02E03.ts" --no-json
+assert_equal "Another Show" "$PARSED_SHOW_NAME" "Standard Show Name with Season/Episode - Show"
+assert_equal "02" "$PARSED_SEASON_NUM" "Standard Show Name with Season/Episode - Season"
+assert_equal "03" "$PARSED_EPISODE_NUM" "Standard Show Name with Season/Episode - Episode"
 
-actual=$(parseFilename "The Simpsons (1989) - S32E01 - Undercover Burns.ts")
-assert_equal "The Simpsons (1989) -" "$(printf "%s\n" "$actual" | jq -r '.show')" "Show Name with hyphens - Show"
-assert_equal "32" "$(printf "%s\n" "$actual" | jq -r '.season')" "Show Name with hyphens - Season"
-assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Show Name with hyphens - Episode"
+parseFilename "The Simpsons (1989) - S32E01 - Undercover Burns.ts" --no-json
+assert_equal "The Simpsons" "$PARSED_SHOW_NAME" "Show Name with hyphens - Show"
+assert_equal "32" "$PARSED_SEASON_NUM" "Show Name with hyphens - Season"
+assert_equal "01" "$PARSED_EPISODE_NUM" "Show Name with hyphens - Episode"
 
 # --- Edge Cases (Asserting current "quirky" behavior) ---
 

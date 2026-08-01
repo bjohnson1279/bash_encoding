@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Encode all .mkv files in a directory to .mp4
 
@@ -13,7 +13,9 @@ PRESET="veryslow"
 QUALITY=21
 
 # Find and loop through all .mkv files in the current directory
-find . -type f -name "*.mkv" -print0 | while IFS= read -r -d '' i; do
+shopt -s globstar nullglob
+for i in **/*.mkv; do
+    shopt -u globstar nullglob
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
