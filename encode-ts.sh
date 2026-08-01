@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Encode all .ts files in a directory to .mp4
 
@@ -14,7 +14,9 @@ QUALITY=21
 
 # Find and loop through all .ts files in the current directory
 # shellcheck disable=SC3045
-find . -type f -name "*.ts" -print0 | while IFS= read -r -d '' i; do
+shopt -s globstar nullglob
+for i in **/*.ts; do
+    shopt -u globstar nullglob
     # Construct the output filename
     new_file="${i%.*}.mp4"
 

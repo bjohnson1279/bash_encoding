@@ -84,3 +84,11 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Consolidating redundant pre-flight binary spawns
 **Learning:** In bash loops, it's common to see a "pre-flight" integrity check (like `ffprobe -i`) followed later by a data-fetching call (like `ffprobe -show_entries`) on the same file. Removing the pre-flight check entirely to save a process spawn can lead to functional regressions by masking explicit error messages.
 **Action:** Instead of deleting pre-flight checks, move the later data-fetching call (e.g., `getDuration`) earlier in the loop to replace the pre-flight check. Use the output of the data-fetching call (e.g., empty duration) to perform the exact same integrity validation, cutting process spawns by 50% without altering script logic.
+
+## 2026-07-21 - [Eliminate external `find` process spawning and `while` loop subshells in encode loops]
+**Learning:** `find ... | while` loops spawn a subshell process for the `while` loop (due to the pipe) which incurs overhead and executes `find` in a separate process. Using bash `shopt -s globstar nullglob` and `for file in **/*.ts` eliminates the subshell and the `find` binary spawn. I benchmarked it and `globstar` is much faster.
+**Action:** When scanning directories with many files, modify `find ... | while` loops in `encode-*.sh` scripts to use purely native Bash loops with `shopt -s globstar nullglob` and `for i in **/*.ext` to eliminate a subshell execution and the `find` binary execution, resulting in measurable performance improvement.
+
+## 2026-07-21 - [Fix redundant JSON generation overhead in encode-all.sh]
+**Learning:** The loop processing `.ts` files inside `encode-all.sh` invokes `parseFilename "$ts_file" --no-json` but the `--no-json` flag logic was faulty. Specifically, it checked for valid nameref variables via regex instead of checking the flag.
+**Action:** Update `parseFilename` logic inside `encode-all.sh` to correctly check for the `--no-json` flag using `if [ "$2" != "--no-json" ]; then`. Ensure that `PARSED_SHOW_NAME`, `PARSED_SEASON_NUM`, `PARSED_EPISODE_NUM`, and `PARSED_EPISODE_TITLE` are correctly assigned out of the parsed values, which restores functionality when the JSON structure isn't created.

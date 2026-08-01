@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # --- Configuration ---
 # Location of the local folder where Plex recordings are stored
@@ -168,6 +168,13 @@ parseFilename() {
     cleanup_name "$show_raw" show_name
     cleanup_name "$title_raw" episode_title
 
+    # ⚡ Bolt Optimization: Set PARSED_* variables for use with --no-json
+    PARSED_SHOW_NAME="$show_name"
+    PARSED_SEASON_NUM="$season_num"
+    PARSED_EPISODE_NUM="$episode_num"
+    PARSED_EPISODE_TITLE="$episode_title"
+
+
     local esc_show esc_season esc_episode esc_title esc_premiered esc_date
     json_escape "$show_name" esc_show
     json_escape "$season_num" esc_season
@@ -176,16 +183,19 @@ parseFilename() {
     json_escape "$year_raw" esc_premiered
     json_escape "" esc_date # We leave date empty for compatibility or further parsing if needed
 
-    local json_str
-    printf -v json_str '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
-        "$esc_show" \
-        "$esc_season" \
-        "$esc_episode" \
-        "$esc_title" \
-        "$esc_premiered" \
-        "$esc_date"
+    local json_str=""
+    if [ "$2" != "--no-json" ]; then
+        printf -v json_str '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
+            "$esc_show" \
+            "$esc_season" \
+            "$esc_episode" \
+            "$esc_title" \
+            "$esc_premiered" \
+            "$esc_date"
+    fi
 
     if [[ -n "$2" ]]; then
+        if [ "$2" = "--no-json" ]; then return 0; fi
         if [[ ! "$2" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
             echo "Error: Invalid output variable name." >&2
             return 1
@@ -204,7 +214,9 @@ fi
 
 # Use find to locate all .ts files recursively, which is more robust
 # than nested loops and `cd`.
-find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0' ts_file; do
+shopt -s globstar nullglob
+for ts_file in "$RECORDING_PATH"/**/*.ts; do
+    shopt -u globstar nullglob
     echo "--------------------------------------------------"
     printf 'Processing file: %s\n' "$ts_file"
 
@@ -212,7 +224,7 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
     # This function is from the sourced parse-filename.sh script.
     # It returns a status code and sets PARSED_* variables.
     # ⚡ Bolt Optimization: Pass --no-json to prevent expensive JSON escaping/formatting since we only read PARSED_* variables
-    if ! parse_filename "$ts_file" --no-json; then
+    if ! parseFilename "$ts_file" --no-json; then
         echo "Warning: Could not parse metadata from '$ts_file'. Skipping."
         continue
     fi

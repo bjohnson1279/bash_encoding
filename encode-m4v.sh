@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Encode all .m4v files in a directory to .mp4
 
@@ -13,7 +13,9 @@ PRESET="veryslow"
 QUALITY=21
 
 # Find and loop through all .m4v files in the current directory
-find . -type f -name "*.m4v" -print0 | while IFS= read -r -d '' i; do
+shopt -s globstar nullglob
+for i in **/*.m4v; do
+    shopt -u globstar nullglob
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
