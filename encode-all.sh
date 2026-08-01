@@ -175,16 +175,16 @@ parseFilename() {
     PARSED_EPISODE_TITLE="$episode_title"
 
 
-    local esc_show esc_season esc_episode esc_title esc_premiered esc_date
-    json_escape "$show_name" esc_show
-    json_escape "$season_num" esc_season
-    json_escape "$episode_num" esc_episode
-    json_escape "$episode_title" esc_title
-    json_escape "$year_raw" esc_premiered
-    json_escape "" esc_date # We leave date empty for compatibility or further parsing if needed
-
     local json_str=""
     if [ "$2" != "--no-json" ]; then
+        local esc_show esc_season esc_episode esc_title esc_premiered esc_date
+        json_escape "$show_name" esc_show
+        json_escape "$season_num" esc_season
+        json_escape "$episode_num" esc_episode
+        json_escape "$episode_title" esc_title
+        json_escape "$year_raw" esc_premiered
+        json_escape "" esc_date # We leave date empty for compatibility or further parsing if needed
+
         printf -v json_str '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
             "$esc_show" \
             "$esc_season" \

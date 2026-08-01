@@ -92,3 +92,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2026-07-21 - [Fix redundant JSON generation overhead in encode-all.sh]
 **Learning:** The loop processing `.ts` files inside `encode-all.sh` invokes `parseFilename "$ts_file" --no-json` but the `--no-json` flag logic was faulty. Specifically, it checked for valid nameref variables via regex instead of checking the flag.
 **Action:** Update `parseFilename` logic inside `encode-all.sh` to correctly check for the `--no-json` flag using `if [ "$2" != "--no-json" ]; then`. Ensure that `PARSED_SHOW_NAME`, `PARSED_SEASON_NUM`, `PARSED_EPISODE_NUM`, and `PARSED_EPISODE_TITLE` are correctly assigned out of the parsed values, which restores functionality when the JSON structure isn't created.
+
+## 2024-11-20 - Skip formatting overhead fully inside conditional block
+**Learning:** Even when skipping JSON output generation using `--no-json` within `encode-all.sh`, the variables were still being string-escaped using `json_escape` unconditionally before the `if` block, wasting processing power.
+**Action:** When a flag like `--no-json` is used to skip output formatting, ensure that all prerequisite data transformations (like string escaping via `json_escape`) are also moved completely inside the conditional block to fully bypass their execution overhead.
