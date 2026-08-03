@@ -145,23 +145,12 @@ parseFilename() {
     local episode_num=""
 
     if [ -n "$season_raw" ]; then
-        local season_stripped="${season_raw#"${season_raw%%[!0]*}"}"
-        season_stripped="${season_stripped:-0}"
-        if [ ${#season_stripped} -eq 1 ]; then
-            season_num="0$season_stripped"
-        else
-            season_num="$season_stripped"
-        fi
+        # ⚡ Bolt Optimization: Replace POSIX padding with faster printf and native base-10 math
+        printf -v season_num "%02d" "$(( 10#${season_raw:-0} ))"
     fi
 
     if [ -n "$episode_raw" ]; then
-        local episode_stripped="${episode_raw#"${episode_raw%%[!0]*}"}"
-        episode_stripped="${episode_stripped:-0}"
-        if [ ${#episode_stripped} -eq 1 ]; then
-            episode_num="0$episode_stripped"
-        else
-            episode_num="$episode_stripped"
-        fi
+        printf -v episode_num "%02d" "$(( 10#${episode_raw:-0} ))"
     fi
 
     local show_name episode_title
