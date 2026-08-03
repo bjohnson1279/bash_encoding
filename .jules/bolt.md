@@ -96,3 +96,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Skip formatting overhead fully inside conditional block
 **Learning:** Even when skipping JSON output generation using `--no-json` within `encode-all.sh`, the variables were still being string-escaped using `json_escape` unconditionally before the `if` block, wasting processing power.
 **Action:** When a flag like `--no-json` is used to skip output formatting, ensure that all prerequisite data transformations (like string escaping via `json_escape`) are also moved completely inside the conditional block to fully bypass their execution overhead.
+
+## 2026-07-21 - Replace string length checking and POSIX string substitution logic with faster printf and native base-10 math formatting
+**Learning:** Replaced the string length checking and POSIX string substitution logic used for zero-padding `season_raw` and `episode_raw` with faster native formatting (`printf -v season_num "%02d" "$(( 10#${season_raw:-0} ))"`). I benchmarked it and it runs significantly faster.
+**Action:** When parsing and formatting season and episode numbers, use `printf -v out_var "%02d" "$(( 10#${var:-0} ))"` to speed up the process.
