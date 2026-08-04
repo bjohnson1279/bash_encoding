@@ -318,14 +318,9 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
             src_val="$src_int$src_frac"
             dest_val="$dest_int$dest_frac"
 
-            # Strip leading zeros to avoid octal interpretation, default to 0 if empty
-            src_val="${src_val#"${src_val%%[!0]*}"}"
-            dest_val="${dest_val#"${dest_val%%[!0]*}"}"
-            src_val="${src_val:-0}"
-            dest_val="${dest_val:-0}"
-
             # Calculate absolute difference
-            duration_diff=$(( src_val - dest_val ))
+            # ⚡ Bolt Optimization: Use 10# to force base-10 instead of stripping leading zeros using string operations
+            duration_diff=$(( 10#${src_val:-0} - 10#${dest_val:-0} ))
             duration_diff="${duration_diff#-}"
 
             # Compare difference (< 1000000 is < 1.0)
