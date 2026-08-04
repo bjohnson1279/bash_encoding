@@ -23,7 +23,7 @@ for i in **/*.ts; do
     printf "Encoding '%s' to '%s'...\n" "$i" "$new_file"
 
     # Construct and execute the ffmpeg command
-    ffmpeg -nostdin -i "$i" \
+    ffmpeg -nostdin -i "./$i" \
         -vf "$VF" \
         -c:v "$ENC_TYPE" \
         -preset "$PRESET" \
@@ -31,7 +31,7 @@ for i in **/*.ts; do
         -pix_fmt yuv420p \
         -c:a copy \
         -movflags faststart \
-        -y "$new_file"
+        -y "./$new_file"
 done
 
 printf "Done.\n"
