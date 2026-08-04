@@ -37,16 +37,16 @@ teardown() {
     # Verify some ffmpeg arguments for file1
     run grep "file1.mkv" "${TEST_TEMP_DIR}/ffmpeg_calls.log"
     [ "$status" -eq 0 ]
-    [[ "$output" == *"-i file1.mkv"* ]]
+    [[ "$output" == *"-i ./file1.mkv"* ]]
     [[ "$output" == *"-c:v libx264"* ]]
-    [[ "$output" == *"-y file1.mp4"* ]]
+    [[ "$output" == *"-y ./file1.mp4"* ]]
 
     # Verify some ffmpeg arguments for file2
     run grep "file2.mkv" "${TEST_TEMP_DIR}/ffmpeg_calls.log"
     [ "$status" -eq 0 ]
-    [[ "$output" == *"-i file2.mkv"* ]]
+    [[ "$output" == *"-i ./file2.mkv"* ]]
     [[ "$output" == *"-c:v libx264"* ]]
-    [[ "$output" == *"-y file2.mp4"* ]]
+    [[ "$output" == *"-y ./file2.mp4"* ]]
 }
 
 @test "encode-mkv.sh handles filenames with spaces correctly" {
@@ -74,8 +74,8 @@ teardown() {
     # Verify ffmpeg arguments handled the spaces correctly
     run grep "file with spaces.mkv" "${TEST_TEMP_DIR}/ffmpeg_calls.log"
     [ "$status" -eq 0 ]
-    [[ "$output" == *"-i file with spaces.mkv"* ]]
-    [[ "$output" == *"-y file with spaces.mp4"* ]]
+    [[ "$output" == *"-i ./file with spaces.mkv"* ]]
+    [[ "$output" == *"-y ./file with spaces.mp4"* ]]
 }
 
 @test "encode-mkv.sh does not call ffmpeg when no .mkv files are present" {
