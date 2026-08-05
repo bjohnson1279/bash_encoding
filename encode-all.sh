@@ -39,10 +39,12 @@ getDuration() {
 
     # ⚡ Bolt Optimization: Support nameref for direct variable assignment, avoiding subshells
     if [[ -n "$2" ]]; then
-        if [[ ! "$2" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        case "$2" in
+            *[!a-zA-Z0-9_]*|[0-9]*|"")
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+        esac
         local -n out_var="$2"
         out_var="${dur}"
     else
@@ -62,10 +64,12 @@ cleanup_name() {
     val="${val%"${val##*[! ]}"}"
 
     if [ -n "$out_ref_name" ]; then
-        if [[ ! "$out_ref_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        case "$out_ref_name" in
+            *[!a-zA-Z0-9_]*|[0-9]*|"")
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+        esac
         printf -v "$out_ref_name" "%s" "$val"
     else
         printf '%s\n' "$val"
@@ -81,10 +85,12 @@ json_escape() {
     escaped="${escaped//$'\n'/\\n}"
 
     if [ -n "$out_ref_name" ]; then
-        if [[ ! "$out_ref_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        case "$out_ref_name" in
+            *[!a-zA-Z0-9_]*|[0-9]*|"")
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+        esac
         printf -v "$out_ref_name" "%s" "$escaped"
     else
         printf '%s\n' "$escaped"
@@ -185,10 +191,12 @@ parseFilename() {
 
     if [[ -n "$2" ]]; then
         if [ "$2" = "--no-json" ]; then return 0; fi
-        if [[ ! "$2" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        case "$2" in
+            *[!a-zA-Z0-9_]*|[0-9]*|"")
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+        esac
         local -n out_var="$2"
         out_var="$json_str"
     else
