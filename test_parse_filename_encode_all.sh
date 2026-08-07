@@ -19,16 +19,16 @@ assert_equal() {
     local message="$3"
 
     if [ "$expected" == "$actual" ]; then
-        echo "✅ PASS: $message"
+        printf "✅ PASS: %s\n" "$message"
     else
-        echo "❌ FAIL: $message"
-        echo "   Expected: '$expected'"
-        echo "   Actual:   '$actual'"
+        printf "❌ FAIL: %s\n" "$message"
+        printf "   Expected: '%s'\n" "$expected"
+        printf "   Actual:   '%s'\n" "$actual"
         FAILED=$((FAILED + 1))
     fi
 }
 
-echo "Testing parseFilename function..."
+printf "Testing parseFilename function...\n"
 
 # Since parseFilename from encode-all.sh relies on somewhat non-standard patterns, we test specifically the ones that correctly output a JSON containing properties based on the buggy regexes in `encode-all.sh`. We use `jq` to ensure valid JSON and specific field extractions.
 
@@ -157,9 +157,9 @@ assert_equal '' "$(printf "%s\n" "$actual" | jq -r '.season')" "Empty input - Se
 assert_equal '' "$(printf "%s\n" "$actual" | jq -r '.episode')" "Empty input - Episode"
 
 if [ $FAILED -gt 0 ]; then
-    echo "Summary: $FAILED tests failed."
+    printf "Summary: %s tests failed.\n" "$FAILED"
     exit 1
 else
-    echo "Summary: All tests passed!"
+    printf "Summary: All tests passed!\n"
     exit 0
 fi
