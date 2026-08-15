@@ -1,0 +1,325 @@
+#!/usr/bin/env python3
+"""
+Bash Isolated Test Harmonizer CLI
+Audits, fixes, and verifies isolated Bash function extractions (sed -n / process substitution)
+in test harnesses using Dynamic Dependency Detection.
+"""
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Dict, List, Set, Tuple
+
+
+def find_function_definitions(script_content: str) -> Dict[str, Tuple[int, int, str]]:
+    """
+    Parses a Bash script and returns a dictionary of:
+    function_name -> (start_char, end_char, function_body_content)
+    """
+    funcs = {}
+    lines = script_content.splitlines(keepends=True)
+    in_func = False
+    current_func_name = ""
+    func_lines = []
+    brace_depth = 0
+
+    func_header_regex = re.compile(r"^\s*(?:function\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*\)\s*\{?")
+
+    for line in lines:
+        if not in_func:
+            match = func_header_regex.match(line)
+            if match:
+                current_func_name = match.group(1)
+                in_func = True
+                func_lines = [line]
+                brace_depth = line.count("{") - line.count("}")
+                if "{" in line and brace_depth == 0:
+                    # Single line function
+                    funcs[current_func_name] = "".join(func_lines)
+                    in_func = False
+                    current_func_name = ""
+                    func_lines = []
+        else:
+            func_lines.append(line)
+            brace_depth += line.count("{") - line.count("}")
+            if brace_depth <= 0:
+                funcs[current_func_name] = "".join(func_lines)
+                in_func = False
+                current_func_name = ""
+                func_lines = []
+
+    return funcs
+
+
+def get_dependencies_for_function(func_name: str, all_funcs: Dict[str, str]) -> List[str]:
+    """
+    Performs Dynamic Dependency Detection (DDD) by scanning the function body
+    for calls to other functions declared in the same script.
+    Returns dependencies in topological / declaration order.
+    """
+    if func_name not in all_funcs:
+        return []
+
+    visited = set()
+    dependencies = []
+
+    def dfs(current: str):
+        body = all_funcs.get(current, "")
+        for other_name in all_funcs:
+            if other_name == current or other_name in visited:
+                continue
+            # Match function call as an isolated token or in command position
+            pattern = rf"(?:^|[\s;|&`$(])\b{re.escape(other_name)}\b"
+            if re.search(pattern, body):
+                visited.add(other_name)
+                dfs(other_name)
+                dependencies.append(other_name)
+
+    dfs(func_name)
+    # Return unique dependencies + the target function itself
+    ordered = []
+    for f in all_funcs:
+        if f in dependencies and f not in ordered:
+            ordered.append(f)
+    if func_name not in ordered:
+        ordered.append(func_name)
+    return ordered
+
+
+def audit_test_files(test_dir: str) -> List[Dict]:
+    """
+    Scans test files in test_dir for sed-based function extractions and detects missing dependencies.
+    """
+    results = []
+    base_path = Path(test_dir).resolve()
+
+    # Find test files
+    test_files = list(base_path.glob("test*.sh")) + list(base_path.glob("parse-filename-test*.sh")) + list(base_path.glob("*.bats"))
+    test_files += list((base_path / "tests").glob("**/*.sh")) if (base_path / "tests").is_dir() else []
+
+    # Regex for sed-based function extractions (handles quotes, $SCRIPT_DIR, process substitutions)
+    extraction_regex = re.compile(
+        r"(sed\s+-n\s+(['\"])(.*?)\2\s+[\"']?(?:\$SCRIPT_DIR/|\./)?([a-zA-Z0-9_\-./]+\.sh)[\"']?)"
+    )
+
+    for tf in sorted(set(test_files)):
+        if not tf.is_file():
+            continue
+        try:
+            content = tf.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            continue
+
+        for match in extraction_regex.finditer(content):
+            full_match = match.group(1)
+            sed_pattern = match.group(3)
+            script_ref = match.group(4).strip("\"'")
+
+            # Resolve script path
+            script_path = (tf.parent / script_ref).resolve()
+            if not script_path.is_file():
+                script_path = (base_path / script_ref).resolve()
+            if not script_path.is_file():
+                continue
+
+            try:
+                script_content = script_path.read_text(encoding="utf-8", errors="ignore")
+            except Exception:
+                continue
+
+            all_funcs = find_function_definitions(script_content)
+            if not all_funcs:
+                continue
+
+            # Extract which functions are currently extracted
+            extracted_funcs = re.findall(r"/\^([a-zA-Z0-9_]+)\(\)\s*\{/", sed_pattern)
+            if not extracted_funcs:
+                continue
+
+            # Check dependencies for each extracted function
+            missing_deps = {}
+            for ef in extracted_funcs:
+                required_chain = get_dependencies_for_function(ef, all_funcs)
+                missing = [dep for dep in required_chain if dep not in extracted_funcs]
+                if missing:
+                    missing_deps[ef] = missing
+
+            results.append({
+                "test_file": tf.as_posix(),
+                "source_script": script_path.as_posix(),
+                "extracted_functions": extracted_funcs,
+                "missing_dependencies": missing_deps,
+                "full_command": full_match,
+                "is_healthy": len(missing_deps) == 0,
+            })
+
+    return results
+
+
+def fix_test_files(test_dir: str, target_file: str = None, dry_run: bool = False) -> Dict:
+    """
+    Rewrites incomplete sed extraction commands in test files to include all prerequisite helper functions.
+    """
+    audit_data = audit_test_files(test_dir)
+    fixed_files = []
+
+    for item in audit_data:
+        if item["is_healthy"]:
+            continue
+        tf_path = Path(item["test_file"])
+        if target_file and Path(target_file).resolve() != tf_path.resolve():
+            continue
+
+        script_content = Path(item["source_script"]).read_text(encoding="utf-8", errors="ignore")
+        all_funcs = find_function_definitions(script_content)
+
+        # Build complete required set of functions
+        needed_funcs = set()
+        for ef in item["extracted_functions"]:
+            for dep in get_dependencies_for_function(ef, all_funcs):
+                needed_funcs.add(dep)
+
+        # Preserve declaration order from source script
+        ordered_needed = [f for f in all_funcs if f in needed_funcs]
+
+        # Construct new sed expression
+        new_sed_chunks = [f"/^{f}() {{/,/^}}/p" for f in ordered_needed]
+        new_sed_expr = "; ".join(new_sed_chunks)
+
+        old_cmd = item["full_command"]
+        quote_char = "'" if "'" in old_cmd else '"'
+        new_cmd = re.sub(
+            r"sed\s+-n\s+['\"][^'\"]+['\"]",
+            f"sed -n {quote_char}{new_sed_expr}{quote_char}",
+            old_cmd
+        )
+
+        tf_content = tf_path.read_text(encoding="utf-8", errors="ignore")
+        updated_content = tf_content.replace(old_cmd, new_cmd)
+
+        if updated_content != tf_content:
+            if not dry_run:
+                tf_path.write_text(updated_content, encoding="utf-8")
+            fixed_files.append({
+                "test_file": tf_path.as_posix(),
+                "old_command": old_cmd,
+                "new_command": new_cmd,
+                "added_dependencies": [f for f in ordered_needed if f not in item["extracted_functions"]],
+            })
+
+    return {
+        "status": "success",
+        "dry_run": dry_run,
+        "fixed_count": len(fixed_files),
+        "fixes": fixed_files,
+    }
+
+
+def verify_test_suites(test_dir: str) -> Dict:
+    """
+    Runs executable bash test suites and collects test execution metrics.
+    """
+    base_path = Path(test_dir).resolve()
+    test_scripts = [
+        "test_parse_filename.sh",
+        "test_parse_filename_encode_all.sh",
+        "test_parse_filename_debug.sh",
+        "test_loop_logic.sh",
+    ]
+
+    results = []
+    all_passed = True
+
+    for ts in test_scripts:
+        script_path = base_path / ts
+        if not script_path.is_file():
+            continue
+
+        try:
+            proc = subprocess.run(
+                ["bash", f"./{ts}"],
+                cwd=str(base_path),
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            passed = proc.returncode == 0
+            if not passed:
+                all_passed = False
+
+            results.append({
+                "script": ts,
+                "passed": passed,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout[-500:] if proc.stdout else "",
+                "stderr": proc.stderr[-500:] if proc.stderr else "",
+            })
+        except subprocess.TimeoutExpired:
+            all_passed = False
+            results.append({
+                "script": ts,
+                "passed": False,
+                "returncode": -1,
+                "error": "Execution timed out (30s limit)",
+            })
+
+    return {
+        "overall_status": "PASS" if all_passed else "FAIL",
+        "total_executed": len(results),
+        "passed_count": sum(1 for r in results if r["passed"]),
+        "failed_count": sum(1 for r in results if not r["passed"]),
+        "results": results,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Bash Isolated Test Harmonizer CLI")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # audit subcommand
+    audit_parser = subparsers.add_parser("audit", help="Audit test files for missing function extraction dependencies")
+    audit_parser.add_argument("--test-dir", default=".", help="Directory containing test scripts")
+    audit_parser.add_argument("--output", required=True, help="Path to write JSON audit report")
+
+    # fix subcommand
+    fix_parser = subparsers.add_parser("fix", help="Fix missing function extraction dependencies in test files")
+    fix_parser.add_argument("--test-dir", default=".", help="Directory containing test scripts")
+    fix_parser.add_argument("--target-file", default=None, help="Optional specific test file to fix")
+    fix_parser.add_argument("--dry-run", action="store_true", help="Preview changes without writing to disk")
+    fix_parser.add_argument("--output", required=True, help="Path to write JSON fix report")
+
+    # verify subcommand
+    verify_parser = subparsers.add_parser("verify", help="Execute and verify test suites")
+    verify_parser.add_argument("--test-dir", default=".", help="Directory containing test scripts")
+    verify_parser.add_argument("--output", required=True, help="Path to write JSON verification report")
+
+    args = parser.parse_args()
+
+    if args.command == "audit":
+        report = audit_test_files(args.test_dir)
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2)
+        print(f"Audit completed: {len(report)} extractions audited. Output written to {args.output}")
+
+    elif args.command == "fix":
+        report = fix_test_files(args.test_dir, target_file=args.target_file, dry_run=args.dry_run)
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2)
+        print(f"Fix completed: {report['fixed_count']} files updated. Output written to {args.output}")
+
+    elif args.command == "verify":
+        report = verify_test_suites(args.test_dir)
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2)
+        status = report["overall_status"]
+        print(f"Verification completed ({status}): {report['passed_count']}/{report['total_executed']} passed. Output written to {args.output}")
+        if status != "PASS":
+            sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
