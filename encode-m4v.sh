@@ -15,7 +15,6 @@ QUALITY=21
 # Find and loop through all .m4v files in the current directory
 shopt -s globstar nullglob
 for i in **/*.m4v; do
-    shopt -u globstar nullglob
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
@@ -32,5 +31,6 @@ for i in **/*.m4v; do
         -movflags faststart \
         -y "./$new_file"
 done
+shopt -u globstar nullglob
 
 printf "Done.\n"

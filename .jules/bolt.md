@@ -107,3 +107,6 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Replace Bash Regex with Case Statement Globbing for Validation
 **Learning:** In Bash, native `case` statement globbing (e.g., `case "$var" in *[!a-zA-Z0-9_]*|[0-9]*|"")`) for simple string validation is significantly faster (measured to be about ~7x faster in a tight loop) than using the bash regex operator (`[[ "$var" =~ ^pattern$ ]]`). This is because `case` uses built-in pattern matching that doesn't invoke the regex engine.
 **Action:** When performing simple variable or format validation inside high-frequency bash functions (like `cleanup_name` or `json_escape` called repeatedly), replace `[[ =~ ]]` regex checks with `case` statements using glob patterns.
+## 2026-07-21 - Avoid state-altering builtins inside loops
+**Learning:** In bash `for` loops iterating over glob expansions, executing option resets like `shopt -u globstar nullglob` *inside* the loop causes O(N) redundant executions. Worse, if the glob yields zero files (because `nullglob` is set), the loop body never runs, meaning the options are never unset and effectively leak to the rest of the script.
+**Action:** Always move `shopt -u` resets immediately after the `done` statement of the loop to ensure they run exactly once and run unconditionally.

@@ -213,7 +213,6 @@ fi
 # than nested loops and `cd`.
 shopt -s globstar nullglob
 for ts_file in "$RECORDING_PATH"/**/*.ts; do
-    shopt -u globstar nullglob
     echo "--------------------------------------------------"
     printf 'Processing file: %s\n' "$ts_file"
 
@@ -347,6 +346,7 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
         printf "Error: Encoding failed. Output file not found. See log for details: %s.log\n" "${new_file_full}"
     fi
 done
+shopt -u globstar nullglob
 
 echo "--------------------------------------------------"
 echo "All processing complete."
