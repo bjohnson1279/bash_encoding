@@ -90,6 +90,71 @@ def get_dependencies_for_function(func_name: str, all_funcs: Dict[str, str]) -> 
     return ordered
 
 
+def find_extraction_blocks(content: str, test_file_path: Path, base_path: Path) -> List[Dict]:
+    """
+    Finds both single-line sed extractions and multi-line split sed extractions (sed > followed by sed >>).
+    """
+    blocks = []
+    handled_spans = []
+
+    # 1. Multi-line sequential split blocks: sed > target followed by one or more sed >> target
+    multi_line_regex = re.compile(
+        r"(^[ \t]*sed\s+-n\s+(['\"])(.*?)\2\s+([\"']?(?:\$SCRIPT_DIR/|\./)?([a-zA-Z0-9_\-./]+\.sh)[\"']?)\s*>\s*([^\r\n]+)\r?\n"
+        r"(?:[ \t]*sed\s+-n\s+(['\"])(.*?)\7\s+[\"']?(?:\$SCRIPT_DIR/|\./)?\5[\"']?\s*>>\s*\6(?:\r?\n|$))+)",
+        re.MULTILINE
+    )
+
+    for match in multi_line_regex.finditer(content):
+        full_block = match.group(1)
+        script_ref = match.group(5).strip("\"'")
+        script_arg = match.group(4)
+        target_dest = match.group(6).strip()
+
+        # Extract all functions from all sed commands in the block
+        funcs = re.findall(r"/\^([a-zA-Z0-9_]+)\(\)\s*\{/", full_block)
+        if funcs:
+            blocks.append({
+                "type": "multi_line",
+                "full_match": full_block,
+                "script_ref": script_ref,
+                "script_arg": script_arg,
+                "target_dest": target_dest,
+                "extracted_functions": funcs,
+                "span": match.span(),
+            })
+            handled_spans.append(match.span())
+
+    # 2. Single-line extractions (including process substitutions and standalone commands)
+    single_line_regex = re.compile(
+        r"(sed\s+-n\s+(['\"])(.*?)\2\s+([\"']?(?:\$SCRIPT_DIR/|\./)?([a-zA-Z0-9_\-./]+\.sh)[\"']?))"
+    )
+
+    for match in single_line_regex.finditer(content):
+        m_start, m_end = match.span()
+        # Skip if part of an already handled multi-line block
+        if any(h_start <= m_start and m_end <= h_end for h_start, h_end in handled_spans):
+            continue
+
+        full_match = match.group(1)
+        sed_pattern = match.group(3)
+        script_arg = match.group(4)
+        script_ref = match.group(5).strip("\"'")
+
+        funcs = re.findall(r"/\^([a-zA-Z0-9_]+)\(\)\s*\{/", sed_pattern)
+        if funcs:
+            blocks.append({
+                "type": "single_line",
+                "full_match": full_match,
+                "script_ref": script_ref,
+                "script_arg": script_arg,
+                "target_dest": None,
+                "extracted_functions": funcs,
+                "span": match.span(),
+            })
+
+    return blocks
+
+
 def audit_test_files(test_dir: str) -> List[Dict]:
     """
     Scans test files in test_dir for sed-based function extractions and detects missing dependencies.
@@ -101,11 +166,6 @@ def audit_test_files(test_dir: str) -> List[Dict]:
     test_files = list(base_path.glob("test*.sh")) + list(base_path.glob("parse-filename-test*.sh")) + list(base_path.glob("*.bats"))
     test_files += list((base_path / "tests").glob("**/*.sh")) if (base_path / "tests").is_dir() else []
 
-    # Regex for sed-based function extractions (handles quotes, $SCRIPT_DIR, process substitutions)
-    extraction_regex = re.compile(
-        r"(sed\s+-n\s+(['\"])(.*?)\2\s+[\"']?(?:\$SCRIPT_DIR/|\./)?([a-zA-Z0-9_\-./]+\.sh)[\"']?)"
-    )
-
     for tf in sorted(set(test_files)):
         if not tf.is_file():
             continue
@@ -114,12 +174,9 @@ def audit_test_files(test_dir: str) -> List[Dict]:
         except Exception:
             continue
 
-        for match in extraction_regex.finditer(content):
-            full_match = match.group(1)
-            sed_pattern = match.group(3)
-            script_ref = match.group(4).strip("\"'")
-
-            # Resolve script path
+        blocks = find_extraction_blocks(content, tf, base_path)
+        for blk in blocks:
+            script_ref = blk["script_ref"]
             script_path = (tf.parent / script_ref).resolve()
             if not script_path.is_file():
                 script_path = (base_path / script_ref).resolve()
@@ -135,12 +192,7 @@ def audit_test_files(test_dir: str) -> List[Dict]:
             if not all_funcs:
                 continue
 
-            # Extract which functions are currently extracted
-            extracted_funcs = re.findall(r"/\^([a-zA-Z0-9_]+)\(\)\s*\{/", sed_pattern)
-            if not extracted_funcs:
-                continue
-
-            # Check dependencies for each extracted function
+            extracted_funcs = blk["extracted_functions"]
             missing_deps = {}
             for ef in extracted_funcs:
                 required_chain = get_dependencies_for_function(ef, all_funcs)
@@ -153,8 +205,11 @@ def audit_test_files(test_dir: str) -> List[Dict]:
                 "source_script": script_path.as_posix(),
                 "extracted_functions": extracted_funcs,
                 "missing_dependencies": missing_deps,
-                "full_command": full_match,
-                "is_healthy": len(missing_deps) == 0,
+                "full_command": blk["full_match"],
+                "block_type": blk["type"],
+                "target_dest": blk.get("target_dest"),
+                "script_arg": blk.get("script_arg"),
+                "is_healthy": len(missing_deps) == 0 and blk["type"] == "single_line",
             })
 
     return results
@@ -162,7 +217,7 @@ def audit_test_files(test_dir: str) -> List[Dict]:
 
 def fix_test_files(test_dir: str, target_file: str = None, dry_run: bool = False) -> Dict:
     """
-    Rewrites incomplete sed extraction commands in test files to include all prerequisite helper functions.
+    Rewrites incomplete and split sed extraction commands in test files to include all prerequisite helper functions.
     """
     audit_data = audit_test_files(test_dir)
     fixed_files = []
@@ -191,12 +246,25 @@ def fix_test_files(test_dir: str, target_file: str = None, dry_run: bool = False
         new_sed_expr = "; ".join(new_sed_chunks)
 
         old_cmd = item["full_command"]
-        quote_char = "'" if "'" in old_cmd else '"'
-        new_cmd = re.sub(
-            r"sed\s+-n\s+['\"][^'\"]+['\"]",
-            f"sed -n {quote_char}{new_sed_expr}{quote_char}",
-            old_cmd
-        )
+        script_arg = item.get("script_arg", "encode-all.sh")
+
+        if item["block_type"] == "multi_line":
+            target_dest = item.get("target_dest", "$TMP_FILE")
+            # Determine leading indentation
+            leading_ws = ""
+            m_ws = re.match(r"^([ \t]*)", old_cmd)
+            if m_ws:
+                leading_ws = m_ws.group(1)
+            new_cmd = f"{leading_ws}sed -n '{new_sed_expr}' {script_arg} > {target_dest}"
+            if old_cmd.endswith("\n") and not new_cmd.endswith("\n"):
+                new_cmd += "\n"
+        else:
+            quote_char = "'" if "'" in old_cmd else '"'
+            new_cmd = re.sub(
+                r"sed\s+-n\s+['\"][^'\"]+['\"]",
+                f"sed -n {quote_char}{new_sed_expr}{quote_char}",
+                old_cmd
+            )
 
         tf_content = tf_path.read_text(encoding="utf-8", errors="ignore")
         updated_content = tf_content.replace(old_cmd, new_cmd)

@@ -95,19 +95,23 @@ source <(sed -n '/^parseFilename() {/,/^}/p' encode-all.sh)
 Inspect internal function invocations (e.g. `parseFilename` calling `cleanup_name` and `json_escape`).
 
 ### 3. Update Extraction Multi-Pattern
-Replace single-function extractors with sequential multi-block extractions:
+Replace single-function extractors and fragile multi-line split `sed -n >` / `sed -n >>` cascades with unified sequential multi-block extractions:
 ```bash
-# Sourced in declaration order:
+# Sourced in declaration order via process substitution:
 source <(sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFilename() {/,/^}/p' encode-all.sh)
+
+# Or written to a temporary test script:
+sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFilename() {/,/^}/p' "$SCRIPT_DIR/encode-all.sh" > "$TMP_FILE"
 ```
 
-### 4. Modernize Legacy Assertions
-Verify that test assertions validate cleaned, modern parsing rules (e.g. structured `.premiered` years, formatted digits) rather than obsolete bug artifacts.
+### 4. Modernize Legacy & Dual-Mode Assertions
+Verify that test assertions validate cleaned, modern parsing rules (e.g. structured `.premiered` years, formatted digits) and preserve dual testing modes (both structured JSON output and raw variable flag mode `--no-json`) across upstream merges.
 
 ---
 
 ## Common Mistakes
 
 1. **Extracting only the target function**: Omitting helper subroutines results in silent subshell failures or `command not found` errors.
-2. **Executing the main script during tests**: Sourcing the entire monolithic script instead of isolated functions triggers top-level code (e.g. recursive `find` loops, directory checks).
-3. **Hardcoding brittle sed line numbers**: Using static line numbers (e.g. `sed -n '55,90p'`) breaks as soon as code above is modified. Always use regex function boundaries (`/^[a-zA-Z_0-9]+() {/,/^}/p`).
+2. **Cascading fragmented sed invocations**: Splitting extractions across multiple `sed -n ... >` and `sed -n ... >>` lines increases process spawning and creates merge conflict churn across branches. Use a single multi-pattern `sed -n` statement.
+3. **Executing the main script during tests**: Sourcing the entire monolithic script instead of isolated functions triggers top-level code (e.g. recursive `find` loops, directory checks).
+4. **Hardcoding brittle sed line numbers**: Using static line numbers (e.g. `sed -n '55,90p'`) breaks as soon as code above is modified. Always use regex function boundaries (`/^[a-zA-Z_0-9]+() {/,/^}/p`).
