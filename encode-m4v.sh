@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Encode all .m4v files in a directory to .mp4
 
@@ -13,14 +13,15 @@ PRESET="veryslow"
 QUALITY=21
 
 # Find and loop through all .m4v files in the current directory
-find . -type f -name "*.m4v" -print0 | while IFS= read -r -d '' i; do
+shopt -s globstar nullglob
+for i in **/*.m4v; do
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
     printf "Encoding '%s' to '%s'...\n" "$i" "$new_file"
 
     # Construct and execute the ffmpeg command
-    ffmpeg -nostdin -i "$i" \
+    ffmpeg -nostdin -i "./$i" \
         -vf "$VF" \
         -c:v "$ENC_TYPE" \
         -preset "$PRESET" \
@@ -28,7 +29,8 @@ find . -type f -name "*.m4v" -print0 | while IFS= read -r -d '' i; do
         -pix_fmt yuv420p \
         -c:a copy \
         -movflags faststart \
-        -y "$new_file"
+        -y "./$new_file"
 done
+shopt -u globstar nullglob
 
 printf "Done.\n"

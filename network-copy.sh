@@ -26,6 +26,7 @@ if [ -z "${BATS_VERSION:-}" ]; then
             exit 1
         fi
     done
+fi
 
 # Enter your mount path for network share
 MNT_SHARE_PATH=""
@@ -81,7 +82,8 @@ get_avail_mb() {
                 printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
         esac
     else
-        echo $(( avail / 1024 ))
+        printf '%s\n' "$(( avail / 1024 ))"
+    fi
 }
 
 # Gets folder size in Megabytes.
@@ -89,6 +91,7 @@ get_avail_mb() {
 get_folder_size_mb() {
     # $1: folder path
     local folder_path="$1"
+    local out_ref="${2:-}"
     local size
 
     # du -sk -> POSIX standard, size in 1K-blocks
@@ -97,10 +100,25 @@ get_folder_size_mb() {
     } < <(du -sk -- "$folder_path")
 
     case "${size#-}" in
+        ''|*[!0-9]*)
             size=0
+            ;;
+        *)
+            # safe to do arithmetic
+    esac
 
+    if [ -n "$out_ref" ]; then
+        case "$out_ref" in
+            *[!a-zA-Z0-9_]*|[0-9]*)
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+            *)
                 printf -v "$out_ref" "%s" "$(( size / 1024 ))"
-        echo $(( size / 1024 ))
+        esac
+    else
+        printf '%s\n' "$(( size / 1024 ))"
+    fi
 }
 
 # Syncs a folder if there is enough disk space.
@@ -117,6 +135,8 @@ folder_sync() {
         echo "Please ensure the network share is mounted correctly."
         echo "Example for Linux (Debian/Alpine): sudo mount -t cifs //SERVER/SHARE '$MNT_SHARE_PATH' -o username=USER,password=PASS"
         echo "Example for macOS: sudo mount -t smbfs //USER@SERVER/SHARE '$MNT_SHARE_PATH'"
+        return 1
+    fi
 
     local avail_mb
     get_avail_mb "." "avail_mb"
@@ -125,16 +145,19 @@ folder_sync() {
     if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
         printf "Insufficient disk space to start copy from '%s'.\n" "$src_folder"
         echo "Required: ${required_space}MB, Available: ${avail_mb:-Unknown}MB"
+        return 1
+    fi
 
     printf "Calculating size of '%s'...\n" "$src_folder"
     local folder_size_mb
     get_folder_size_mb "$src_folder" "folder_size_mb"
-    echo "Calculating size of '$src_folder'..."
     echo "Source folder size: ${folder_size_mb}MB"
 
     if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
         printf "Insufficient disk space to copy '%s'.\n" "$src_folder"
         echo "Required: ${folder_size_mb}MB, Available: ${avail_mb}MB"
+        return 1
+    fi
 
     printf "Starting copy from '%s' to '%s'...\n" "$src_folder" "$RECORDING_PATH"
     # 🛡️ Sentinel: Avoid -a (archive) flag to prevent preserving malicious device files (-D) or suid bits (-p) from network shares
@@ -144,17 +167,14 @@ folder_sync() {
 
 # --- Main Script ---
 
-# Check initial disk space
-avail_mb=""
-get_avail_mb "." "avail_mb"
-if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
-    echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
-    exit 1
+if [ -z "${BATS_VERSION:-}" ]; then
     # Check initial disk space
     avail_mb=""
+    get_avail_mb "." "avail_mb"
     if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
         echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
         exit 1
+    fi
 
     # --- Define Folders to Copy ---
     # Add more calls to folder_sync for each show or directory you want to copy.
@@ -176,127 +196,4 @@ if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
     # recordings_src_another="$LOCAL_SHARE_PATH/Recorded TV Shows/Another Show (2022)"
     # required_space_another=3000
     # folder_sync "$recordings_src_another" "$required_space_another"
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {
-
-        ''|*[!0-9]*) avail=0 ;;
-
-        printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
-}
-
-
-    {
-
-        ''|*[!0-9]*) size=0 ;;
-
-        printf -v "$out_ref" "%s" "$(( size / 1024 ))"
-}
-
-
-
-
-    # shellcheck disable=SC2119
-    avail_mb="$(get_avail_mb)"
-
-
-    folder_size_mb="$(get_folder_size_mb "$src_folder")"
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {
-
-
-}
-
-
-    {
-
-
-}
-
-
-
-
-
-
-    folder_size_mb="$(get_folder_size_mb "$src_folder")"
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {
-
-
-        printf '%s\n' "$(( avail / 1024 ))"
-}
-
-
-    {
-
-
-        printf '%s\n' "$(( size / 1024 ))"
-}
-
-
-
-
-
-
-
-
-}
-
-
-    if [ -z "$avail_mb" ] || [ "$avail_mb" -lt "$REQUIRED_DISK_AMOUNT" ]; then
-    avail_mb=""
-
-
-
-
+fi

@@ -26,10 +26,12 @@ cleanup_name() {
     val="${val%"${val##*[! ]}"}"
 
     if [ -n "$out_ref_name" ]; then
-        if [[ ! "$out_ref_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        case "$out_ref_name" in
+            *[!a-zA-Z0-9_]*|[0-9]*|"")
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+        esac
         # ⚡ Bolt Optimization: Use printf -v instead of eval to prevent command injection and subshell overhead
         printf -v "$out_ref_name" "%s" "$val"
     else
@@ -51,10 +53,12 @@ json_escape() {
     escaped="${escaped//\"/\\\"}"
 
     if [ -n "$out_ref_name" ]; then
-        if [[ ! "$out_ref_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        case "$out_ref_name" in
+            *[!a-zA-Z0-9_]*|[0-9]*|"")
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+        esac
         # ⚡ Bolt Optimization: Use printf -v to prevent command injection and subshell overhead
         printf -v "$out_ref_name" "%s" "$escaped"
     else
@@ -103,24 +107,18 @@ parse_filename() {
     fi
 
     # ⚡ Bolt Optimization: Replace subshells and sed with native POSIX parameter expansion to remove leading zeros
-    season_stripped="${season_raw#"${season_raw%%[!0]*}"}"
-    episode_stripped="${episode_raw#"${episode_raw%%[!0]*}"}"
-    season_stripped="${season_stripped:-0}"
-    episode_stripped="${episode_stripped:-0}"
-
-    # Pad to 2 digits natively in POSIX sh
-    if [ ${#season_stripped} -eq 1 ]; then
-        season_num="0$season_stripped"
+    if [ -n "$season_raw" ]; then
+        printf -v season_num "%02d" "$(( 10#${season_raw:-0} ))"
     else
-        season_num="$season_stripped"
+        season_num=""
     fi
     # shellcheck disable=SC2034
     PARSED_SEASON_NUM="$season_num"
 
-    if [ ${#episode_stripped} -eq 1 ]; then
-        episode_num="0$episode_stripped"
+    if [ -n "$episode_raw" ]; then
+        printf -v episode_num "%02d" "$(( 10#${episode_raw:-0} ))"
     else
-        episode_num="$episode_stripped"
+        episode_num=""
     fi
     # shellcheck disable=SC2034
     PARSED_EPISODE_NUM="$episode_num"

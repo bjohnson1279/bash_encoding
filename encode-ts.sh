@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Encode all .ts files in a directory to .mp4
 
@@ -14,14 +14,15 @@ QUALITY=21
 
 # Find and loop through all .ts files in the current directory
 # shellcheck disable=SC3045
-find . -type f -name "*.ts" -print0 | while IFS= read -r -d '' i; do
+shopt -s globstar nullglob
+for i in **/*.ts; do
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
     printf "Encoding '%s' to '%s'...\n" "$i" "$new_file"
 
     # Construct and execute the ffmpeg command
-    ffmpeg -nostdin -i "$i" \
+    ffmpeg -nostdin -i "./$i" \
         -vf "$VF" \
         -c:v "$ENC_TYPE" \
         -preset "$PRESET" \
@@ -29,7 +30,8 @@ find . -type f -name "*.ts" -print0 | while IFS= read -r -d '' i; do
         -pix_fmt yuv420p \
         -c:a copy \
         -movflags faststart \
-        -y "$new_file"
+        -y "./$new_file"
 done
+shopt -u globstar nullglob
 
 printf "Done.\n"

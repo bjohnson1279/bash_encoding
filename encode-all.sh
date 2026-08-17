@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # --- Configuration ---
 # Location of the local folder where Plex recordings are stored
@@ -39,10 +39,12 @@ getDuration() {
 
     # ⚡ Bolt Optimization: Support nameref for direct variable assignment, avoiding subshells
     if [[ -n "$2" ]]; then
-        if [[ ! "$2" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        case "$2" in
+            *[!a-zA-Z0-9_]*|[0-9]*|"")
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+        esac
         local -n out_var="$2"
         out_var="${dur}"
     else
@@ -62,10 +64,12 @@ cleanup_name() {
     val="${val%"${val##*[! ]}"}"
 
     if [ -n "$out_ref_name" ]; then
-        if [[ ! "$out_ref_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        case "$out_ref_name" in
+            *[!a-zA-Z0-9_]*|[0-9]*|"")
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+        esac
         printf -v "$out_ref_name" "%s" "$val"
     else
         printf '%s\n' "$val"
@@ -81,10 +85,12 @@ json_escape() {
     escaped="${escaped//$'\n'/\\n}"
 
     if [ -n "$out_ref_name" ]; then
-        if [[ ! "$out_ref_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        case "$out_ref_name" in
+            *[!a-zA-Z0-9_]*|[0-9]*|"")
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+        esac
         printf -v "$out_ref_name" "%s" "$escaped"
     else
         printf '%s\n' "$escaped"
@@ -145,51 +151,52 @@ parseFilename() {
     local episode_num=""
 
     if [ -n "$season_raw" ]; then
-        local season_stripped="${season_raw#"${season_raw%%[!0]*}"}"
-        season_stripped="${season_stripped:-0}"
-        if [ ${#season_stripped} -eq 1 ]; then
-            season_num="0$season_stripped"
-        else
-            season_num="$season_stripped"
-        fi
+        # ⚡ Bolt Optimization: Replace POSIX padding with faster printf and native base-10 math
+        printf -v season_num "%02d" "$(( 10#${season_raw:-0} ))"
     fi
 
     if [ -n "$episode_raw" ]; then
-        local episode_stripped="${episode_raw#"${episode_raw%%[!0]*}"}"
-        episode_stripped="${episode_stripped:-0}"
-        if [ ${#episode_stripped} -eq 1 ]; then
-            episode_num="0$episode_stripped"
-        else
-            episode_num="$episode_stripped"
-        fi
+        printf -v episode_num "%02d" "$(( 10#${episode_raw:-0} ))"
     fi
 
     local show_name episode_title
     cleanup_name "$show_raw" show_name
     cleanup_name "$title_raw" episode_title
 
-    local esc_show esc_season esc_episode esc_title esc_premiered esc_date
-    json_escape "$show_name" esc_show
-    json_escape "$season_num" esc_season
-    json_escape "$episode_num" esc_episode
-    json_escape "$episode_title" esc_title
-    json_escape "$year_raw" esc_premiered
-    json_escape "" esc_date # We leave date empty for compatibility or further parsing if needed
+    # ⚡ Bolt Optimization: Set PARSED_* variables for use with --no-json
+    PARSED_SHOW_NAME="$show_name"
+    PARSED_SEASON_NUM="$season_num"
+    PARSED_EPISODE_NUM="$episode_num"
+    PARSED_EPISODE_TITLE="$episode_title"
 
-    local json_str
-    printf -v json_str '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
-        "$esc_show" \
-        "$esc_season" \
-        "$esc_episode" \
-        "$esc_title" \
-        "$esc_premiered" \
-        "$esc_date"
+
+    local json_str=""
+    if [ "$2" != "--no-json" ]; then
+        local esc_show esc_season esc_episode esc_title esc_premiered esc_date
+        json_escape "$show_name" esc_show
+        json_escape "$season_num" esc_season
+        json_escape "$episode_num" esc_episode
+        json_escape "$episode_title" esc_title
+        json_escape "$year_raw" esc_premiered
+        json_escape "" esc_date # We leave date empty for compatibility or further parsing if needed
+
+        printf -v json_str '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
+            "$esc_show" \
+            "$esc_season" \
+            "$esc_episode" \
+            "$esc_title" \
+            "$esc_premiered" \
+            "$esc_date"
+    fi
 
     if [[ -n "$2" ]]; then
-        if [[ ! "$2" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-            echo "Error: Invalid output variable name." >&2
-            return 1
-        fi
+        if [ "$2" = "--no-json" ]; then return 0; fi
+        case "$2" in
+            *[!a-zA-Z0-9_]*|[0-9]*|"")
+                echo "Error: Invalid output variable name." >&2
+                return 1
+                ;;
+        esac
         local -n out_var="$2"
         out_var="$json_str"
     else
@@ -204,7 +211,8 @@ fi
 
 # Use find to locate all .ts files recursively, which is more robust
 # than nested loops and `cd`.
-find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0' ts_file; do
+shopt -s globstar nullglob
+for ts_file in "$RECORDING_PATH"/**/*.ts; do
     echo "--------------------------------------------------"
     printf 'Processing file: %s\n' "$ts_file"
 
@@ -212,7 +220,7 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
     # This function is from the sourced parse-filename.sh script.
     # It returns a status code and sets PARSED_* variables.
     # ⚡ Bolt Optimization: Pass --no-json to prevent expensive JSON escaping/formatting since we only read PARSED_* variables
-    if ! parse_filename "$ts_file" --no-json; then
+    if ! parseFilename "$ts_file" --no-json; then
         echo "Warning: Could not parse metadata from '$ts_file'. Skipping."
         continue
     fi
@@ -317,14 +325,9 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
             src_val="$src_int$src_frac"
             dest_val="$dest_int$dest_frac"
 
-            # Strip leading zeros to avoid octal interpretation, default to 0 if empty
-            src_val="${src_val#"${src_val%%[!0]*}"}"
-            dest_val="${dest_val#"${dest_val%%[!0]*}"}"
-            src_val="${src_val:-0}"
-            dest_val="${dest_val:-0}"
-
             # Calculate absolute difference
-            duration_diff=$(( src_val - dest_val ))
+            # ⚡ Bolt Optimization: Use 10# to force base-10 instead of stripping leading zeros using string operations
+            duration_diff=$(( 10#${src_val:-0} - 10#${dest_val:-0} ))
             duration_diff="${duration_diff#-}"
 
             # Compare difference (< 1000000 is < 1.0)
@@ -343,6 +346,7 @@ find "$RECORDING_PATH" -type f -name "*.ts" -print0 | while IFS= read -r -d $'\0
         printf "Error: Encoding failed. Output file not found. See log for details: %s.log\n" "${new_file_full}"
     fi
 done
+shopt -u globstar nullglob
 
 echo "--------------------------------------------------"
 echo "All processing complete."

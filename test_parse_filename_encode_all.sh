@@ -17,16 +17,16 @@ assert_equal() {
     local message="$3"
 
     if [ "$expected" == "$actual" ]; then
-        echo "✅ PASS: $message"
+        printf "✅ PASS: %s\n" "$message"
     else
-        echo "❌ FAIL: $message"
-        echo "   Expected: '$expected'"
-        echo "   Actual:   '$actual'"
+        printf "❌ FAIL: %s\n" "$message"
+        printf "   Expected: '%s'\n" "$expected"
+        printf "   Actual:   '%s'\n" "$actual"
         FAILED=$((FAILED + 1))
     fi
 }
 
-echo "Testing parseFilename function..."
+printf "Testing parseFilename function...\n"
 
 # Since parseFilename from encode-all.sh relies on somewhat non-standard patterns, we test specifically the ones that correctly output a JSON containing properties based on the buggy regexes in `encode-all.sh`. We use `jq` to ensure valid JSON and specific field extractions.
 
@@ -39,10 +39,15 @@ assert_equal "2020" "$(printf "%s\n" "$actual" | jq -r '.premiered')" "Standard 
 assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.season')" "Standard Show Name with Year and Season/Episode - Season"
 assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Standard Show Name with Year and Season/Episode - Episode"
 
-actual=$(parseFilename "Another Show S02E03.ts")
-assert_equal "Another Show" "$(printf "%s\n" "$actual" | jq -r '.show')" "Standard Show Name with Season/Episode - Show"
-assert_equal "02" "$(printf "%s\n" "$actual" | jq -r '.season')" "Standard Show Name with Season/Episode - Season"
-assert_equal "03" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Standard Show Name with Season/Episode - Episode"
+parseFilename "Show Name (2020) S01E01.ts" --no-json
+assert_equal "Show Name" "$PARSED_SHOW_NAME" "Standard Show Name with Year and Season/Episode - Show (--no-json)"
+assert_equal "01" "$PARSED_SEASON_NUM" "Standard Show Name with Year and Season/Episode - Season (--no-json)"
+assert_equal "01" "$PARSED_EPISODE_NUM" "Standard Show Name with Year and Season/Episode - Episode (--no-json)"
+
+parseFilename "Another Show S02E03.ts" --no-json
+assert_equal "Another Show" "$PARSED_SHOW_NAME" "Standard Show Name with Season/Episode - Show"
+assert_equal "02" "$PARSED_SEASON_NUM" "Standard Show Name with Season/Episode - Season"
+assert_equal "03" "$PARSED_EPISODE_NUM" "Standard Show Name with Season/Episode - Episode"
 
 actual=$(parseFilename "The Simpsons (1989) - S32E01 - Undercover Burns.ts")
 assert_equal "The Simpsons" "$(printf "%s\n" "$actual" | jq -r '.show')" "Show Name with hyphens - Show"
@@ -50,6 +55,11 @@ assert_equal "1989" "$(printf "%s\n" "$actual" | jq -r '.premiered')" "Show Name
 assert_equal "32" "$(printf "%s\n" "$actual" | jq -r '.season')" "Show Name with hyphens - Season"
 assert_equal "01" "$(printf "%s\n" "$actual" | jq -r '.episode')" "Show Name with hyphens - Episode"
 assert_equal "Undercover Burns" "$(printf "%s\n" "$actual" | jq -r '.title')" "Show Name with hyphens - Title"
+
+parseFilename "The Simpsons (1989) - S32E01 - Undercover Burns.ts" --no-json
+assert_equal "The Simpsons" "$PARSED_SHOW_NAME" "Show Name with hyphens - Show (--no-json)"
+assert_equal "32" "$PARSED_SEASON_NUM" "Show Name with hyphens - Season (--no-json)"
+assert_equal "01" "$PARSED_EPISODE_NUM" "Show Name with hyphens - Episode (--no-json)"
 
 # --- Edge Cases ---
 
@@ -153,9 +163,9 @@ assert_equal '' "$(printf "%s\n" "$actual" | jq -r '.season')" "Empty input - Se
 assert_equal '' "$(printf "%s\n" "$actual" | jq -r '.episode')" "Empty input - Episode"
 
 if [ $FAILED -gt 0 ]; then
-    echo "Summary: $FAILED tests failed."
+    printf "Summary: %s tests failed.\n" "$FAILED"
     exit 1
 else
-    echo "Summary: All tests passed!"
+    printf "Summary: All tests passed!\n"
     exit 0
 fi
