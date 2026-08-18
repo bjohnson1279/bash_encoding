@@ -24,11 +24,14 @@ getDuration() {
     # This halves process spawning overhead for files missing format duration (or returning N/A).
     output=$(ffprobe -v error -select_streams v:0 -show_entries format=duration:stream=duration -of flat -i "${1}" 2>/dev/null || true)
 
-    if [[ "$output" =~ format\.duration=\"([^\"]+)\" ]]; then
-        format_dur="${BASH_REMATCH[1]}"
+    # ⚡ Bolt Optimization: Replace slow Bash regex parsing with native string manipulation for performance
+    if [[ "$output" == *"format.duration="* ]]; then
+        format_dur="${output#*format.duration=\"}"
+        format_dur="${format_dur%%\"*}"
     fi
-    if [[ "$output" =~ streams\.stream\.0\.duration=\"([^\"]+)\" ]]; then
-        stream_dur="${BASH_REMATCH[1]}"
+    if [[ "$output" == *"streams.stream.0.duration="* ]]; then
+        stream_dur="${output#*streams.stream.0.duration=\"}"
+        stream_dur="${stream_dur%%\"*}"
     fi
 
     if [ -n "$format_dur" ] && [ "$format_dur" != "N/A" ]; then
