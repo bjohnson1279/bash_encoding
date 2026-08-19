@@ -4,7 +4,7 @@ source encode-all.sh &>/dev/null || true # Source it to get parseFilename functi
 echo "Benchmarking regex match via subshell execution vs. eval:"
 
 FILE="The Big Bang Theory - S05E12 - The Shiny Trinket Maneuver.ts"
-source <(sed -n '/^parseFilename() {/,/^}/p' encode-all.sh)
+source <(sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFilename() {/,/^}/p' encode-all.sh)
 
 echo "Benchmarking jq in loop:"
 time for j in {1..2000}; do
