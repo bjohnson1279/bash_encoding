@@ -71,6 +71,14 @@ Categorizes PRs into:
 - **Group B (Defective / Failing CI)**: Broken tests or destructive line removals.
 - **Group C (Zero-Diff / Hallucinatory)**: 0 code diffs outside `.jules/` logs.
 
+### 4. `find-duplicates`
+Analyzes open PRs across a repository to detect duplicate/competing PRs targeting the same source files or functions, identifying primary candidates and superseded PRs.
+
+```bash
+python .agents/skills/bot-pr-triage-runner/scripts/triage_runner.py find-duplicates \
+  --repo bjohnson1279/bash_encoding
+```
+
 ---
 
 ## Workflow

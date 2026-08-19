@@ -24,20 +24,14 @@ When refactoring introduces helper subroutines (like `cleanup_name` or `json_esc
 ## Quick Start
 
 ```bash
-# 1. Audit test files for missing dependencies in function extractions
-python .agents/skills/bash-isolated-test-harmonizer/scripts/test_harmonizer.py audit \
-  --test-dir . \
-  --output audit_report.json
+# 1. Audit test files for missing dependencies in function extractions (prints JSON or writes to file)
+python .agents/skills/bash-isolated-test-harmonizer/scripts/test_harmonizer.py audit
 
 # 2. Automatically patch missing dependencies using Dynamic Dependency Detection
-python .agents/skills/bash-isolated-test-harmonizer/scripts/test_harmonizer.py fix \
-  --test-dir . \
-  --output fix_report.json
+python .agents/skills/bash-isolated-test-harmonizer/scripts/test_harmonizer.py fix
 
-# 3. Verify all test suites pass
-python .agents/skills/bash-isolated-test-harmonizer/scripts/test_harmonizer.py verify \
-  --test-dir . \
-  --output test_results.json
+# 3. Verify all test suites pass with environment-aware test runner fallbacks (bash/wsl/bats)
+python .agents/skills/bash-isolated-test-harmonizer/scripts/test_harmonizer.py verify
 ```
 
 ---

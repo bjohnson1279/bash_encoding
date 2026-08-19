@@ -12,7 +12,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 def find_function_definitions(script_content: str) -> Dict[str, Tuple[int, int, str]]:
@@ -287,11 +287,26 @@ def fix_test_files(test_dir: str, target_file: str = None, dry_run: bool = False
     }
 
 
+def detect_test_runner() -> Dict[str, bool]:
+    """Detects available test runners in the current environment."""
+    runners = {"bash": False, "bats": False, "wsl": False}
+    for r in ["bash", "bats", "wsl"]:
+        try:
+            res = subprocess.run([r, "--version"], capture_output=True, text=True, timeout=5)
+            if res.returncode == 0 or "version" in (res.stdout + res.stderr).lower():
+                runners[r] = True
+        except Exception:
+            runners[r] = False
+    return runners
+
+
 def verify_test_suites(test_dir: str) -> Dict:
     """
-    Runs executable bash test suites and collects test execution metrics.
+    Runs executable bash and bats test suites with graceful runner fallbacks.
     """
     base_path = Path(test_dir).resolve()
+    runners = detect_test_runner()
+    
     test_scripts = [
         "test_parse_filename.sh",
         "test_parse_filename_encode_all.sh",
@@ -302,46 +317,94 @@ def verify_test_suites(test_dir: str) -> Dict:
     results = []
     all_passed = True
 
-    for ts in test_scripts:
-        script_path = base_path / ts
-        if not script_path.is_file():
-            continue
+    # Run bash test scripts
+    bash_cmd = "bash" if runners["bash"] else ("wsl bash" if runners["wsl"] else None)
+    if bash_cmd:
+        for ts in test_scripts:
+            script_path = base_path / ts
+            if not script_path.is_file():
+                continue
 
-        try:
-            proc = subprocess.run(
-                ["bash", f"./{ts}"],
-                cwd=str(base_path),
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            passed = proc.returncode == 0
-            if not passed:
+            try:
+                cmd = ["bash", f"./{ts}"] if bash_cmd == "bash" else ["wsl", "bash", f"./{ts}"]
+                proc = subprocess.run(
+                    cmd,
+                    cwd=str(base_path),
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                passed = proc.returncode == 0
+                if not passed:
+                    all_passed = False
+
+                results.append({
+                    "runner": "bash",
+                    "script": ts,
+                    "passed": passed,
+                    "returncode": proc.returncode,
+                    "stdout": proc.stdout[-500:] if proc.stdout else "",
+                    "stderr": proc.stderr[-500:] if proc.stderr else "",
+                })
+            except subprocess.TimeoutExpired:
                 all_passed = False
+                results.append({
+                    "runner": "bash",
+                    "script": ts,
+                    "passed": False,
+                    "returncode": -1,
+                    "error": "Execution timed out (30s limit)",
+                })
 
-            results.append({
-                "script": ts,
-                "passed": passed,
-                "returncode": proc.returncode,
-                "stdout": proc.stdout[-500:] if proc.stdout else "",
-                "stderr": proc.stderr[-500:] if proc.stderr else "",
-            })
-        except subprocess.TimeoutExpired:
-            all_passed = False
-            results.append({
-                "script": ts,
-                "passed": False,
-                "returncode": -1,
-                "error": "Execution timed out (30s limit)",
-            })
+    # Run bats tests if bats is available
+    if runners["bats"]:
+        bats_files = list(base_path.glob("*.bats"))
+        for bf in bats_files:
+            try:
+                proc = subprocess.run(
+                    ["bats", bf.name],
+                    cwd=str(base_path),
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                passed = proc.returncode == 0
+                if not passed:
+                    all_passed = False
+                results.append({
+                    "runner": "bats",
+                    "script": bf.name,
+                    "passed": passed,
+                    "returncode": proc.returncode,
+                    "stdout": proc.stdout[-500:] if proc.stdout else "",
+                    "stderr": proc.stderr[-500:] if proc.stderr else "",
+                })
+            except Exception as e:
+                results.append({
+                    "runner": "bats",
+                    "script": bf.name,
+                    "passed": False,
+                    "returncode": -1,
+                    "error": str(e),
+                })
 
     return {
-        "overall_status": "PASS" if all_passed else "FAIL",
+        "overall_status": "PASS" if all_passed and results else ("FAIL" if not all_passed else "NO_TESTS"),
+        "runners_available": runners,
         "total_executed": len(results),
         "passed_count": sum(1 for r in results if r["passed"]),
         "failed_count": sum(1 for r in results if not r["passed"]),
         "results": results,
     }
+
+
+def output_json_report(data: any, output_path: Optional[str] = None):
+    """Writes JSON report to file if output_path is set, else prints formatted JSON to stdout."""
+    if output_path:
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    else:
+        print(json.dumps(data, indent=2))
 
 
 def main():
@@ -351,43 +414,44 @@ def main():
     # audit subcommand
     audit_parser = subparsers.add_parser("audit", help="Audit test files for missing function extraction dependencies")
     audit_parser.add_argument("--test-dir", default=".", help="Directory containing test scripts")
-    audit_parser.add_argument("--output", required=True, help="Path to write JSON audit report")
+    audit_parser.add_argument("--output", default=None, help="Optional path to write JSON audit report")
 
     # fix subcommand
     fix_parser = subparsers.add_parser("fix", help="Fix missing function extraction dependencies in test files")
     fix_parser.add_argument("--test-dir", default=".", help="Directory containing test scripts")
     fix_parser.add_argument("--target-file", default=None, help="Optional specific test file to fix")
     fix_parser.add_argument("--dry-run", action="store_true", help="Preview changes without writing to disk")
-    fix_parser.add_argument("--output", required=True, help="Path to write JSON fix report")
+    fix_parser.add_argument("--output", default=None, help="Optional path to write JSON fix report")
 
     # verify subcommand
     verify_parser = subparsers.add_parser("verify", help="Execute and verify test suites")
     verify_parser.add_argument("--test-dir", default=".", help="Directory containing test scripts")
-    verify_parser.add_argument("--output", required=True, help="Path to write JSON verification report")
+    verify_parser.add_argument("--output", default=None, help="Optional path to write JSON verification report")
 
     args = parser.parse_args()
 
     if args.command == "audit":
         report = audit_test_files(args.test_dir)
-        with open(args.output, "w", encoding="utf-8") as f:
-            json.dump(report, f, indent=2)
-        print(f"Audit completed: {len(report)} extractions audited. Output written to {args.output}")
+        output_json_report(report, args.output)
+        if args.output:
+            print(f"Audit completed: {len(report)} extractions audited. Output written to {args.output}")
 
     elif args.command == "fix":
         report = fix_test_files(args.test_dir, target_file=args.target_file, dry_run=args.dry_run)
-        with open(args.output, "w", encoding="utf-8") as f:
-            json.dump(report, f, indent=2)
-        print(f"Fix completed: {report['fixed_count']} files updated. Output written to {args.output}")
+        output_json_report(report, args.output)
+        if args.output:
+            print(f"Fix completed: {report['fixed_count']} files updated. Output written to {args.output}")
 
     elif args.command == "verify":
         report = verify_test_suites(args.test_dir)
-        with open(args.output, "w", encoding="utf-8") as f:
-            json.dump(report, f, indent=2)
+        output_json_report(report, args.output)
         status = report["overall_status"]
-        print(f"Verification completed ({status}): {report['passed_count']}/{report['total_executed']} passed. Output written to {args.output}")
+        if args.output:
+            print(f"Verification completed ({status}): {report['passed_count']}/{report['total_executed']} passed. Output written to {args.output}")
         if status != "PASS":
             sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
+
