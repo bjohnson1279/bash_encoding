@@ -43,7 +43,7 @@ getDuration() {
     if [[ -n "$2" ]]; then
         case "$2" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -68,7 +68,7 @@ cleanup_name() {
     if [ -n "$out_ref_name" ]; then
         case "$out_ref_name" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -89,7 +89,7 @@ json_escape() {
     if [ -n "$out_ref_name" ]; then
         case "$out_ref_name" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -195,7 +195,7 @@ parseFilename() {
         if [ "$2" = "--no-json" ]; then return 0; fi
         case "$2" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -207,7 +207,7 @@ parseFilename() {
 }
 
 if [ ! -d "$DESTINATION_PATH" ]; then
-    echo "Error: Destination path '$DESTINATION_PATH' not found." >&2
+    printf '%s\n' "Error: Destination path '$DESTINATION_PATH' not found." >&2
     exit 1
 fi
 
@@ -215,7 +215,7 @@ fi
 # than nested loops and `cd`.
 shopt -s globstar nullglob
 for ts_file in "$RECORDING_PATH"/**/*.ts; do
-    echo "--------------------------------------------------"
+    printf '%s\n' "--------------------------------------------------"
     printf 'Processing file: %s\n' "$ts_file"
 
     # Parse filename to get metadata
@@ -223,7 +223,7 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
     # It returns a status code and sets PARSED_* variables.
     # ⚡ Bolt Optimization: Pass --no-json to prevent expensive JSON escaping/formatting since we only read PARSED_* variables
     if ! parseFilename "$ts_file" --no-json; then
-        echo "Warning: Could not parse metadata from '$ts_file'. Skipping."
+        printf '%s\n' "Warning: Could not parse metadata from '$ts_file'. Skipping."
         continue
     fi
 
@@ -253,7 +253,7 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
     fi
 
     # --- Pre-flight check on the source file ---
-    echo "Verifying source file integrity with ffprobe..."
+    printf '%s\n' "Verifying source file integrity with ffprobe..."
     # ⚡ Bolt Optimization: Combine pre-flight integrity check and duration fetch into one call.
     # ffprobe will return empty/no duration for corrupt files.
     getDuration "$ts_file" src_duration
@@ -281,7 +281,7 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
     )
 
     # Execute the command
-    echo "Encoding..."
+    printf '%s\n' "Encoding..."
     # We redirect stderr (2) to stdout (1), then pipe it to `tee`.
     # `tee` will print to the console and also write to the log file.
     # We use `pipefail` to ensure the exit status of the `if` statement
@@ -300,10 +300,10 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
         getDuration "$new_file_full" dest_duration
 
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
-            echo "Warning: Duration could not be reliably determined. Original file kept."
+            printf '%s\n' "Warning: Duration could not be reliably determined. Original file kept."
         elif ! [[ "$src_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$dest_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
             # 🛡️ Sentinel: Validate duration formats to prevent arithmetic expression injection during calculation
-            echo "Warning: Duration formats are invalid. Expected numeric formats. Original file kept."
+            printf '%s\n' "Warning: Duration formats are invalid. Expected numeric formats. Original file kept."
         else
             # ⚡ Bolt Optimization: Replace subshells spawning `bc` with native bash fixed-point math.
             # This avoids expensive process forks, significantly speeding up the duration matching logic.
@@ -334,13 +334,13 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
 
             # Compare difference (< 1000000 is < 1.0)
             if [ "$duration_diff" -lt 1000000 ]; then
-                echo "Encoding successful. Durations match."
+                printf '%s\n' "Encoding successful. Durations match."
                 if [ "$DEL_ORIG" -eq 1 ]; then
                     printf "Deleting original file: %s\n" "$ts_file"
                     rm -- "$ts_file"
                 fi
             else
-                echo "Warning: Duration mismatch. Source: ${src_duration}s, Dest: ${dest_duration}s. Original file kept."
+                printf '%s\n' "Warning: Duration mismatch. Source: ${src_duration}s, Dest: ${dest_duration}s. Original file kept."
             fi
         fi
     else
@@ -350,5 +350,5 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
 done
 shopt -u globstar nullglob
 
-echo "--------------------------------------------------"
-echo "All processing complete."
+printf '%s\n' "--------------------------------------------------"
+printf '%s\n' "All processing complete."
