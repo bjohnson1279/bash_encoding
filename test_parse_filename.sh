@@ -4,6 +4,22 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/parse-filename.sh"
 
+# Resilient jq fallback for environments without jq installed
+if ! command -v jq >/dev/null 2>&1; then
+    jq() {
+        local field="$2"
+        field="${field#.}"
+        local content
+        content=$(cat)
+        if [[ "$content" =~ \"$field\"[[:space:]]*:[[:space:]]*\"([^\"]*)\" ]]; then
+            printf '%s\n' "${BASH_REMATCH[1]}"
+        elif [[ "$content" =~ \"$field\"[[:space:]]*:[[:space:]]*([0-9]+) ]]; then
+            printf '%s\n' "${BASH_REMATCH[1]}"
+        fi
+    }
+fi
+
+
 # Simple testing framework for parse-filename.sh
 
 GREEN='\033[0;32m'

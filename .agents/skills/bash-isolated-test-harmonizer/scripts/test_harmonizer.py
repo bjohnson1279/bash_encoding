@@ -287,16 +287,35 @@ def fix_test_files(test_dir: str, target_file: str = None, dry_run: bool = False
     }
 
 
-def detect_test_runner() -> Dict[str, bool]:
+def detect_test_runner() -> Dict[str, Any]:
     """Detects available test runners in the current environment."""
-    runners = {"bash": False, "bats": False, "wsl": False}
-    for r in ["bash", "bats", "wsl"]:
+    runners = {"bash": False, "bash_cmd": None, "bats": False, "wsl": False}
+    
+    # Check for Git Bash / native Bash on Windows
+    candidate_bash_paths = [
+        "C:\\Program Files\\Git\\bin\\bash.exe",
+        "C:\\Program Files\\Git\\usr\\bin\\bash.exe",
+        "C:\\Program Files (x86)\\Git\\bin\\bash.exe",
+        "bash",
+    ]
+    for b in candidate_bash_paths:
+        try:
+            res = subprocess.run([b, "--version"], capture_output=True, text=True, timeout=5)
+            if res.returncode == 0 or "version" in (res.stdout + res.stderr).lower():
+                runners["bash"] = True
+                runners["bash_cmd"] = b
+                break
+        except Exception:
+            continue
+
+    for r in ["bats", "wsl"]:
         try:
             res = subprocess.run([r, "--version"], capture_output=True, text=True, timeout=5)
             if res.returncode == 0 or "version" in (res.stdout + res.stderr).lower():
                 runners[r] = True
         except Exception:
             runners[r] = False
+
     return runners
 
 
@@ -318,21 +337,26 @@ def verify_test_suites(test_dir: str) -> Dict:
     all_passed = True
 
     # Run bash test scripts
-    bash_cmd = "bash" if runners["bash"] else ("wsl bash" if runners["wsl"] else None)
-    if bash_cmd:
+    bash_exec = runners.get("bash_cmd")
+    if not bash_exec and runners.get("wsl"):
+        bash_exec = "wsl"
+
+    if bash_exec:
         for ts in test_scripts:
             script_path = base_path / ts
             if not script_path.is_file():
                 continue
 
             try:
-                cmd = ["bash", f"./{ts}"] if bash_cmd == "bash" else ["wsl", "bash", f"./{ts}"]
+                cmd = [bash_exec, f"./{ts}"] if bash_exec != "wsl" else ["wsl", "bash", f"./{ts}"]
                 proc = subprocess.run(
                     cmd,
                     cwd=str(base_path),
                     capture_output=True,
                     text=True,
-                    timeout=30,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=60,
                 )
                 passed = proc.returncode == 0
                 if not passed:
@@ -355,6 +379,7 @@ def verify_test_suites(test_dir: str) -> Dict:
                     "returncode": -1,
                     "error": "Execution timed out (30s limit)",
                 })
+
 
     # Run bats tests if bats is available
     if runners["bats"]:
