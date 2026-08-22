@@ -100,3 +100,8 @@ Ensure `case` statement branches always terminate properly with `;;` when they d
 **Vulnerability:** Insecure Temporary File Creation (CWE-377).
 **Learning:** The BATS test scripts (`test_network-copy.bats` and `test_encode-all.bats`) previously hardcoded temporary directory and file paths directly into the `/tmp` directory (e.g., `/tmp/mock_dir`). Writing to predictable locations in world-writable directories allows an attacker to pre-create these files/directories as symlinks to sensitive files, resulting in arbitrary file modification/deletion or information disclosure when the tests run.
 **Prevention:** Never use hardcoded paths in `/tmp` or other world-writable directories. Always use commands like `mktemp -d` to generate secure, randomized temporary directories with restricted permissions (0700).
+
+## 2024-07-26 - [HIGH] Fix Option Injection in echo commands in test_encode-all.bats and test_encode-mkv.bats
+**Vulnerability:** Use of `echo "$result"` and `echo "ffmpeg $@"` which are susceptible to Option Injection if the variables start with a hyphen.
+**Learning:** `echo` is notoriously unreliable and insecure in Bash if the variable's content is derived from external input, as strings starting with hyphens (like `-e`, `-n`) can be interpreted as flags rather than text. The tests were parsing JSON or logging function mock calls directly with `echo` which could evaluate test data as options unexpectedly.
+**Prevention:** Always use `printf '%s\n' "$var"` instead of `echo "$var"` for robust, POSIX-compliant output of variables, safely restricting arbitrary inputs from being executed as format string options.
