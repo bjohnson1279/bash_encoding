@@ -53,11 +53,11 @@ teardown() {
 @test "parseFilename parses standard show name with year, season, episode, title, and datetime" {
     source <(sed "s|DESTINATION_PATH=\"/path/to/encoded\"|DESTINATION_PATH=\"$TEST_TEMP_DIR/dummy_dest\"|" encode-all.sh) || true
     result=$(parseFilename "The Show Name (2020) - S02E05 - The Episode Title (2020-01-01 20 00 00).ts")
-    show=$(echo "$result" | jq -r '.show')
-    season=$(echo "$result" | jq -r '.season')
-    episode=$(echo "$result" | jq -r '.episode')
-    title=$(echo "$result" | jq -r '.title')
-    premiered=$(echo "$result" | jq -r '.premiered')
+    show=$(printf '%s\n' "$result" | jq -r '.show')
+    season=$(printf '%s\n' "$result" | jq -r '.season')
+    episode=$(printf '%s\n' "$result" | jq -r '.episode')
+    title=$(printf '%s\n' "$result" | jq -r '.title')
+    premiered=$(printf '%s\n' "$result" | jq -r '.premiered')
     [ "$show" = "The Show Name" ]
     [ "$season" = "02" ]
     [ "$episode" = "05" ]
@@ -68,11 +68,11 @@ teardown() {
 @test "parseFilename parses standard show name with year, season, episode, pilot title, and datetime without hyphens" {
     source <(sed "s|DESTINATION_PATH=\"/path/to/encoded\"|DESTINATION_PATH=\"$TEST_TEMP_DIR/dummy_dest\"|" encode-all.sh) || true
     result=$(parseFilename "Another Show (2019) S01E01 Pilot (2019-10-10 10 10 10).ts")
-    show=$(echo "$result" | jq -r '.show')
-    season=$(echo "$result" | jq -r '.season')
-    episode=$(echo "$result" | jq -r '.episode')
-    title=$(echo "$result" | jq -r '.title')
-    premiered=$(echo "$result" | jq -r '.premiered')
+    show=$(printf '%s\n' "$result" | jq -r '.show')
+    season=$(printf '%s\n' "$result" | jq -r '.season')
+    episode=$(printf '%s\n' "$result" | jq -r '.episode')
+    title=$(printf '%s\n' "$result" | jq -r '.title')
+    premiered=$(printf '%s\n' "$result" | jq -r '.premiered')
     [ "$show" = "Another Show" ]
     [ "$season" = "01" ]
     [ "$episode" = "01" ]
@@ -83,11 +83,11 @@ teardown() {
 @test "parseFilename parses movie format with year" {
     source <(sed "s|DESTINATION_PATH=\"/path/to/encoded\"|DESTINATION_PATH=\"$TEST_TEMP_DIR/dummy_dest\"|" encode-all.sh) || true
     result=$(parseFilename "Movie Name (2022).ts")
-    show=$(echo "$result" | jq -r '.show')
-    season=$(echo "$result" | jq -r '.season')
-    episode=$(echo "$result" | jq -r '.episode')
-    title=$(echo "$result" | jq -r '.title')
-    premiered=$(echo "$result" | jq -r '.premiered')
+    show=$(printf '%s\n' "$result" | jq -r '.show')
+    season=$(printf '%s\n' "$result" | jq -r '.season')
+    episode=$(printf '%s\n' "$result" | jq -r '.episode')
+    title=$(printf '%s\n' "$result" | jq -r '.title')
+    premiered=$(printf '%s\n' "$result" | jq -r '.premiered')
     [ "$show" = "Movie Name" ]
     [ "$season" = "" ]
     [ "$episode" = "" ]
@@ -98,11 +98,11 @@ teardown() {
 @test "parseFilename correctly escapes double quotes" {
     source <(sed "s|DESTINATION_PATH=\"/path/to/encoded\"|DESTINATION_PATH=\"$TEST_TEMP_DIR/dummy_dest\"|" encode-all.sh) || true
     result=$(parseFilename 'Show With "Quotes" (2023) - S01E02 - Title "Quotes" (2023-01-01 12 00 00).ts')
-    show=$(echo "$result" | jq -r '.show')
-    season=$(echo "$result" | jq -r '.season')
-    episode=$(echo "$result" | jq -r '.episode')
-    title=$(echo "$result" | jq -r '.title')
-    premiered=$(echo "$result" | jq -r '.premiered')
+    show=$(printf '%s\n' "$result" | jq -r '.show')
+    season=$(printf '%s\n' "$result" | jq -r '.season')
+    episode=$(printf '%s\n' "$result" | jq -r '.episode')
+    title=$(printf '%s\n' "$result" | jq -r '.title')
+    premiered=$(printf '%s\n' "$result" | jq -r '.premiered')
     [ "$show" = 'Show With "Quotes"' ]
     [ "$season" = "01" ]
     [ "$episode" = "02" ]
@@ -113,11 +113,11 @@ teardown() {
 @test "parseFilename correctly escapes backslashes" {
     source <(sed "s|DESTINATION_PATH=\"/path/to/encoded\"|DESTINATION_PATH=\"$TEST_TEMP_DIR/dummy_dest\"|" encode-all.sh) || true
     result=$(parseFilename 'Show with \ Backslash (2023) - S01E02 - Title \ Backslash (2023-01-01 12 00 00).ts')
-    show=$(echo "$result" | jq -r '.show')
-    season=$(echo "$result" | jq -r '.season')
-    episode=$(echo "$result" | jq -r '.episode')
-    title=$(echo "$result" | jq -r '.title')
-    premiered=$(echo "$result" | jq -r '.premiered')
+    show=$(printf '%s\n' "$result" | jq -r '.show')
+    season=$(printf '%s\n' "$result" | jq -r '.season')
+    episode=$(printf '%s\n' "$result" | jq -r '.episode')
+    title=$(printf '%s\n' "$result" | jq -r '.title')
+    premiered=$(printf '%s\n' "$result" | jq -r '.premiered')
     [ "$show" = 'Show with \ Backslash' ]
     [ "$season" = "01" ]
     [ "$episode" = "02" ]
@@ -128,11 +128,11 @@ teardown() {
 @test "parseFilename correctly escapes newlines" {
     source <(sed "s|DESTINATION_PATH=\"/path/to/encoded\"|DESTINATION_PATH=\"$TEST_TEMP_DIR/dummy_dest\"|" encode-all.sh) || true
     result=$(parseFilename $'Show With Newline\n (2023) - S01E02 - Title\nNewline (2023-01-01 12 00 00).ts')
-    show=$(echo "$result" | jq -r '.show')
-    season=$(echo "$result" | jq -r '.season')
-    episode=$(echo "$result" | jq -r '.episode')
-    title=$(echo "$result" | jq -r '.title')
-    premiered=$(echo "$result" | jq -r '.premiered')
+    show=$(printf '%s\n' "$result" | jq -r '.show')
+    season=$(printf '%s\n' "$result" | jq -r '.season')
+    episode=$(printf '%s\n' "$result" | jq -r '.episode')
+    title=$(printf '%s\n' "$result" | jq -r '.title')
+    premiered=$(printf '%s\n' "$result" | jq -r '.premiered')
     [ "$show" = $'Show With Newline' ]
     [ "$season" = "01" ]
     [ "$episode" = "02" ]
