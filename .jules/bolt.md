@@ -117,3 +117,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Replace Bash regex with parameter expansion for string extraction
 **Learning:** When parsing specific substrings from multiline command output (e.g., extracting values from `ffprobe -of flat`), replacing bash regex (`=~`) and `BASH_REMATCH` with native parameter expansions (e.g., `${var#*prefix}` and `${var%%suffix*}`) can provide measurable performance improvements while maintaining code readability. Profiling showed it to be ~35% faster.
 **Action:** Use native parameter substitutions over `[[ =~ ]]` regex when extracting simple bounded values from strings or command output.
+
+## 2026-08-19 - Regex evaluation bottleneck in parseFilename
+**Learning:** In bash, evaluating long, complex regular expressions inside tight loops (like iterating over all files in a directory) is a significant bottleneck. Furthermore, having near-identical overlapping regex branches (e.g., matching a trailing date vs not matching it) duplicates evaluation time unnecessarily.
+**Action:** Consolidate near-identical regex patterns by making trailing capture groups optional where applicable, and remove redundant `elif` blocks. This avoids the cost of repeatedly evaluating essentially the same long regex pattern.

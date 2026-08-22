@@ -116,13 +116,6 @@ parseFilename() {
         season_raw="${BASH_REMATCH[3]}"
         episode_raw="${BASH_REMATCH[4]}"
         title_raw="${BASH_REMATCH[5]}"
-    # 2. Try to match: Show Name (Year) S01E02 Title (Date Time)
-    elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]+(.*)\ \([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
-        show_raw="${BASH_REMATCH[1]}"
-        year_raw="${BASH_REMATCH[2]}"
-        season_raw="${BASH_REMATCH[3]}"
-        episode_raw="${BASH_REMATCH[4]}"
-        title_raw="${BASH_REMATCH[5]}"
     # 3. Try to match: Show Name (Year) S01E02 Title...
     elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
         show_raw="${BASH_REMATCH[1]}"
