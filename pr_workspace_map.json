@@ -1,0 +1,577 @@
+{
+  "status": "success",
+  "total_mapped": 57,
+  "matched_local": 55,
+  "mappings": [
+    {
+      "repository": "bjohnson1279/tampermonkey_collection",
+      "pr_number": 202,
+      "title": "\ud83c\udfa8 Palette: Add WCAG minimum touch target size to mobile AdBlock toggle",
+      "mergeable": "MERGEABLE",
+      "head_branch": "palette-mobile-adblock-touch-target-10435497329650860050",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\tampermonkey_collection",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js-ddd-inventory",
+      "pr_number": 680,
+      "title": "\ud83d\udee1\ufe0f Sentinel: [MEDIUM] Fix Information Disclosure in API Responses",
+      "mergeable": "MERGEABLE",
+      "head_branch": "sentinel-fix-information-disclosure-10445987505905423633",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\js-ddd-inventory",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/convo-sim",
+      "pr_number": 32,
+      "title": "\ud83d\udee1\ufe0f Sentinel: [security improvement]",
+      "mergeable": "MERGEABLE",
+      "head_branch": "sentinel/input-validation-log-injection-10742341621077465672",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\convo-sim",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/convo-sim",
+      "pr_number": 31,
+      "title": "\u26a1 Bolt: [performance improvement] Replace N+1 GenServer calls with O(1) Registry.select",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt-registry-select-optimization-5911625277793618439",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\convo-sim",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ams-proto",
+      "pr_number": 31,
+      "title": "\ud83c\udfa8 Palette: [UX improvement] Add async loading states to AL3 workbench buttons",
+      "mergeable": "MERGEABLE",
+      "head_branch": "ux-async-loading-state-9647237354468640816",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ams-proto",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/convo-sim",
+      "pr_number": 30,
+      "title": "\ud83c\udfa8 Palette: [accessibility improvement] Add ARIA announcements for chat messages",
+      "mergeable": "MERGEABLE",
+      "head_branch": "palette-chat-messages-a11y-1228042109413590579",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\convo-sim",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/php-ddd-inventory",
+      "pr_number": 540,
+      "title": "\ud83d\udee1\ufe0f Sentinel: [CRITICAL] Fix authorization bypass IDOR in shipping endpoint",
+      "mergeable": "MERGEABLE",
+      "head_branch": "sentinel-fix-shipping-idor-12281543496121095573",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\php-ddd-inventory",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/bash_encoding",
+      "pr_number": 148,
+      "title": "\u26a1 Bolt: [performance improvement] Consolidate parseFilename regex",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt-optimize-parse-filename-regex-12490634731636211229",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\bash_encoding",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/php-ddd-inventory",
+      "pr_number": 539,
+      "title": "\u26a1 Bolt: Optimize array_sum/array_map loops to reduce memory and CPU overhead",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt-optimize-report-valuation-1853179102201474963",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\php-ddd-inventory",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/gql-ddd-inventory",
+      "pr_number": 600,
+      "title": "\ud83d\udee1\ufe0f Sentinel: [MEDIUM] Fix stack trace leakage in subgraphs",
+      "mergeable": "MERGEABLE",
+      "head_branch": "sentinel-subgraph-error-leakage-4877012430191128150",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\gql-ddd-inventory",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/threat-telemetry",
+      "pr_number": 1,
+      "title": "chore(deps): bump the npm_and_yarn group across 5 directories with 2 updates",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/npm_and_yarn-75ebb1dcaf",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\threat-telemetry",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/tampermonkey_collection",
+      "pr_number": 201,
+      "title": "\u26a1 Bolt: Optimize tvdb scraper loops",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt-performance-tvdbscraper-loop-10425969248893126340",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\tampermonkey_collection",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/convo-sim",
+      "pr_number": 29,
+      "title": "\u26a1 Bolt: [performance improvement] Use O(1) ETS matches for bulk process state fetch",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt-optimize-ets-state-fetch-6687406097270248426",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\convo-sim",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js-ddd-inventory",
+      "pr_number": 679,
+      "title": "\ud83d\udee1\ufe0f Sentinel: [MEDIUM] Fix error message leakage in RfidController",
+      "mergeable": "MERGEABLE",
+      "head_branch": "sentinel/fix-error-leakage-rfid-controller-17581664362818747796",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\js-ddd-inventory",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/convo-sim",
+      "pr_number": 28,
+      "title": "\ud83d\udee1\ufe0f Sentinel: [security improvement] Limit input length to prevent memory DoS",
+      "mergeable": "MERGEABLE",
+      "head_branch": "sentinel/limit-input-length-4506788810172718775",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\convo-sim",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ams-proto",
+      "pr_number": 30,
+      "title": "\ud83c\udfa8 Palette: [UX improvement] Add loading feedback to async buttons",
+      "mergeable": "MERGEABLE",
+      "head_branch": "palette-ux-async-button-feedback-11740953264835977271",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ams-proto",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/convo-sim",
+      "pr_number": 27,
+      "title": "\ud83c\udfa8 Palette: [UX improvement] Add ARIA log role to message container",
+      "mergeable": "MERGEABLE",
+      "head_branch": "palette-chat-log-a11y-9020980059308983790",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\convo-sim",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ams-proto",
+      "pr_number": 29,
+      "title": "\u26a1 Bolt: [performance improvement] Optimize Customer Search Filtering",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt-search-filter-optimization-15247456865617484998",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ams-proto",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/php-ddd-inventory",
+      "pr_number": 538,
+      "title": "\u26a1 Bolt: Optimize array iterations in WAC calculation",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt/optimize-wac-loop-9036101425582097357",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\php-ddd-inventory",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/react-ddd-inventory-client",
+      "pr_number": 127,
+      "title": "\ud83e\uddea Add unit tests for DigitalTwinCopilotPanel",
+      "mergeable": "CONFLICTING",
+      "head_branch": "testing/digital-twin-copilot-tests-2856569846631459759",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\react-ddd-inventory-client",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/gql-ddd-inventory",
+      "pr_number": 599,
+      "title": "\ud83d\udee1\ufe0f Sentinel: [MEDIUM] Fix Leaking stack traces in subgraphs",
+      "mergeable": "MERGEABLE",
+      "head_branch": "sentinel-fix-subgraph-stacktraces-2981930143955408468",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\gql-ddd-inventory",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ams-proto",
+      "pr_number": 28,
+      "title": "\ud83d\udee1\ufe0f Sentinel: [HIGH] Fix XSS vulnerabilities in UI rendering",
+      "mergeable": "MERGEABLE",
+      "head_branch": "fix-xss-ui-1002994663385085606",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ams-proto",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/tampermonkey_collection",
+      "pr_number": 200,
+      "title": "\u26a1 Bolt: Cache HTMLCollections in bing quiz interval",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt-cache-quiz-interval-8433390053353382125",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\tampermonkey_collection",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js-ddd-inventory",
+      "pr_number": 678,
+      "title": "\ud83d\udee1\ufe0f Sentinel: [MEDIUM] Fix Information Disclosure in RfidController",
+      "mergeable": "MERGEABLE",
+      "head_branch": "fix-information-disclosure-rfid-8838275706003151702",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\js-ddd-inventory",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/gql-ddd-inventory",
+      "pr_number": 598,
+      "title": "\u26a1 Bolt: [performance improvement]",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt/putaway-optimization-15523319793767034970",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\gql-ddd-inventory",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/php-ddd-inventory",
+      "pr_number": 537,
+      "title": "\u26a1 Bolt: Optimize proxy IP lookups in RateLimitMiddleware",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt-optimize-ratelimit-17111411493225129539",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\inventory\\php-ddd-inventory",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ams-proto",
+      "pr_number": 27,
+      "title": "\ud83c\udfa8 Palette: Add loading states to AL3 processing buttons",
+      "mergeable": "MERGEABLE",
+      "head_branch": "palette/ux-async-button-loading-6062385200598212860",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ams-proto",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ams-proto",
+      "pr_number": 26,
+      "title": "\u26a1 Bolt: [performance improvement] Optimize client-side search filtering",
+      "mergeable": "MERGEABLE",
+      "head_branch": "bolt-frontend-filter-optimization-14272023912414556602",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ams-proto",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ams-proto",
+      "pr_number": 25,
+      "title": "\ud83d\udee1\ufe0f Sentinel: [CRITICAL] Fix Cross-Site Scripting (XSS) vulnerabilities",
+      "mergeable": "CONFLICTING",
+      "head_branch": "fix-xss-vulnerabilities-13018026216338375513",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ams-proto",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ruby-crm",
+      "pr_number": 15,
+      "title": "Bump thruster from 0.1.22 to 0.1.25",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/bundler/thruster-0.1.25",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ruby-crm",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ruby-crm",
+      "pr_number": 14,
+      "title": "Bump brakeman from 8.0.5 to 8.0.6",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/bundler/brakeman-8.0.6",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ruby-crm",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ruby-crm",
+      "pr_number": 13,
+      "title": "Bump bootsnap from 1.24.6 to 1.25.0",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/bundler/bootsnap-1.25.0",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ruby-crm",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ruby-crm",
+      "pr_number": 12,
+      "title": "Bump image_processing from 2.0.2 to 2.0.3",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/bundler/image_processing-2.0.3",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ruby-crm",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ruby-crm",
+      "pr_number": 11,
+      "title": "Bump solid_queue from 1.4.0 to 1.6.0",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/bundler/solid_queue-1.6.0",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ruby-crm",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ruby-crm",
+      "pr_number": 10,
+      "title": "Bump rails from 8.1.3 to 8.1.3.1",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/bundler/rails-8.1.3.1",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ruby-crm",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ruby-crm",
+      "pr_number": 8,
+      "title": "Bump loofah from 2.25.1 to 2.25.2 in the bundler group across 1 directory",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/bundler/bundler-e34e83336b",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ruby-crm",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ruby-crm",
+      "pr_number": 6,
+      "title": "Bump solid_cable from 4.0.0 to 4.0.2",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/bundler/solid_cable-4.0.2",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ruby-crm",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/ruby-crm",
+      "pr_number": 5,
+      "title": "Bump pagy from 43.5.6 to 43.6.1",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/bundler/pagy-43.6.1",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\ruby-crm",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/css-practice",
+      "pr_number": 4,
+      "title": "Bump the npm_and_yarn group across 1 directory with 3 updates",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/react-grid-layout/grid-layout/npm_and_yarn-e35d90b649",
+      "base_branch": "main",
+      "local_path": "C:\\Users\\johns\\DEV\\css-practice",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/permit-tracker-frontend",
+      "pr_number": 4,
+      "title": "Bump the npm_and_yarn group across 1 directory with 3 updates",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/npm_and_yarn-58c3b0d4d3",
+      "base_branch": "master",
+      "local_path": null,
+      "has_local_checkout": false
+    },
+    {
+      "repository": "bjohnson1279/permit-tracker-frontend",
+      "pr_number": 1,
+      "title": "Bump on-headers and compression",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/multi-96c788614a",
+      "base_branch": "master",
+      "local_path": null,
+      "has_local_checkout": false
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 32,
+      "title": "Bump ua-parser-js from 0.7.28 to 0.7.33 in /21 - Geolocation",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/21---Geolocation/ua-parser-js-0.7.33",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 31,
+      "title": "Bump ua-parser-js from 0.7.28 to 0.7.33 in /20 - Speech Detection",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/20---Speech-Detection/ua-parser-js-0.7.33",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 30,
+      "title": "Bump ua-parser-js from 0.7.28 to 0.7.33 in /19 - Webcam Fun",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/19---Webcam-Fun/ua-parser-js-0.7.33",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 28,
+      "title": "Bump qs from 6.2.3 to 6.11.0 in /21 - Geolocation",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/21---Geolocation/qs-6.11.0",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 29,
+      "title": "Bump qs from 6.2.3 to 6.11.0 in /19 - Webcam Fun",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/19---Webcam-Fun/qs-6.11.0",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 27,
+      "title": "Bump qs from 6.2.3 to 6.11.0 in /20 - Speech Detection",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/20---Speech-Detection/qs-6.11.0",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 26,
+      "title": "Bump engine.io from 3.5.0 to 6.2.1 in /21 - Geolocation",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/21---Geolocation/engine.io-6.2.1",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 25,
+      "title": "Bump engine.io from 3.5.0 to 6.2.1 in /20 - Speech Detection",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/20---Speech-Detection/engine.io-6.2.1",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 24,
+      "title": "Bump engine.io from 3.5.0 to 6.2.1 in /19 - Webcam Fun",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/19---Webcam-Fun/engine.io-6.2.1",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 23,
+      "title": "Bump socket.io-parser from 3.3.2 to 3.3.3 in /21 - Geolocation",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/21---Geolocation/socket.io-parser-3.3.3",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 22,
+      "title": "Bump socket.io-parser from 3.3.2 to 3.3.3 in /20 - Speech Detection",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/20---Speech-Detection/socket.io-parser-3.3.3",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 21,
+      "title": "Bump socket.io-parser from 3.3.2 to 3.3.3 in /19 - Webcam Fun",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/19---Webcam-Fun/socket.io-parser-3.3.3",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 20,
+      "title": "Bump minimatch from 3.0.4 to 3.1.2 in /21 - Geolocation",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/21---Geolocation/minimatch-3.1.2",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 19,
+      "title": "Bump follow-redirects from 1.13.3 to 1.14.8 in /21 - Geolocation",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/21---Geolocation/follow-redirects-1.14.8",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 18,
+      "title": "Bump follow-redirects from 1.14.1 to 1.14.8 in /20 - Speech Detection",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/20---Speech-Detection/follow-redirects-1.14.8",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    },
+    {
+      "repository": "bjohnson1279/js30",
+      "pr_number": 17,
+      "title": "Bump follow-redirects from 1.13.3 to 1.14.8 in /19 - Webcam Fun",
+      "mergeable": "MERGEABLE",
+      "head_branch": "dependabot/npm_and_yarn/19---Webcam-Fun/follow-redirects-1.14.8",
+      "base_branch": "master",
+      "local_path": "C:\\Users\\johns\\DEV\\js30",
+      "has_local_checkout": true
+    }
+  ]
+}
