@@ -121,3 +121,6 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2026-08-19 - Regex evaluation bottleneck in parseFilename
 **Learning:** In bash, evaluating long, complex regular expressions inside tight loops (like iterating over all files in a directory) is a significant bottleneck. Furthermore, having near-identical overlapping regex branches (e.g., matching a trailing date vs not matching it) duplicates evaluation time unnecessarily.
 **Action:** Consolidate near-identical regex patterns by making trailing capture groups optional where applicable, and remove redundant `elif` blocks. This avoids the cost of repeatedly evaluating essentially the same long regex pattern.
+## 2024-11-20 - Bash Regex Greedy matching workaround
+**Learning:** Native Bash regex (`[[ ... =~ ... ]]`) does not support non-greedy modifiers like `.*?`. If you try to consolidate regex branches by making trailing groups optional (e.g. `(.*)?`), a preceding greedy `(.*)` will consume the remainder of the string, causing the optional group to never match.
+**Action:** When consolidating bash regular expressions, account for greedy matching. If you have an optional trailing component (like a date in a filename), you may need to parse the greedy matched string afterwards (e.g., using another regex check) instead of relying on non-greedy optional capture groups.
