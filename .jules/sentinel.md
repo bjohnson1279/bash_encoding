@@ -100,3 +100,8 @@ Ensure `case` statement branches always terminate properly with `;;` when they d
 **Vulnerability:** Insecure Temporary File Creation (CWE-377).
 **Learning:** The BATS test scripts (`test_network-copy.bats` and `test_encode-all.bats`) previously hardcoded temporary directory and file paths directly into the `/tmp` directory (e.g., `/tmp/mock_dir`). Writing to predictable locations in world-writable directories allows an attacker to pre-create these files/directories as symlinks to sensitive files, resulting in arbitrary file modification/deletion or information disclosure when the tests run.
 **Prevention:** Never use hardcoded paths in `/tmp` or other world-writable directories. Always use commands like `mktemp -d` to generate secure, randomized temporary directories with restricted permissions (0700).
+
+## 2024-05-18 - [CRITICAL] Prevent Option Injection in tee command
+**Vulnerability:** Option Injection via unescaped variable in `tee` command
+**Learning:** In `encode-all.sh`, the output of `ffmpeg` was piped to `tee "${new_file_full}.log"`. If the output file name (which may be derived from an unescaped or malicious source file name) begins with a hyphen (e.g., `-test.log`), `tee` treats it as a command-line option rather than a file path, resulting in command failure or potentially writing to unintended files if an attacker can manipulate the option.
+**Prevention:** Always use `--` to terminate option parsing before passing dynamic or untrusted variables as file paths to standard utilities like `tee` (e.g., `tee -- "$file"`).
