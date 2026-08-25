@@ -107,3 +107,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Replace Bash Regex with Case Statement Globbing for Validation
 **Learning:** In Bash, native `case` statement globbing (e.g., `case "$var" in *[!a-zA-Z0-9_]*|[0-9]*|"")`) for simple string validation is significantly faster (measured to be about ~7x faster in a tight loop) than using the bash regex operator (`[[ "$var" =~ ^pattern$ ]]`). This is because `case` uses built-in pattern matching that doesn't invoke the regex engine.
 **Action:** When performing simple variable or format validation inside high-frequency bash functions (like `cleanup_name` or `json_escape` called repeatedly), replace `[[ =~ ]]` regex checks with `case` statements using glob patterns.
+
+## 2024-11-20 - Replace Bash Regex with Parameter Expansion
+**Learning:** In bash, regex matching (`=~`) using `BASH_REMATCH` creates overhead. If the goal is simple substring matching and extraction, using parameter expansion (`== *pattern*` followed by `${var##*pattern}` and `${var%%pattern*}`) is substantially faster, cutting execution time by more than half in tight loops.
+**Action:** Replace `[[ =~ ]]` with parameter expansions for simple string extractions inside busy bash functions.
