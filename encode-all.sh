@@ -109,23 +109,23 @@ parseFilename() {
     local title_raw=""
     local year_raw=""
 
-    # 1. Try to match: Show Name (Year) - S01E02 - Title (Date Time)
-    if [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]+(.*)\ \([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
-        show_raw="${BASH_REMATCH[1]}"
-        year_raw="${BASH_REMATCH[2]}"
-        season_raw="${BASH_REMATCH[3]}"
-        episode_raw="${BASH_REMATCH[4]}"
-        title_raw="${BASH_REMATCH[5]}"
-    # 3. Try to match: Show Name (Year) S01E02 Title...
-    elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
+    # ⚡ Bolt Optimization: Consolidate overlapping regex evaluations into a single branch.
+    # Evaluating complex regular expressions in bash is a significant bottleneck.
+    # The previous logic had two near-identical regex branches for "Show Name (Year) S01E02..."
+    # which we've combined. We handle stripping the trailing date manually below.
+    # 1. Try to match: Show Name (Year) S01E02 Title...
+    if [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
         show_raw="${BASH_REMATCH[1]}"
         year_raw="${BASH_REMATCH[2]}"
         season_raw="${BASH_REMATCH[3]}"
         episode_raw="${BASH_REMATCH[4]}"
         title_raw="${BASH_REMATCH[5]}"
         # Strip trailing date if present
-        if [[ "$title_raw" =~ ^(.*)\ \([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
+        if [[ "$title_raw" =~ ^(.*)[._\ -]+\([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
             title_raw="${BASH_REMATCH[1]}"
+        elif [[ "$title_raw" =~ ^\([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
+            # The title was just the date, effectively no title
+            title_raw=""
         fi
     # 4. Try to match: Movie Name (Year)
     elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)$ ]]; then
