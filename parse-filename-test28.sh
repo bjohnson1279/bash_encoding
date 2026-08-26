@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source <(sed -n '/^parseFilename() {/,/^}/p' encode-all.sh)
+source <(sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFilename() {/,/^}/p' encode-all.sh)
 
 FILE="Another Show - S02E10 - A New Day (2022).ts"
 parseFilename "$FILE" episode_data

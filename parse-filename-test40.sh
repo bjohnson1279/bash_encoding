@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source <(sed -n '/^parseFilename() {/,/^}/p' encode-all.sh)
+source <(sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFilename() {/,/^}/p' encode-all.sh)
 
 for FILE in "Another Show - S02E10 - A New Day (2022).ts" "Test Show S01E02 (2020).ts" "Something \"Quotes\" S01E01.ts"; do
     SHOW_NAME=""

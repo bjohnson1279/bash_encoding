@@ -21,7 +21,7 @@ teardown() {
 
         # Mock ffmpeg to just record arguments
         ffmpeg() {
-            echo "ffmpeg $@" >> "${TEST_TEMP_DIR}/ffmpeg_calls.log"
+            printf 'ffmpeg %s\n' "$*" >> "${TEST_TEMP_DIR}/ffmpeg_calls.log"
         }
         export -f ffmpeg
 
@@ -59,7 +59,7 @@ teardown() {
 
         # Mock ffmpeg
         ffmpeg() {
-            echo "ffmpeg $@" >> "${TEST_TEMP_DIR}/ffmpeg_calls.log"
+            printf 'ffmpeg %s\n' "$*" >> "${TEST_TEMP_DIR}/ffmpeg_calls.log"
         }
         export -f ffmpeg
 
@@ -87,7 +87,7 @@ teardown() {
         cd "$TEST_TEMP_DIR"
 
         ffmpeg() {
-            echo "ffmpeg $@" >> "${TEST_TEMP_DIR}/ffmpeg_calls.log"
+            printf 'ffmpeg %s\n' "$*" >> "${TEST_TEMP_DIR}/ffmpeg_calls.log"
         }
         export -f ffmpeg
 

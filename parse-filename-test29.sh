@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source <(sed -n '/^parseFilename() {/,/^}/p' encode-all.sh)
+source <(sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFilename() {/,/^}/p' encode-all.sh)
 
 FILE="Test Show S01E02 (2020).ts"
 SHOW_NAME="InitialValue"

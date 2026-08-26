@@ -16,7 +16,6 @@ QUALITY=21
 # shellcheck disable=SC3045
 shopt -s globstar nullglob
 for i in **/*.ts; do
-    shopt -u globstar nullglob
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
@@ -33,5 +32,6 @@ for i in **/*.ts; do
         -movflags faststart \
         -y "./$new_file"
 done
+shopt -u globstar nullglob
 
 printf "Done.\n"

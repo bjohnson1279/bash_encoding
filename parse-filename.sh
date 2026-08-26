@@ -28,7 +28,7 @@ cleanup_name() {
     if [ -n "$out_ref_name" ]; then
         case "$out_ref_name" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -55,7 +55,7 @@ json_escape() {
     if [ -n "$out_ref_name" ]; then
         case "$out_ref_name" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -68,7 +68,7 @@ json_escape() {
 
 parse_filename() {
     if [ -z "$1" ]; then
-        echo "Usage: parse_filename \"<filename>\""
+        printf '%s\n' "Usage: parse_filename \"<filename>\""
         return 1
     fi
 
