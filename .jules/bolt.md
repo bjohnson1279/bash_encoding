@@ -107,6 +107,26 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Replace Bash Regex with Case Statement Globbing for Validation
 **Learning:** In Bash, native `case` statement globbing (e.g., `case "$var" in *[!a-zA-Z0-9_]*|[0-9]*|"")`) for simple string validation is significantly faster (measured to be about ~7x faster in a tight loop) than using the bash regex operator (`[[ "$var" =~ ^pattern$ ]]`). This is because `case` uses built-in pattern matching that doesn't invoke the regex engine.
 **Action:** When performing simple variable or format validation inside high-frequency bash functions (like `cleanup_name` or `json_escape` called repeatedly), replace `[[ =~ ]]` regex checks with `case` statements using glob patterns.
+<<<<<<< HEAD
 ## 2026-08-08 - Use parameter expansion and case globbing over regex
 **Learning:** Native bash regex matching (`[[ =~ ]]`) invokes the regex engine, which adds noticeable overhead in high-frequency loops. When extracting values from string formats, substituting regex extraction with parameter expansion (`${var#*prefix}`, `${var%%suffix*}`) results in ~40% faster execution. For simple numeric string validation (like checking floating point format), substituting regex validation (`^[0-9]+(\.[0-9]+)?$`) with native `case` statement globbing (`case "$var" in ''|*[!0-9.]*|*.*.*|.*|*.) false ;; *) true ;; esac`) executes ~4-7x faster.
 **Action:** Replace `[[ =~ ]]` checks with parameter expansion extraction or `case` statement globbing for validations when dealing with simple, predictable string structures inside busy bash loops.
+=======
+## 2026-07-21 - Avoid state-altering builtins inside loops
+**Learning:** In bash `for` loops iterating over glob expansions, executing option resets like `shopt -u globstar nullglob` *inside* the loop causes O(N) redundant executions. Worse, if the glob yields zero files (because `nullglob` is set), the loop body never runs, meaning the options are never unset and effectively leak to the rest of the script.
+**Action:** Always move `shopt -u` resets immediately after the `done` statement of the loop to ensure they run exactly once and run unconditionally.
+## 2024-05-29 - Parameter Expansion is Faster Than Regex for Multiline Substring Extraction
+**Learning:** In Bash, extracting a specific substring from multiline output (like `ffprobe -of flat`) using native Bash regex matching (`[[ "$output" =~ pattern ]]`) is noticeably slower than using native parameter expansions (e.g., `${output#*pattern}` followed by `${var%%\"*}`). Benchmark testing of `getDuration` in a busy loop showed parameter expansion is about ~8% faster than regex execution, eliminating regex engine overhead for simple substring extraction while maintaining readability.
+**Action:** When extracting simple prefixed/suffixed substrings from multiline command output in high-frequency functions, prefer using native parameter expansions (e.g., `${var#*prefix}` and `${var%%suffix*}`) over Bash regex (`=~`) for measurable performance gains.
+
+## 2024-11-20 - Replace Bash regex with parameter expansion for string extraction
+**Learning:** When parsing specific substrings from multiline command output (e.g., extracting values from `ffprobe -of flat`), replacing bash regex (`=~`) and `BASH_REMATCH` with native parameter expansions (e.g., `${var#*prefix}` and `${var%%suffix*}`) can provide measurable performance improvements while maintaining code readability. Profiling showed it to be ~35% faster.
+**Action:** Use native parameter substitutions over `[[ =~ ]]` regex when extracting simple bounded values from strings or command output.
+
+## 2026-08-19 - Regex evaluation bottleneck in parseFilename
+**Learning:** In bash, evaluating long, complex regular expressions inside tight loops (like iterating over all files in a directory) is a significant bottleneck. Furthermore, having near-identical overlapping regex branches (e.g., matching a trailing date vs not matching it) duplicates evaluation time unnecessarily.
+**Action:** Consolidate near-identical regex patterns by making trailing capture groups optional where applicable, and remove redundant `elif` blocks. This avoids the cost of repeatedly evaluating essentially the same long regex pattern.
+## 2024-11-20 - Bash Regex Greedy matching workaround
+**Learning:** Native Bash regex (`[[ ... =~ ... ]]`) does not support non-greedy modifiers like `.*?`. If you try to consolidate regex branches by making trailing groups optional (e.g. `(.*)?`), a preceding greedy `(.*)` will consume the remainder of the string, causing the optional group to never match.
+**Action:** When consolidating bash regular expressions, account for greedy matching. If you have an optional trailing component (like a date in a filename), you may need to parse the greedy matched string afterwards (e.g., using another regex check) instead of relying on non-greedy optional capture groups.
+>>>>>>> master
