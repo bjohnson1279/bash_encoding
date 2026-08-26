@@ -280,7 +280,7 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
     # We use `pipefail` to ensure the exit status of the `if` statement
     # is from ffmpeg, not from tee.
     set -o pipefail
-    if ! ffmpeg "${ffmpeg_args[@]}" "$new_file_full" 2>&1 | tee "${new_file_full}.log"; then
+    if ! ffmpeg "${ffmpeg_args[@]}" "$new_file_full" 2>&1 | tee -- "${new_file_full}.log"; then
         printf "Error: Encoding failed. See log for details: %s.log\n" "${new_file_full}"
         set +o pipefail # Unset pipefail
         continue # Move to the next file
