@@ -79,7 +79,7 @@ run_test() {
 
     # Extract JSON part from output (ignoring the "Parsing filename: ..." line)
     local json_output
-    json_output=$(printf "%s\n" "$output" | grep -v "^Parsing filename:")
+    json_output=$(printf "%s\n" "$output" | grep -v -e "^Parsing filename:")
 
     local show=$(printf "%s\n" "$json_output" | jq -r '.show_name')
     local season=$(printf "%s\n" "$json_output" | jq -r '.season')

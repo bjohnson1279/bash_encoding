@@ -9,5 +9,5 @@ source <(sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFil
 echo "Benchmarking jq in loop:"
 time for j in {1..2000}; do
     parseFilename "$FILE" episode_data > /dev/null
-    SHOW_NAME=$(echo "$episode_data" | grep -o '"show":"[^"]*"' | cut -d'"' -f4)
+    SHOW_NAME=$(echo "$episode_data" | grep -o -e '"show":"[^"]*"' | cut -d'"' -f4)
 done
