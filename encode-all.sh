@@ -280,7 +280,7 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
     # We use `pipefail` to ensure the exit status of the `if` statement
     # is from ffmpeg, not from tee.
     set -o pipefail
-    if ! ffmpeg "${ffmpeg_args[@]}" "$new_file_full" 2>&1 | tee "${new_file_full}.log"; then
+    if ! ffmpeg "${ffmpeg_args[@]}" "$new_file_full" 2>&1 | tee -- "${new_file_full}.log"; then
         printf "Error: Encoding failed. See log for details: %s.log\n" "${new_file_full}"
         set +o pipefail # Unset pipefail
         continue # Move to the next file
@@ -294,7 +294,8 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
 
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
             printf '%s\n' "Warning: Duration could not be reliably determined. Original file kept."
-        elif ! [[ "$src_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$dest_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        elif case "$src_duration" in ''|*[!0-9.]*|*.*.*|.*|*.) true ;; *) false ;; esac || \
+             case "$dest_duration" in ''|*[!0-9.]*|*.*.*|.*|*.) true ;; *) false ;; esac; then
             # 🛡️ Sentinel: Validate duration formats to prevent arithmetic expression injection during calculation
             printf '%s\n' "Warning: Duration formats are invalid. Expected numeric formats. Original file kept."
         else
