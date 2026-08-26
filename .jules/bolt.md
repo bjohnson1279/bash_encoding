@@ -107,3 +107,6 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Replace Bash Regex with Case Statement Globbing for Validation
 **Learning:** In Bash, native `case` statement globbing (e.g., `case "$var" in *[!a-zA-Z0-9_]*|[0-9]*|"")`) for simple string validation is significantly faster (measured to be about ~7x faster in a tight loop) than using the bash regex operator (`[[ "$var" =~ ^pattern$ ]]`). This is because `case` uses built-in pattern matching that doesn't invoke the regex engine.
 **Action:** When performing simple variable or format validation inside high-frequency bash functions (like `cleanup_name` or `json_escape` called repeatedly), replace `[[ =~ ]]` regex checks with `case` statements using glob patterns.
+## 2026-08-26 - Remove Redundant String Cleaning Execution
+**Learning:** The script was executing `cleanup_name` twice sequentially on the exact same `show_raw` variable due to a copy-paste error. Even simple function calls with parameter expansions add measurable execution overhead when placed in the hot path of parsing files.
+**Action:** When auditing code for performance, actively look for duplicate function executions or redundant variable assignments inside loops or parsing functions, and delete them to avoid wasting CPU cycles.

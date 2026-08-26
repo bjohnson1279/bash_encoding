@@ -129,9 +129,6 @@ parse_filename() {
     cleanup_name "$show_raw" PARSED_SHOW_NAME
     show_name="$PARSED_SHOW_NAME"
 
-    cleanup_name "$show_raw" PARSED_SHOW_NAME
-    show_name="$PARSED_SHOW_NAME"
-
     # ⚡ Bolt Optimization: Skip expensive JSON escaping and formatting if --no-json is passed.
     if [ "$2" != "--no-json" ]; then
         json_escape "$show_name" show_name_esc
