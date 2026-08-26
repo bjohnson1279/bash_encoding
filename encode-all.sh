@@ -24,19 +24,11 @@ getDuration() {
     # This halves process spawning overhead for files missing format duration (or returning N/A).
     output=$(ffprobe -v error -select_streams v:0 -show_entries format=duration:stream=duration -of flat -i "${1}" 2>/dev/null || true)
 
-<<<<<<< HEAD
-    if [[ "$output" == *"format.duration="* ]]; then
-        format_dur="${output#*format.duration=\"}"
-        format_dur="${format_dur%%\"*}"
-    fi
-    if [[ "$output" == *"streams.stream.0.duration="* ]]; then
-=======
     if [[ "$output" == *format.duration=\"* ]]; then
         format_dur="${output#*format.duration=\"}"
         format_dur="${format_dur%%\"*}"
     fi
     if [[ "$output" == *streams.stream.0.duration=\"* ]]; then
->>>>>>> master
         stream_dur="${output#*streams.stream.0.duration=\"}"
         stream_dur="${stream_dur%%\"*}"
     fi
@@ -301,14 +293,9 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
         getDuration "$new_file_full" dest_duration
 
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
-<<<<<<< HEAD
-            echo "Warning: Duration could not be reliably determined. Original file kept."
+            printf '%s\n' "Warning: Duration could not be reliably determined. Original file kept."
         elif case "$src_duration" in ''|*[!0-9.]*|*.*.*|.*|*.) true ;; *) false ;; esac || \
              case "$dest_duration" in ''|*[!0-9.]*|*.*.*|.*|*.) true ;; *) false ;; esac; then
-=======
-            printf '%s\n' "Warning: Duration could not be reliably determined. Original file kept."
-        elif ! [[ "$src_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$dest_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
->>>>>>> master
             # 🛡️ Sentinel: Validate duration formats to prevent arithmetic expression injection during calculation
             printf '%s\n' "Warning: Duration formats are invalid. Expected numeric formats. Original file kept."
         else
