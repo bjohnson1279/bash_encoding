@@ -127,3 +127,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Bash Regex Greedy matching workaround
 **Learning:** Native Bash regex (`[[ ... =~ ... ]]`) does not support non-greedy modifiers like `.*?`. If you try to consolidate regex branches by making trailing groups optional (e.g. `(.*)?`), a preceding greedy `(.*)` will consume the remainder of the string, causing the optional group to never match.
 **Action:** When consolidating bash regular expressions, account for greedy matching. If you have an optional trailing component (like a date in a filename), you may need to parse the greedy matched string afterwards (e.g., using another regex check) instead of relying on non-greedy optional capture groups.
+
+## $(date +%Y-%m-%d) - Removing duplicate assignments in hot paths
+**Learning:** Found redundant identical variable assignments and string processing calls inside `parse-filename.sh` (e.g. `cleanup_name "$show_raw" PARSED_SHOW_NAME` called twice back-to-back). This was adding unnecessary process/string manipulation overhead on every iteration for no reason.
+**Action:** Always scan sequential lines for duplicate function executions or redundant variable assignments (e.g., from copy-paste errors) when auditing bash scripts for micro-optimizations, as these add measurable execution overhead in hot paths.
