@@ -107,6 +107,11 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Replace Bash Regex with Case Statement Globbing for Validation
 **Learning:** In Bash, native `case` statement globbing (e.g., `case "$var" in *[!a-zA-Z0-9_]*|[0-9]*|"")`) for simple string validation is significantly faster (measured to be about ~7x faster in a tight loop) than using the bash regex operator (`[[ "$var" =~ ^pattern$ ]]`). This is because `case` uses built-in pattern matching that doesn't invoke the regex engine.
 **Action:** When performing simple variable or format validation inside high-frequency bash functions (like `cleanup_name` or `json_escape` called repeatedly), replace `[[ =~ ]]` regex checks with `case` statements using glob patterns.
+<<<<<<< HEAD
+## 2026-08-08 - Use parameter expansion and case globbing over regex
+**Learning:** Native bash regex matching (`[[ =~ ]]`) invokes the regex engine, which adds noticeable overhead in high-frequency loops. When extracting values from string formats, substituting regex extraction with parameter expansion (`${var#*prefix}`, `${var%%suffix*}`) results in ~40% faster execution. For simple numeric string validation (like checking floating point format), substituting regex validation (`^[0-9]+(\.[0-9]+)?$`) with native `case` statement globbing (`case "$var" in ''|*[!0-9.]*|*.*.*|.*|*.) false ;; *) true ;; esac`) executes ~4-7x faster.
+**Action:** Replace `[[ =~ ]]` checks with parameter expansion extraction or `case` statement globbing for validations when dealing with simple, predictable string structures inside busy bash loops.
+=======
 ## 2026-07-21 - Avoid state-altering builtins inside loops
 **Learning:** In bash `for` loops iterating over glob expansions, executing option resets like `shopt -u globstar nullglob` *inside* the loop causes O(N) redundant executions. Worse, if the glob yields zero files (because `nullglob` is set), the loop body never runs, meaning the options are never unset and effectively leak to the rest of the script.
 **Action:** Always move `shopt -u` resets immediately after the `done` statement of the loop to ensure they run exactly once and run unconditionally.
@@ -124,3 +129,4 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-20 - Bash Regex Greedy matching workaround
 **Learning:** Native Bash regex (`[[ ... =~ ... ]]`) does not support non-greedy modifiers like `.*?`. If you try to consolidate regex branches by making trailing groups optional (e.g. `(.*)?`), a preceding greedy `(.*)` will consume the remainder of the string, causing the optional group to never match.
 **Action:** When consolidating bash regular expressions, account for greedy matching. If you have an optional trailing component (like a date in a filename), you may need to parse the greedy matched string afterwards (e.g., using another regex check) instead of relying on non-greedy optional capture groups.
+>>>>>>> master
