@@ -109,3 +109,8 @@ Ensure `case` statement branches always terminate properly with `;;` when they d
 **Vulnerability:** Use of `echo "$result"` and `echo "ffmpeg $@"` which are susceptible to Option Injection if the variables start with a hyphen.
 **Learning:** `echo` is notoriously unreliable and insecure in Bash if the variable's content is derived from external input, as strings starting with hyphens (like `-e`, `-n`) can be interpreted as flags rather than text. The tests were parsing JSON or logging function mock calls directly with `echo` which could evaluate test data as options unexpectedly.
 **Prevention:** Always use `printf '%s\n' "$var"` instead of `echo "$var"` for robust, POSIX-compliant output of variables, safely restricting arbitrary inputs from being executed as format string options.
+
+## 2024-08-26 - [MEDIUM] Prevent Option Injection in text search commands like grep
+**Vulnerability:** Command Line Option Injection
+**Learning:** `grep` usages like `grep "$var"` or `grep "file.mkv"` are technically vulnerable if the provided string begins with a hyphen, which could cause `grep` to interpret it as an option (e.g. `-e`) instead of a search string.
+**Prevention:** Always explicitly use the `-e` flag for the pattern (e.g. `grep -e "$pattern"`) to ensure the pattern is treated as a pattern and not a flag, and `--` to signify the end of options.
