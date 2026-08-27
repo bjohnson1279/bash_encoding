@@ -16,6 +16,14 @@ QUALITY=21
 # Delete original file after encoding? (1 for YES, 0 for NO)
 DEL_ORIG=1
 
+# Validates duration strings using fast case statement globbing instead of regex
+is_valid_duration() {
+    case "$1" in
+        "" | *[!0-9.]* | *.*.* | .* | *. ) return 1 ;;
+        *) return 0 ;;
+    esac
+}
+
 # Function to obtain length of video
 getDuration() {
     local dur format_dur stream_dur output
@@ -300,7 +308,7 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
 
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
             echo "Warning: Duration could not be reliably determined. Original file kept."
-        elif ! [[ "$src_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$dest_duration" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+        elif ! is_valid_duration "$src_duration" || ! is_valid_duration "$dest_duration"; then
             # 🛡️ Sentinel: Validate duration formats to prevent arithmetic expression injection during calculation
             echo "Warning: Duration formats are invalid. Expected numeric formats. Original file kept."
         else
