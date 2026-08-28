@@ -6,7 +6,7 @@ set -eo pipefail
 
 # Error handler trap
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-trap 'echo "An unexpected error occurred at line $LINENO. Exiting." >&2' ERR
+trap 'printf "%s\n" "An unexpected error occurred at line $LINENO. Exiting." >&2' ERR
 fi
 
 # Copy Plex recordings from a network location
@@ -19,9 +19,9 @@ if [ -z "${BATS_VERSION:-}" ]; then
     for cmd in rsync awk df du mount.cifs; do
         # For mount.cifs, it might not be in the standard PATH for non-root users, so check /sbin explicitly
         if ! command -v "$cmd" >/dev/null 2>&1 && [ ! -x "/sbin/$cmd" ] && [ ! -x "/usr/sbin/$cmd" ]; then
-            echo "Error: Required command '$cmd' is not installed." >&2
+            printf '%s\n' "Error: Required command '$cmd' is not installed." >&2
             if [ "$cmd" = "mount.cifs" ]; then
-                echo "  Please install cifs-utils (e.g., 'sudo apk add cifs-utils' on Alpine or 'sudo apt install cifs-utils' on Debian)." >&2
+                printf '%s\n' "  Please install cifs-utils (e.g., 'sudo apk add cifs-utils' on Alpine or 'sudo apt install cifs-utils' on Debian)." >&2
             fi
             exit 1
         fi
@@ -75,14 +75,14 @@ get_avail_mb() {
         # 🛡️ Sentinel: Validate variable name to prevent command injection via printf -v
         case "$out_ref" in
             *[!a-zA-Z0-9_]*|[0-9]*)
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
             *)
                 printf -v "$out_ref" "%s" "$(( avail / 1024 ))"
         esac
     else
-        echo $(( avail / 1024 ))
+        printf '%s\n' "$(( avail / 1024 ))"
     fi
 }
 
@@ -110,14 +110,14 @@ get_folder_size_mb() {
     if [ -n "$out_ref" ]; then
         case "$out_ref" in
             *[!a-zA-Z0-9_]*|[0-9]*)
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
             *)
                 printf -v "$out_ref" "%s" "$(( size / 1024 ))"
         esac
     else
-        echo $(( size / 1024 ))
+        printf '%s\n' "$(( size / 1024 ))"
     fi
 }
 
@@ -132,37 +132,37 @@ folder_sync() {
     # Check if source directory exists
     if [ ! -d "$src_folder" ]; then
         printf "Directory '%s' not available.\n" "$src_folder"
-        echo "Please ensure the network share is mounted correctly."
-        echo "Example for Linux (Debian/Alpine): sudo mount -t cifs //SERVER/SHARE '$MNT_SHARE_PATH' -o username=USER,password=PASS"
-        echo "Example for macOS: sudo mount -t smbfs //USER@SERVER/SHARE '$MNT_SHARE_PATH'"
+        printf '%s\n' "Please ensure the network share is mounted correctly."
+        printf '%s\n' "Example for Linux (Debian/Alpine): sudo mount -t cifs //SERVER/SHARE '$MNT_SHARE_PATH' -o username=USER,password=PASS"
+        printf '%s\n' "Example for macOS: sudo mount -t smbfs //USER@SERVER/SHARE '$MNT_SHARE_PATH'"
         return 1
     fi
 
     local avail_mb
     get_avail_mb "." "avail_mb"
-    echo "Available disk space: ${avail_mb}MB"
+    printf '%s\n' "Available disk space: ${avail_mb}MB"
 
     if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
         printf "Insufficient disk space to start copy from '%s'.\n" "$src_folder"
-        echo "Required: ${required_space}MB, Available: ${avail_mb:-Unknown}MB"
+        printf '%s\n' "Required: ${required_space}MB, Available: ${avail_mb:-Unknown}MB"
         return 1
     fi
 
     printf "Calculating size of '%s'...\n" "$src_folder"
     local folder_size_mb
     get_folder_size_mb "$src_folder" "folder_size_mb"
-    echo "Source folder size: ${folder_size_mb}MB"
+    printf '%s\n' "Source folder size: ${folder_size_mb}MB"
 
     if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
         printf "Insufficient disk space to copy '%s'.\n" "$src_folder"
-        echo "Required: ${folder_size_mb}MB, Available: ${avail_mb}MB"
+        printf '%s\n' "Required: ${folder_size_mb}MB, Available: ${avail_mb}MB"
         return 1
     fi
 
     printf "Starting copy from '%s' to '%s'...\n" "$src_folder" "$RECORDING_PATH"
     # 🛡️ Sentinel: Avoid -a (archive) flag to prevent preserving malicious device files (-D) or suid bits (-p) from network shares
     rsync -rltvzh --progress -- "$src_folder/" "$RECORDING_PATH"
-    echo "Copy complete."
+    printf '%s\n' "Copy complete."
 }
 
 # --- Main Script ---
@@ -172,7 +172,7 @@ if [ -z "${BATS_VERSION:-}" ]; then
     avail_mb=""
     get_avail_mb "." "avail_mb"
     if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
-        echo "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
+        printf '%s\n' "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
         exit 1
     fi
 

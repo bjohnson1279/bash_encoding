@@ -1,0 +1,2498 @@
+{
+  "status": "success",
+  "owner": "bjohnson1279",
+  "total_prs": 49,
+  "repositories_count": 12,
+  "by_repository": {
+    "bjohnson1279/js-ddd-inventory": [
+      {
+        "baseRefName": "main",
+        "headRefName": "bolt-optimize-routing-rate-cache-8947452485199942718",
+        "mergeable": "CONFLICTING",
+        "number": 691,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "\u26a1 Bolt: Optimize OrderRoutingEngine by caching rate calculator",
+        "url": "https://github.com/bjohnson1279/js-ddd-inventory/pull/691",
+        "repository": "bjohnson1279/js-ddd-inventory"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "sentinel-math-random-fix-17678549935830799862",
+        "mergeable": "MERGEABLE",
+        "number": 690,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T03:58:52Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/js-ddd-inventory/actions/runs/32928456318/job/98055943767",
+            "name": "audit-bot-pr",
+            "startedAt": "2026-08-26T03:58:46Z",
+            "status": "COMPLETED",
+            "workflowName": "Automated Bot Guardrail"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:00:15Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/js-ddd-inventory/actions/runs/32928456321/job/98055943798",
+            "name": "test",
+            "startedAt": "2026-08-26T03:58:45Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "\ud83d\udee1\ufe0f Sentinel: [MEDIUM] Replace insecure Math.random() with crypto",
+        "url": "https://github.com/bjohnson1279/js-ddd-inventory/pull/690",
+        "repository": "bjohnson1279/js-ddd-inventory"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "bolt-perf-reconcile-audit-optim-6370379075339040428",
+        "mergeable": "MERGEABLE",
+        "number": 689,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T03:59:37Z",
+            "conclusion": "SKIPPED",
+            "detailsUrl": "https://github.com/bjohnson1279/js-ddd-inventory/actions/runs/32928512210/job/98056098772",
+            "name": "audit-bot-pr",
+            "startedAt": "2026-08-26T03:59:38Z",
+            "status": "COMPLETED",
+            "workflowName": "Automated Bot Guardrail"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:01:15Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/js-ddd-inventory/actions/runs/32928512432/job/98056098843",
+            "name": "test",
+            "startedAt": "2026-08-26T03:59:40Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "\u26a1 Bolt: Optimize ReconcileInventoryAudit by pre-fetching cost layers",
+        "url": "https://github.com/bjohnson1279/js-ddd-inventory/pull/689",
+        "repository": "bjohnson1279/js-ddd-inventory"
+      }
+    ],
+    "bjohnson1279/tampermonkey_collection": [
+      {
+        "baseRefName": "master",
+        "headRefName": "bolt-optimize-yt-adblock-5772097507502446114",
+        "mergeable": "CONFLICTING",
+        "number": 207,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T03:48:59Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/actions/runs/32927799515/job/98054066211",
+            "name": "Analyze (javascript-typescript)",
+            "startedAt": "2026-08-26T03:48:00Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T03:48:52Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/runs/98054220347",
+            "name": "CodeQL",
+            "startedAt": "2026-08-26T03:48:50Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+          }
+        ],
+        "title": "\u26a1 Bolt: Replace querySelectorAll with O(1) CSS injection and getElementsByTagName",
+        "url": "https://github.com/bjohnson1279/tampermonkey_collection/pull/207",
+        "repository": "bjohnson1279/tampermonkey_collection"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "palette-fix-empty-state-layout-10255880072127564974",
+        "mergeable": "CONFLICTING",
+        "number": 206,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T03:44:40Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/actions/runs/32927542596/job/98053341339",
+            "name": "Analyze (javascript-typescript)",
+            "startedAt": "2026-08-26T03:43:50Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T03:44:33Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/runs/98053467844",
+            "name": "CodeQL",
+            "startedAt": "2026-08-26T03:44:31Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+          }
+        ],
+        "title": "\ud83c\udfa8 Palette: Fix layout shift on copy button empty state",
+        "url": "https://github.com/bjohnson1279/tampermonkey_collection/pull/206",
+        "repository": "bjohnson1279/tampermonkey_collection"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "bolt-optimize-youtube-ad-remover-17686312053687710734",
+        "mergeable": "MERGEABLE",
+        "number": 205,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T03:24:48Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/actions/runs/32926274064/job/98049717964",
+            "name": "Analyze (javascript-typescript)",
+            "startedAt": "2026-08-26T03:23:44Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T03:24:40Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/runs/98049890857",
+            "name": "CodeQL",
+            "startedAt": "2026-08-26T03:24:37Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+          }
+        ],
+        "title": "\u26a1 Bolt: Optimize redundant DOM queries and removals in YouTube Ad Remover",
+        "url": "https://github.com/bjohnson1279/tampermonkey_collection/pull/205",
+        "repository": "bjohnson1279/tampermonkey_collection"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "sentinel-fix-fetch-toctou-9911691010504638327",
+        "mergeable": "CONFLICTING",
+        "number": 204,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-25T23:35:12Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/actions/runs/32911371922/job/98006071868",
+            "name": "Analyze (javascript-typescript)",
+            "startedAt": "2026-08-25T23:34:27Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-25T23:35:06Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/runs/98006203879",
+            "name": "CodeQL",
+            "startedAt": "2026-08-25T23:35:03Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+          }
+        ],
+        "title": "\ud83d\udee1\ufe0f Sentinel: [CRITICAL/HIGH] Fix TOCTOU evasion in fetch interceptor",
+        "url": "https://github.com/bjohnson1279/tampermonkey_collection/pull/204",
+        "repository": "bjohnson1279/tampermonkey_collection"
+      }
+    ],
+    "bjohnson1279/gql-ddd-inventory": [
+      {
+        "baseRefName": "main",
+        "headRefName": "bolt-putaway-suggester-perf-4047667387018691352",
+        "mergeable": "MERGEABLE",
+        "number": 609,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:11:47Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/gql-ddd-inventory/actions/runs/32929187258/job/98057982679",
+            "name": "build-and-test",
+            "startedAt": "2026-08-26T04:10:12Z",
+            "status": "COMPLETED",
+            "workflowName": "CI Pipeline"
+          }
+        ],
+        "title": "\u26a1 Bolt: [performance improvement] O(1) attribute lookups in PutawaySuggester",
+        "url": "https://github.com/bjohnson1279/gql-ddd-inventory/pull/609",
+        "repository": "bjohnson1279/gql-ddd-inventory"
+      }
+    ],
+    "bjohnson1279/react-ddd-inventory-client": [
+      {
+        "baseRefName": "main",
+        "headRefName": "bolt-performance-array-reduce-7382351391413231067",
+        "mergeable": "MERGEABLE",
+        "number": 145,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:00:33Z",
+            "conclusion": "SKIPPED",
+            "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928577009/job/98056298773",
+            "name": "audit-bot-pr",
+            "startedAt": "2026-08-26T04:00:42Z",
+            "status": "COMPLETED",
+            "workflowName": "Automated Bot Guardrail"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:01:07Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928573479/job/98056266014",
+            "name": "Analyze (actions)",
+            "startedAt": "2026-08-26T04:00:33Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:01:41Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928576968/job/98056272224",
+            "name": "build-and-test",
+            "startedAt": "2026-08-26T04:00:36Z",
+            "status": "COMPLETED",
+            "workflowName": "React Client CI/CD Pipeline"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:01:40Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928573479/job/98056265918",
+            "name": "Analyze (javascript-typescript)",
+            "startedAt": "2026-08-26T04:00:34Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:01:02Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/runs/98056351936",
+            "name": "CodeQL",
+            "startedAt": "2026-08-26T04:00:58Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+          }
+        ],
+        "title": "\u26a1 Bolt: [performance improvement] Memoize array reduce operations in render loop",
+        "url": "https://github.com/bjohnson1279/react-ddd-inventory-client/pull/145",
+        "repository": "bjohnson1279/react-ddd-inventory-client"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "sentinel/fix-graphql-auth-validation-4453135093477134849",
+        "mergeable": "MERGEABLE",
+        "number": 144,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:04:10Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928803899/job/98056912441",
+            "name": "audit-bot-pr",
+            "startedAt": "2026-08-26T04:04:06Z",
+            "status": "COMPLETED",
+            "workflowName": "Automated Bot Guardrail"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:04:47Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928800254/job/98056904448",
+            "name": "Analyze (actions)",
+            "startedAt": "2026-08-26T04:04:04Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:05:15Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928803926/job/98056912161",
+            "name": "build-and-test",
+            "startedAt": "2026-08-26T04:04:06Z",
+            "status": "COMPLETED",
+            "workflowName": "React Client CI/CD Pipeline"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:05:07Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928800254/job/98056904413",
+            "name": "Analyze (javascript-typescript)",
+            "startedAt": "2026-08-26T04:04:04Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:04:39Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/runs/98057008755",
+            "name": "CodeQL",
+            "startedAt": "2026-08-26T04:04:37Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+          }
+        ],
+        "title": "\ud83d\udee1\ufe0f Sentinel: [HIGH] Fix missing authentication validation in GraphQL adapter",
+        "url": "https://github.com/bjohnson1279/react-ddd-inventory-client/pull/144",
+        "repository": "bjohnson1279/react-ddd-inventory-client"
+      }
+    ],
+    "bjohnson1279/php-ddd-inventory": [
+      {
+        "baseRefName": "master",
+        "headRefName": "bolt-optimize-rma-receive-11369039237165285360",
+        "mergeable": "MERGEABLE",
+        "number": 552,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:01:40Z",
+            "conclusion": "SKIPPED",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928648808/job/98056479401",
+            "name": "audit-bot-pr",
+            "startedAt": "2026-08-26T04:01:41Z",
+            "status": "COMPLETED",
+            "workflowName": "Automated Bot Guardrail"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:02:18Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928645045/job/98056471019",
+            "name": "Analyze (actions)",
+            "startedAt": "2026-08-26T04:01:40Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:02:04Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928648344/job/98056477536",
+            "name": "Unit tests",
+            "startedAt": "2026-08-26T04:01:43Z",
+            "status": "COMPLETED",
+            "workflowName": "PHPUnit"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:02:33Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928645045/job/98056470860",
+            "name": "Analyze (javascript-typescript)",
+            "startedAt": "2026-08-26T04:01:40Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:02:24Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928645045/job/98056471045",
+            "name": "Analyze (python)",
+            "startedAt": "2026-08-26T04:01:40Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:03:04Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928648344/job/98056477419",
+            "name": "Integration tests (with Postgres)",
+            "startedAt": "2026-08-26T04:01:42Z",
+            "status": "COMPLETED",
+            "workflowName": "PHPUnit"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:02:12Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/runs/98056567480",
+            "name": "CodeQL",
+            "startedAt": "2026-08-26T04:02:10Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+          }
+        ],
+        "title": "\u26a1 Bolt: Pre-fetch serialized items to fix N+1 query in RMA receiving",
+        "url": "https://github.com/bjohnson1279/php-ddd-inventory/pull/552",
+        "repository": "bjohnson1279/php-ddd-inventory"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "bolt-fix-po-n-plus-one-8717121596612255802",
+        "mergeable": "MERGEABLE",
+        "number": 551,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:02:29Z",
+            "conclusion": "SKIPPED",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928703264/job/98056628362",
+            "name": "audit-bot-pr",
+            "startedAt": "2026-08-26T04:02:30Z",
+            "status": "COMPLETED",
+            "workflowName": "Automated Bot Guardrail"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:03:08Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928699997/job/98056620637",
+            "name": "Analyze (actions)",
+            "startedAt": "2026-08-26T04:02:29Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:02:49Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928703267/job/98056627521",
+            "name": "Unit tests",
+            "startedAt": "2026-08-26T04:02:31Z",
+            "status": "COMPLETED",
+            "workflowName": "PHPUnit"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:03:21Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928699997/job/98056620737",
+            "name": "Analyze (javascript-typescript)",
+            "startedAt": "2026-08-26T04:02:30Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:03:16Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928699997/job/98056620575",
+            "name": "Analyze (python)",
+            "startedAt": "2026-08-26T04:02:30Z",
+            "status": "COMPLETED",
+            "workflowName": "CodeQL"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:03:57Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928703267/job/98056627671",
+            "name": "Integration tests (with Postgres)",
+            "startedAt": "2026-08-26T04:02:31Z",
+            "status": "COMPLETED",
+            "workflowName": "PHPUnit"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-26T04:03:03Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/runs/98056718735",
+            "name": "CodeQL",
+            "startedAt": "2026-08-26T04:03:00Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+          }
+        ],
+        "title": "\u26a1 Bolt: Optimize PurchaseOrderRepository to fetch by tenant and status",
+        "url": "https://github.com/bjohnson1279/php-ddd-inventory/pull/551",
+        "repository": "bjohnson1279/php-ddd-inventory"
+      }
+    ],
+    "bjohnson1279/bash_encoding": [
+      {
+        "baseRefName": "master",
+        "headRefName": "bolt-regex-extraction-globbing-4175813923384417547",
+        "mergeable": "CONFLICTING",
+        "number": 153,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "\u26a1 Bolt: [performance improvement] Replace regex extraction with parameter expansion and case globbing",
+        "url": "https://github.com/bjohnson1279/bash_encoding/pull/153",
+        "repository": "bjohnson1279/bash_encoding"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "bolt/optimize-duration-validation-2802081006699050838",
+        "mergeable": "CONFLICTING",
+        "number": 152,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "\u26a1 Bolt: Replace regex validation with case globbing in encode-all.sh duration check",
+        "url": "https://github.com/bjohnson1279/bash_encoding/pull/152",
+        "repository": "bjohnson1279/bash_encoding"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "bolt/perf-getduration-regex-10384962677081624172",
+        "mergeable": "CONFLICTING",
+        "number": 151,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "\u26a1 Bolt: Optimize getDuration regex parsing",
+        "url": "https://github.com/bjohnson1279/bash_encoding/pull/151",
+        "repository": "bjohnson1279/bash_encoding"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "fix-tee-option-injection-1822199058524299035",
+        "mergeable": "CONFLICTING",
+        "number": 150,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "\ud83d\udee1\ufe0f Sentinel: [CRITICAL] Fix Option Injection in tee command",
+        "url": "https://github.com/bjohnson1279/bash_encoding/pull/150",
+        "repository": "bjohnson1279/bash_encoding"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "sentinel-fix-eval-command-injection-tests-2243683132543009979",
+        "mergeable": "MERGEABLE",
+        "number": 149,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "\ud83d\udee1\ufe0f Sentinel: [MEDIUM] Fix command injection in test mocks",
+        "url": "https://github.com/bjohnson1279/bash_encoding/pull/149",
+        "repository": "bjohnson1279/bash_encoding"
+      }
+    ],
+    "bjohnson1279/ams-proto": [
+      {
+        "baseRefName": "main",
+        "headRefName": "sentinel/add-api-rate-limiting-9047938700605217906",
+        "mergeable": "MERGEABLE",
+        "number": 34,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-25T17:37:38Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ams-proto/actions/runs/32878952383/job/97903559335",
+            "name": "build-and-test (20.x)",
+            "startedAt": "2026-08-25T17:37:18Z",
+            "status": "COMPLETED",
+            "workflowName": "CI Pipeline"
+          }
+        ],
+        "title": "\ud83d\udee1\ufe0f Sentinel: [HIGH] Add rate limiting to API endpoints",
+        "url": "https://github.com/bjohnson1279/ams-proto/pull/34",
+        "repository": "bjohnson1279/ams-proto"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "fix/xss-vulnerabilities-innerhtml-1339108095910317542",
+        "mergeable": "MERGEABLE",
+        "number": 33,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-25T17:26:46Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ams-proto/actions/runs/32877894630/job/97900177031",
+            "name": "build-and-test (20.x)",
+            "startedAt": "2026-08-25T17:26:30Z",
+            "status": "COMPLETED",
+            "workflowName": "CI Pipeline"
+          }
+        ],
+        "title": "\ud83d\udee1\ufe0f Sentinel: [HIGH] Fix DOM-based XSS via innerHTML templates",
+        "url": "https://github.com/bjohnson1279/ams-proto/pull/33",
+        "repository": "bjohnson1279/ams-proto"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "bolt-client-filtering-optimization-11995048800524055687",
+        "mergeable": "MERGEABLE",
+        "number": 32,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-25T17:27:01Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ams-proto/actions/runs/32877905811/job/97900213118",
+            "name": "build-and-test (20.x)",
+            "startedAt": "2026-08-25T17:26:38Z",
+            "status": "COMPLETED",
+            "workflowName": "CI Pipeline"
+          }
+        ],
+        "title": "\u26a1 Bolt: [performance improvement] Optimize client-side search filtering",
+        "url": "https://github.com/bjohnson1279/ams-proto/pull/32",
+        "repository": "bjohnson1279/ams-proto"
+      }
+    ],
+    "bjohnson1279/threat-telemetry": [
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/npm_and_yarn/npm_and_yarn-75ebb1dcaf",
+        "mergeable": "MERGEABLE",
+        "number": 1,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "chore(deps): bump the npm_and_yarn group across 5 directories with 2 updates",
+        "url": "https://github.com/bjohnson1279/threat-telemetry/pull/1",
+        "repository": "bjohnson1279/threat-telemetry"
+      }
+    ],
+    "bjohnson1279/ruby-crm": [
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/bundler/thruster-0.1.25",
+        "mergeable": "MERGEABLE",
+        "number": 15,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-19T17:37:07Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282545714/job/96164419488",
+            "name": "scan_ruby",
+            "startedAt": "2026-08-19T17:36:14Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-19T17:37:05Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282545714/job/96164419737",
+            "name": "lint",
+            "startedAt": "2026-08-19T17:36:14Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-19T17:37:38Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282545714/job/96164419694",
+            "name": "test",
+            "startedAt": "2026-08-19T17:36:14Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "Bump thruster from 0.1.22 to 0.1.25",
+        "url": "https://github.com/bjohnson1279/ruby-crm/pull/15",
+        "repository": "bjohnson1279/ruby-crm"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/bundler/brakeman-8.0.6",
+        "mergeable": "MERGEABLE",
+        "number": 14,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-19T17:36:54Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282521561/job/96164342775",
+            "name": "scan_ruby",
+            "startedAt": "2026-08-19T17:35:59Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-19T17:36:48Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282521561/job/96164343114",
+            "name": "lint",
+            "startedAt": "2026-08-19T17:35:58Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-19T17:37:24Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282521561/job/96164343090",
+            "name": "test",
+            "startedAt": "2026-08-19T17:35:58Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "Bump brakeman from 8.0.5 to 8.0.6",
+        "url": "https://github.com/bjohnson1279/ruby-crm/pull/14",
+        "repository": "bjohnson1279/ruby-crm"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/bundler/bootsnap-1.25.0",
+        "mergeable": "MERGEABLE",
+        "number": 13,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-12T17:34:46Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623295550/job/94203219184",
+            "name": "scan_ruby",
+            "startedAt": "2026-08-12T17:34:24Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-12T17:34:53Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623295550/job/94203219052",
+            "name": "lint",
+            "startedAt": "2026-08-12T17:34:25Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-12T17:35:14Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623295550/job/94203219171",
+            "name": "test",
+            "startedAt": "2026-08-12T17:34:25Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "Bump bootsnap from 1.24.6 to 1.25.0",
+        "url": "https://github.com/bjohnson1279/ruby-crm/pull/13",
+        "repository": "bjohnson1279/ruby-crm"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/bundler/image_processing-2.0.3",
+        "mergeable": "MERGEABLE",
+        "number": 12,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-12T17:34:25Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623271597/job/94203138429",
+            "name": "scan_ruby",
+            "startedAt": "2026-08-12T17:34:07Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-12T17:34:23Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623271597/job/94203138589",
+            "name": "lint",
+            "startedAt": "2026-08-12T17:34:08Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-12T17:34:49Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623271597/job/94203138658",
+            "name": "test",
+            "startedAt": "2026-08-12T17:34:07Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "Bump image_processing from 2.0.2 to 2.0.3",
+        "url": "https://github.com/bjohnson1279/ruby-crm/pull/12",
+        "repository": "bjohnson1279/ruby-crm"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/bundler/solid_queue-1.6.0",
+        "mergeable": "MERGEABLE",
+        "number": 11,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-05T17:35:06Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31030653328/job/92390204823",
+            "name": "scan_ruby",
+            "startedAt": "2026-08-05T17:34:37Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-05T17:35:03Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31030653328/job/92390204868",
+            "name": "lint",
+            "startedAt": "2026-08-05T17:34:32Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-08-05T17:35:31Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31030653328/job/92390205329",
+            "name": "test",
+            "startedAt": "2026-08-05T17:34:39Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "Bump solid_queue from 1.4.0 to 1.6.0",
+        "url": "https://github.com/bjohnson1279/ruby-crm/pull/11",
+        "repository": "bjohnson1279/ruby-crm"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/bundler/rails-8.1.3.1",
+        "mergeable": "MERGEABLE",
+        "number": 10,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-29T17:35:19Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30475969650/job/90657628257",
+            "name": "scan_ruby",
+            "startedAt": "2026-07-29T17:34:43Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-29T17:35:16Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30475969650/job/90657628296",
+            "name": "lint",
+            "startedAt": "2026-07-29T17:34:49Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-29T17:35:26Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30475969650/job/90657628276",
+            "name": "test",
+            "startedAt": "2026-07-29T17:34:43Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "Bump rails from 8.1.3 to 8.1.3.1",
+        "url": "https://github.com/bjohnson1279/ruby-crm/pull/10",
+        "repository": "bjohnson1279/ruby-crm"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/bundler/bundler-e34e83336b",
+        "mergeable": "MERGEABLE",
+        "number": 8,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-23T15:06:59Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30018993535/job/89246441369",
+            "name": "scan_ruby",
+            "startedAt": "2026-07-23T15:06:42Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-23T15:07:02Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30018993535/job/89246441310",
+            "name": "lint",
+            "startedAt": "2026-07-23T15:06:43Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-23T15:07:35Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30018993535/job/89246441324",
+            "name": "test",
+            "startedAt": "2026-07-23T15:06:43Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "Bump loofah from 2.25.1 to 2.25.2 in the bundler group across 1 directory",
+        "url": "https://github.com/bjohnson1279/ruby-crm/pull/8",
+        "repository": "bjohnson1279/ruby-crm"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/bundler/solid_cable-4.0.2",
+        "mergeable": "MERGEABLE",
+        "number": 6,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-22T17:35:27Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942950655/job/89001142663",
+            "name": "scan_ruby",
+            "startedAt": "2026-07-22T17:34:59Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-22T17:35:27Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942950655/job/89001142853",
+            "name": "lint",
+            "startedAt": "2026-07-22T17:34:59Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-22T17:35:45Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942950655/job/89001142794",
+            "name": "test",
+            "startedAt": "2026-07-22T17:34:59Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "Bump solid_cable from 4.0.0 to 4.0.2",
+        "url": "https://github.com/bjohnson1279/ruby-crm/pull/6",
+        "repository": "bjohnson1279/ruby-crm"
+      },
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/bundler/pagy-43.6.1",
+        "mergeable": "MERGEABLE",
+        "number": 5,
+        "state": "OPEN",
+        "statusCheckRollup": [
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-22T17:35:10Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942934459/job/89001088392",
+            "name": "scan_ruby",
+            "startedAt": "2026-07-22T17:34:46Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-22T17:35:09Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942934459/job/89001088302",
+            "name": "lint",
+            "startedAt": "2026-07-22T17:34:46Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          },
+          {
+            "__typename": "CheckRun",
+            "completedAt": "2026-07-22T17:35:29Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942934459/job/89001088336",
+            "name": "test",
+            "startedAt": "2026-07-22T17:34:46Z",
+            "status": "COMPLETED",
+            "workflowName": "CI"
+          }
+        ],
+        "title": "Bump pagy from 43.5.6 to 43.6.1",
+        "url": "https://github.com/bjohnson1279/ruby-crm/pull/5",
+        "repository": "bjohnson1279/ruby-crm"
+      }
+    ],
+    "bjohnson1279/css-practice": [
+      {
+        "baseRefName": "main",
+        "headRefName": "dependabot/npm_and_yarn/react-grid-layout/grid-layout/npm_and_yarn-e35d90b649",
+        "mergeable": "MERGEABLE",
+        "number": 4,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump the npm_and_yarn group across 1 directory with 3 updates",
+        "url": "https://github.com/bjohnson1279/css-practice/pull/4",
+        "repository": "bjohnson1279/css-practice"
+      }
+    ],
+    "bjohnson1279/permit-tracker-frontend": [
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/npm_and_yarn-58c3b0d4d3",
+        "mergeable": "MERGEABLE",
+        "number": 4,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump the npm_and_yarn group across 1 directory with 3 updates",
+        "url": "https://github.com/bjohnson1279/permit-tracker-frontend/pull/4",
+        "repository": "bjohnson1279/permit-tracker-frontend"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/multi-96c788614a",
+        "mergeable": "MERGEABLE",
+        "number": 1,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump on-headers and compression",
+        "url": "https://github.com/bjohnson1279/permit-tracker-frontend/pull/1",
+        "repository": "bjohnson1279/permit-tracker-frontend"
+      }
+    ],
+    "bjohnson1279/js30": [
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/21---Geolocation/ua-parser-js-0.7.33",
+        "mergeable": "MERGEABLE",
+        "number": 32,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump ua-parser-js from 0.7.28 to 0.7.33 in /21 - Geolocation",
+        "url": "https://github.com/bjohnson1279/js30/pull/32",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/20---Speech-Detection/ua-parser-js-0.7.33",
+        "mergeable": "MERGEABLE",
+        "number": 31,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump ua-parser-js from 0.7.28 to 0.7.33 in /20 - Speech Detection",
+        "url": "https://github.com/bjohnson1279/js30/pull/31",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/19---Webcam-Fun/ua-parser-js-0.7.33",
+        "mergeable": "MERGEABLE",
+        "number": 30,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump ua-parser-js from 0.7.28 to 0.7.33 in /19 - Webcam Fun",
+        "url": "https://github.com/bjohnson1279/js30/pull/30",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/21---Geolocation/qs-6.11.0",
+        "mergeable": "MERGEABLE",
+        "number": 28,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump qs from 6.2.3 to 6.11.0 in /21 - Geolocation",
+        "url": "https://github.com/bjohnson1279/js30/pull/28",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/19---Webcam-Fun/qs-6.11.0",
+        "mergeable": "MERGEABLE",
+        "number": 29,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump qs from 6.2.3 to 6.11.0 in /19 - Webcam Fun",
+        "url": "https://github.com/bjohnson1279/js30/pull/29",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/20---Speech-Detection/qs-6.11.0",
+        "mergeable": "MERGEABLE",
+        "number": 27,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump qs from 6.2.3 to 6.11.0 in /20 - Speech Detection",
+        "url": "https://github.com/bjohnson1279/js30/pull/27",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/21---Geolocation/engine.io-6.2.1",
+        "mergeable": "MERGEABLE",
+        "number": 26,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump engine.io from 3.5.0 to 6.2.1 in /21 - Geolocation",
+        "url": "https://github.com/bjohnson1279/js30/pull/26",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/20---Speech-Detection/engine.io-6.2.1",
+        "mergeable": "MERGEABLE",
+        "number": 25,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump engine.io from 3.5.0 to 6.2.1 in /20 - Speech Detection",
+        "url": "https://github.com/bjohnson1279/js30/pull/25",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/19---Webcam-Fun/engine.io-6.2.1",
+        "mergeable": "MERGEABLE",
+        "number": 24,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump engine.io from 3.5.0 to 6.2.1 in /19 - Webcam Fun",
+        "url": "https://github.com/bjohnson1279/js30/pull/24",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/21---Geolocation/socket.io-parser-3.3.3",
+        "mergeable": "MERGEABLE",
+        "number": 23,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump socket.io-parser from 3.3.2 to 3.3.3 in /21 - Geolocation",
+        "url": "https://github.com/bjohnson1279/js30/pull/23",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/20---Speech-Detection/socket.io-parser-3.3.3",
+        "mergeable": "MERGEABLE",
+        "number": 22,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump socket.io-parser from 3.3.2 to 3.3.3 in /20 - Speech Detection",
+        "url": "https://github.com/bjohnson1279/js30/pull/22",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/19---Webcam-Fun/socket.io-parser-3.3.3",
+        "mergeable": "MERGEABLE",
+        "number": 21,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump socket.io-parser from 3.3.2 to 3.3.3 in /19 - Webcam Fun",
+        "url": "https://github.com/bjohnson1279/js30/pull/21",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/21---Geolocation/minimatch-3.1.2",
+        "mergeable": "MERGEABLE",
+        "number": 20,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump minimatch from 3.0.4 to 3.1.2 in /21 - Geolocation",
+        "url": "https://github.com/bjohnson1279/js30/pull/20",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/21---Geolocation/follow-redirects-1.14.8",
+        "mergeable": "MERGEABLE",
+        "number": 19,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump follow-redirects from 1.13.3 to 1.14.8 in /21 - Geolocation",
+        "url": "https://github.com/bjohnson1279/js30/pull/19",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/20---Speech-Detection/follow-redirects-1.14.8",
+        "mergeable": "MERGEABLE",
+        "number": 18,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump follow-redirects from 1.14.1 to 1.14.8 in /20 - Speech Detection",
+        "url": "https://github.com/bjohnson1279/js30/pull/18",
+        "repository": "bjohnson1279/js30"
+      },
+      {
+        "baseRefName": "master",
+        "headRefName": "dependabot/npm_and_yarn/19---Webcam-Fun/follow-redirects-1.14.8",
+        "mergeable": "MERGEABLE",
+        "number": 17,
+        "state": "OPEN",
+        "statusCheckRollup": [],
+        "title": "Bump follow-redirects from 1.13.3 to 1.14.8 in /19 - Webcam Fun",
+        "url": "https://github.com/bjohnson1279/js30/pull/17",
+        "repository": "bjohnson1279/js30"
+      }
+    ]
+  },
+  "prs": [
+    {
+      "baseRefName": "main",
+      "headRefName": "bolt-optimize-routing-rate-cache-8947452485199942718",
+      "mergeable": "CONFLICTING",
+      "number": 691,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "\u26a1 Bolt: Optimize OrderRoutingEngine by caching rate calculator",
+      "url": "https://github.com/bjohnson1279/js-ddd-inventory/pull/691",
+      "repository": "bjohnson1279/js-ddd-inventory"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "bolt-optimize-yt-adblock-5772097507502446114",
+      "mergeable": "CONFLICTING",
+      "number": 207,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T03:48:59Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/actions/runs/32927799515/job/98054066211",
+          "name": "Analyze (javascript-typescript)",
+          "startedAt": "2026-08-26T03:48:00Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T03:48:52Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/runs/98054220347",
+          "name": "CodeQL",
+          "startedAt": "2026-08-26T03:48:50Z",
+          "status": "COMPLETED",
+          "workflowName": ""
+        }
+      ],
+      "title": "\u26a1 Bolt: Replace querySelectorAll with O(1) CSS injection and getElementsByTagName",
+      "url": "https://github.com/bjohnson1279/tampermonkey_collection/pull/207",
+      "repository": "bjohnson1279/tampermonkey_collection"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "palette-fix-empty-state-layout-10255880072127564974",
+      "mergeable": "CONFLICTING",
+      "number": 206,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T03:44:40Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/actions/runs/32927542596/job/98053341339",
+          "name": "Analyze (javascript-typescript)",
+          "startedAt": "2026-08-26T03:43:50Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T03:44:33Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/runs/98053467844",
+          "name": "CodeQL",
+          "startedAt": "2026-08-26T03:44:31Z",
+          "status": "COMPLETED",
+          "workflowName": ""
+        }
+      ],
+      "title": "\ud83c\udfa8 Palette: Fix layout shift on copy button empty state",
+      "url": "https://github.com/bjohnson1279/tampermonkey_collection/pull/206",
+      "repository": "bjohnson1279/tampermonkey_collection"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "bolt-putaway-suggester-perf-4047667387018691352",
+      "mergeable": "MERGEABLE",
+      "number": 609,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:11:47Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/gql-ddd-inventory/actions/runs/32929187258/job/98057982679",
+          "name": "build-and-test",
+          "startedAt": "2026-08-26T04:10:12Z",
+          "status": "COMPLETED",
+          "workflowName": "CI Pipeline"
+        }
+      ],
+      "title": "\u26a1 Bolt: [performance improvement] O(1) attribute lookups in PutawaySuggester",
+      "url": "https://github.com/bjohnson1279/gql-ddd-inventory/pull/609",
+      "repository": "bjohnson1279/gql-ddd-inventory"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "bolt-performance-array-reduce-7382351391413231067",
+      "mergeable": "MERGEABLE",
+      "number": 145,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:00:33Z",
+          "conclusion": "SKIPPED",
+          "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928577009/job/98056298773",
+          "name": "audit-bot-pr",
+          "startedAt": "2026-08-26T04:00:42Z",
+          "status": "COMPLETED",
+          "workflowName": "Automated Bot Guardrail"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:01:07Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928573479/job/98056266014",
+          "name": "Analyze (actions)",
+          "startedAt": "2026-08-26T04:00:33Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:01:41Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928576968/job/98056272224",
+          "name": "build-and-test",
+          "startedAt": "2026-08-26T04:00:36Z",
+          "status": "COMPLETED",
+          "workflowName": "React Client CI/CD Pipeline"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:01:40Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928573479/job/98056265918",
+          "name": "Analyze (javascript-typescript)",
+          "startedAt": "2026-08-26T04:00:34Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:01:02Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/runs/98056351936",
+          "name": "CodeQL",
+          "startedAt": "2026-08-26T04:00:58Z",
+          "status": "COMPLETED",
+          "workflowName": ""
+        }
+      ],
+      "title": "\u26a1 Bolt: [performance improvement] Memoize array reduce operations in render loop",
+      "url": "https://github.com/bjohnson1279/react-ddd-inventory-client/pull/145",
+      "repository": "bjohnson1279/react-ddd-inventory-client"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "sentinel-math-random-fix-17678549935830799862",
+      "mergeable": "MERGEABLE",
+      "number": 690,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T03:58:52Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/js-ddd-inventory/actions/runs/32928456318/job/98055943767",
+          "name": "audit-bot-pr",
+          "startedAt": "2026-08-26T03:58:46Z",
+          "status": "COMPLETED",
+          "workflowName": "Automated Bot Guardrail"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:00:15Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/js-ddd-inventory/actions/runs/32928456321/job/98055943798",
+          "name": "test",
+          "startedAt": "2026-08-26T03:58:45Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "\ud83d\udee1\ufe0f Sentinel: [MEDIUM] Replace insecure Math.random() with crypto",
+      "url": "https://github.com/bjohnson1279/js-ddd-inventory/pull/690",
+      "repository": "bjohnson1279/js-ddd-inventory"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "bolt-optimize-rma-receive-11369039237165285360",
+      "mergeable": "MERGEABLE",
+      "number": 552,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:01:40Z",
+          "conclusion": "SKIPPED",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928648808/job/98056479401",
+          "name": "audit-bot-pr",
+          "startedAt": "2026-08-26T04:01:41Z",
+          "status": "COMPLETED",
+          "workflowName": "Automated Bot Guardrail"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:02:18Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928645045/job/98056471019",
+          "name": "Analyze (actions)",
+          "startedAt": "2026-08-26T04:01:40Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:02:04Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928648344/job/98056477536",
+          "name": "Unit tests",
+          "startedAt": "2026-08-26T04:01:43Z",
+          "status": "COMPLETED",
+          "workflowName": "PHPUnit"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:02:33Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928645045/job/98056470860",
+          "name": "Analyze (javascript-typescript)",
+          "startedAt": "2026-08-26T04:01:40Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:02:24Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928645045/job/98056471045",
+          "name": "Analyze (python)",
+          "startedAt": "2026-08-26T04:01:40Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:03:04Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928648344/job/98056477419",
+          "name": "Integration tests (with Postgres)",
+          "startedAt": "2026-08-26T04:01:42Z",
+          "status": "COMPLETED",
+          "workflowName": "PHPUnit"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:02:12Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/runs/98056567480",
+          "name": "CodeQL",
+          "startedAt": "2026-08-26T04:02:10Z",
+          "status": "COMPLETED",
+          "workflowName": ""
+        }
+      ],
+      "title": "\u26a1 Bolt: Pre-fetch serialized items to fix N+1 query in RMA receiving",
+      "url": "https://github.com/bjohnson1279/php-ddd-inventory/pull/552",
+      "repository": "bjohnson1279/php-ddd-inventory"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "bolt-perf-reconcile-audit-optim-6370379075339040428",
+      "mergeable": "MERGEABLE",
+      "number": 689,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T03:59:37Z",
+          "conclusion": "SKIPPED",
+          "detailsUrl": "https://github.com/bjohnson1279/js-ddd-inventory/actions/runs/32928512210/job/98056098772",
+          "name": "audit-bot-pr",
+          "startedAt": "2026-08-26T03:59:38Z",
+          "status": "COMPLETED",
+          "workflowName": "Automated Bot Guardrail"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:01:15Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/js-ddd-inventory/actions/runs/32928512432/job/98056098843",
+          "name": "test",
+          "startedAt": "2026-08-26T03:59:40Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "\u26a1 Bolt: Optimize ReconcileInventoryAudit by pre-fetching cost layers",
+      "url": "https://github.com/bjohnson1279/js-ddd-inventory/pull/689",
+      "repository": "bjohnson1279/js-ddd-inventory"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "sentinel/fix-graphql-auth-validation-4453135093477134849",
+      "mergeable": "MERGEABLE",
+      "number": 144,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:04:10Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928803899/job/98056912441",
+          "name": "audit-bot-pr",
+          "startedAt": "2026-08-26T04:04:06Z",
+          "status": "COMPLETED",
+          "workflowName": "Automated Bot Guardrail"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:04:47Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928800254/job/98056904448",
+          "name": "Analyze (actions)",
+          "startedAt": "2026-08-26T04:04:04Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:05:15Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928803926/job/98056912161",
+          "name": "build-and-test",
+          "startedAt": "2026-08-26T04:04:06Z",
+          "status": "COMPLETED",
+          "workflowName": "React Client CI/CD Pipeline"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:05:07Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/actions/runs/32928800254/job/98056904413",
+          "name": "Analyze (javascript-typescript)",
+          "startedAt": "2026-08-26T04:04:04Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:04:39Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/react-ddd-inventory-client/runs/98057008755",
+          "name": "CodeQL",
+          "startedAt": "2026-08-26T04:04:37Z",
+          "status": "COMPLETED",
+          "workflowName": ""
+        }
+      ],
+      "title": "\ud83d\udee1\ufe0f Sentinel: [HIGH] Fix missing authentication validation in GraphQL adapter",
+      "url": "https://github.com/bjohnson1279/react-ddd-inventory-client/pull/144",
+      "repository": "bjohnson1279/react-ddd-inventory-client"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "bolt-optimize-youtube-ad-remover-17686312053687710734",
+      "mergeable": "MERGEABLE",
+      "number": 205,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T03:24:48Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/actions/runs/32926274064/job/98049717964",
+          "name": "Analyze (javascript-typescript)",
+          "startedAt": "2026-08-26T03:23:44Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T03:24:40Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/runs/98049890857",
+          "name": "CodeQL",
+          "startedAt": "2026-08-26T03:24:37Z",
+          "status": "COMPLETED",
+          "workflowName": ""
+        }
+      ],
+      "title": "\u26a1 Bolt: Optimize redundant DOM queries and removals in YouTube Ad Remover",
+      "url": "https://github.com/bjohnson1279/tampermonkey_collection/pull/205",
+      "repository": "bjohnson1279/tampermonkey_collection"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "bolt-fix-po-n-plus-one-8717121596612255802",
+      "mergeable": "MERGEABLE",
+      "number": 551,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:02:29Z",
+          "conclusion": "SKIPPED",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928703264/job/98056628362",
+          "name": "audit-bot-pr",
+          "startedAt": "2026-08-26T04:02:30Z",
+          "status": "COMPLETED",
+          "workflowName": "Automated Bot Guardrail"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:03:08Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928699997/job/98056620637",
+          "name": "Analyze (actions)",
+          "startedAt": "2026-08-26T04:02:29Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:02:49Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928703267/job/98056627521",
+          "name": "Unit tests",
+          "startedAt": "2026-08-26T04:02:31Z",
+          "status": "COMPLETED",
+          "workflowName": "PHPUnit"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:03:21Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928699997/job/98056620737",
+          "name": "Analyze (javascript-typescript)",
+          "startedAt": "2026-08-26T04:02:30Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:03:16Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928699997/job/98056620575",
+          "name": "Analyze (python)",
+          "startedAt": "2026-08-26T04:02:30Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:03:57Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/actions/runs/32928703267/job/98056627671",
+          "name": "Integration tests (with Postgres)",
+          "startedAt": "2026-08-26T04:02:31Z",
+          "status": "COMPLETED",
+          "workflowName": "PHPUnit"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-26T04:03:03Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/php-ddd-inventory/runs/98056718735",
+          "name": "CodeQL",
+          "startedAt": "2026-08-26T04:03:00Z",
+          "status": "COMPLETED",
+          "workflowName": ""
+        }
+      ],
+      "title": "\u26a1 Bolt: Optimize PurchaseOrderRepository to fetch by tenant and status",
+      "url": "https://github.com/bjohnson1279/php-ddd-inventory/pull/551",
+      "repository": "bjohnson1279/php-ddd-inventory"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "bolt-regex-extraction-globbing-4175813923384417547",
+      "mergeable": "CONFLICTING",
+      "number": 153,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "\u26a1 Bolt: [performance improvement] Replace regex extraction with parameter expansion and case globbing",
+      "url": "https://github.com/bjohnson1279/bash_encoding/pull/153",
+      "repository": "bjohnson1279/bash_encoding"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "bolt/optimize-duration-validation-2802081006699050838",
+      "mergeable": "CONFLICTING",
+      "number": 152,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "\u26a1 Bolt: Replace regex validation with case globbing in encode-all.sh duration check",
+      "url": "https://github.com/bjohnson1279/bash_encoding/pull/152",
+      "repository": "bjohnson1279/bash_encoding"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "sentinel-fix-fetch-toctou-9911691010504638327",
+      "mergeable": "CONFLICTING",
+      "number": 204,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-25T23:35:12Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/actions/runs/32911371922/job/98006071868",
+          "name": "Analyze (javascript-typescript)",
+          "startedAt": "2026-08-25T23:34:27Z",
+          "status": "COMPLETED",
+          "workflowName": "CodeQL"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-25T23:35:06Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/tampermonkey_collection/runs/98006203879",
+          "name": "CodeQL",
+          "startedAt": "2026-08-25T23:35:03Z",
+          "status": "COMPLETED",
+          "workflowName": ""
+        }
+      ],
+      "title": "\ud83d\udee1\ufe0f Sentinel: [CRITICAL/HIGH] Fix TOCTOU evasion in fetch interceptor",
+      "url": "https://github.com/bjohnson1279/tampermonkey_collection/pull/204",
+      "repository": "bjohnson1279/tampermonkey_collection"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "bolt/perf-getduration-regex-10384962677081624172",
+      "mergeable": "CONFLICTING",
+      "number": 151,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "\u26a1 Bolt: Optimize getDuration regex parsing",
+      "url": "https://github.com/bjohnson1279/bash_encoding/pull/151",
+      "repository": "bjohnson1279/bash_encoding"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "fix-tee-option-injection-1822199058524299035",
+      "mergeable": "CONFLICTING",
+      "number": 150,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "\ud83d\udee1\ufe0f Sentinel: [CRITICAL] Fix Option Injection in tee command",
+      "url": "https://github.com/bjohnson1279/bash_encoding/pull/150",
+      "repository": "bjohnson1279/bash_encoding"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "sentinel/add-api-rate-limiting-9047938700605217906",
+      "mergeable": "MERGEABLE",
+      "number": 34,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-25T17:37:38Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ams-proto/actions/runs/32878952383/job/97903559335",
+          "name": "build-and-test (20.x)",
+          "startedAt": "2026-08-25T17:37:18Z",
+          "status": "COMPLETED",
+          "workflowName": "CI Pipeline"
+        }
+      ],
+      "title": "\ud83d\udee1\ufe0f Sentinel: [HIGH] Add rate limiting to API endpoints",
+      "url": "https://github.com/bjohnson1279/ams-proto/pull/34",
+      "repository": "bjohnson1279/ams-proto"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "fix/xss-vulnerabilities-innerhtml-1339108095910317542",
+      "mergeable": "MERGEABLE",
+      "number": 33,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-25T17:26:46Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ams-proto/actions/runs/32877894630/job/97900177031",
+          "name": "build-and-test (20.x)",
+          "startedAt": "2026-08-25T17:26:30Z",
+          "status": "COMPLETED",
+          "workflowName": "CI Pipeline"
+        }
+      ],
+      "title": "\ud83d\udee1\ufe0f Sentinel: [HIGH] Fix DOM-based XSS via innerHTML templates",
+      "url": "https://github.com/bjohnson1279/ams-proto/pull/33",
+      "repository": "bjohnson1279/ams-proto"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "sentinel-fix-eval-command-injection-tests-2243683132543009979",
+      "mergeable": "MERGEABLE",
+      "number": 149,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "\ud83d\udee1\ufe0f Sentinel: [MEDIUM] Fix command injection in test mocks",
+      "url": "https://github.com/bjohnson1279/bash_encoding/pull/149",
+      "repository": "bjohnson1279/bash_encoding"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "bolt-client-filtering-optimization-11995048800524055687",
+      "mergeable": "MERGEABLE",
+      "number": 32,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-25T17:27:01Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ams-proto/actions/runs/32877905811/job/97900213118",
+          "name": "build-and-test (20.x)",
+          "startedAt": "2026-08-25T17:26:38Z",
+          "status": "COMPLETED",
+          "workflowName": "CI Pipeline"
+        }
+      ],
+      "title": "\u26a1 Bolt: [performance improvement] Optimize client-side search filtering",
+      "url": "https://github.com/bjohnson1279/ams-proto/pull/32",
+      "repository": "bjohnson1279/ams-proto"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/npm_and_yarn/npm_and_yarn-75ebb1dcaf",
+      "mergeable": "MERGEABLE",
+      "number": 1,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "chore(deps): bump the npm_and_yarn group across 5 directories with 2 updates",
+      "url": "https://github.com/bjohnson1279/threat-telemetry/pull/1",
+      "repository": "bjohnson1279/threat-telemetry"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/bundler/thruster-0.1.25",
+      "mergeable": "MERGEABLE",
+      "number": 15,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-19T17:37:07Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282545714/job/96164419488",
+          "name": "scan_ruby",
+          "startedAt": "2026-08-19T17:36:14Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-19T17:37:05Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282545714/job/96164419737",
+          "name": "lint",
+          "startedAt": "2026-08-19T17:36:14Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-19T17:37:38Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282545714/job/96164419694",
+          "name": "test",
+          "startedAt": "2026-08-19T17:36:14Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "Bump thruster from 0.1.22 to 0.1.25",
+      "url": "https://github.com/bjohnson1279/ruby-crm/pull/15",
+      "repository": "bjohnson1279/ruby-crm"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/bundler/brakeman-8.0.6",
+      "mergeable": "MERGEABLE",
+      "number": 14,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-19T17:36:54Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282521561/job/96164342775",
+          "name": "scan_ruby",
+          "startedAt": "2026-08-19T17:35:59Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-19T17:36:48Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282521561/job/96164343114",
+          "name": "lint",
+          "startedAt": "2026-08-19T17:35:58Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-19T17:37:24Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/32282521561/job/96164343090",
+          "name": "test",
+          "startedAt": "2026-08-19T17:35:58Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "Bump brakeman from 8.0.5 to 8.0.6",
+      "url": "https://github.com/bjohnson1279/ruby-crm/pull/14",
+      "repository": "bjohnson1279/ruby-crm"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/bundler/bootsnap-1.25.0",
+      "mergeable": "MERGEABLE",
+      "number": 13,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-12T17:34:46Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623295550/job/94203219184",
+          "name": "scan_ruby",
+          "startedAt": "2026-08-12T17:34:24Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-12T17:34:53Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623295550/job/94203219052",
+          "name": "lint",
+          "startedAt": "2026-08-12T17:34:25Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-12T17:35:14Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623295550/job/94203219171",
+          "name": "test",
+          "startedAt": "2026-08-12T17:34:25Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "Bump bootsnap from 1.24.6 to 1.25.0",
+      "url": "https://github.com/bjohnson1279/ruby-crm/pull/13",
+      "repository": "bjohnson1279/ruby-crm"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/bundler/image_processing-2.0.3",
+      "mergeable": "MERGEABLE",
+      "number": 12,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-12T17:34:25Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623271597/job/94203138429",
+          "name": "scan_ruby",
+          "startedAt": "2026-08-12T17:34:07Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-12T17:34:23Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623271597/job/94203138589",
+          "name": "lint",
+          "startedAt": "2026-08-12T17:34:08Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-12T17:34:49Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31623271597/job/94203138658",
+          "name": "test",
+          "startedAt": "2026-08-12T17:34:07Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "Bump image_processing from 2.0.2 to 2.0.3",
+      "url": "https://github.com/bjohnson1279/ruby-crm/pull/12",
+      "repository": "bjohnson1279/ruby-crm"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/bundler/solid_queue-1.6.0",
+      "mergeable": "MERGEABLE",
+      "number": 11,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-05T17:35:06Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31030653328/job/92390204823",
+          "name": "scan_ruby",
+          "startedAt": "2026-08-05T17:34:37Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-05T17:35:03Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31030653328/job/92390204868",
+          "name": "lint",
+          "startedAt": "2026-08-05T17:34:32Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-08-05T17:35:31Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/31030653328/job/92390205329",
+          "name": "test",
+          "startedAt": "2026-08-05T17:34:39Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "Bump solid_queue from 1.4.0 to 1.6.0",
+      "url": "https://github.com/bjohnson1279/ruby-crm/pull/11",
+      "repository": "bjohnson1279/ruby-crm"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/bundler/rails-8.1.3.1",
+      "mergeable": "MERGEABLE",
+      "number": 10,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-29T17:35:19Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30475969650/job/90657628257",
+          "name": "scan_ruby",
+          "startedAt": "2026-07-29T17:34:43Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-29T17:35:16Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30475969650/job/90657628296",
+          "name": "lint",
+          "startedAt": "2026-07-29T17:34:49Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-29T17:35:26Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30475969650/job/90657628276",
+          "name": "test",
+          "startedAt": "2026-07-29T17:34:43Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "Bump rails from 8.1.3 to 8.1.3.1",
+      "url": "https://github.com/bjohnson1279/ruby-crm/pull/10",
+      "repository": "bjohnson1279/ruby-crm"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/bundler/bundler-e34e83336b",
+      "mergeable": "MERGEABLE",
+      "number": 8,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-23T15:06:59Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30018993535/job/89246441369",
+          "name": "scan_ruby",
+          "startedAt": "2026-07-23T15:06:42Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-23T15:07:02Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30018993535/job/89246441310",
+          "name": "lint",
+          "startedAt": "2026-07-23T15:06:43Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-23T15:07:35Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/30018993535/job/89246441324",
+          "name": "test",
+          "startedAt": "2026-07-23T15:06:43Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "Bump loofah from 2.25.1 to 2.25.2 in the bundler group across 1 directory",
+      "url": "https://github.com/bjohnson1279/ruby-crm/pull/8",
+      "repository": "bjohnson1279/ruby-crm"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/bundler/solid_cable-4.0.2",
+      "mergeable": "MERGEABLE",
+      "number": 6,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-22T17:35:27Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942950655/job/89001142663",
+          "name": "scan_ruby",
+          "startedAt": "2026-07-22T17:34:59Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-22T17:35:27Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942950655/job/89001142853",
+          "name": "lint",
+          "startedAt": "2026-07-22T17:34:59Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-22T17:35:45Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942950655/job/89001142794",
+          "name": "test",
+          "startedAt": "2026-07-22T17:34:59Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "Bump solid_cable from 4.0.0 to 4.0.2",
+      "url": "https://github.com/bjohnson1279/ruby-crm/pull/6",
+      "repository": "bjohnson1279/ruby-crm"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/bundler/pagy-43.6.1",
+      "mergeable": "MERGEABLE",
+      "number": 5,
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-22T17:35:10Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942934459/job/89001088392",
+          "name": "scan_ruby",
+          "startedAt": "2026-07-22T17:34:46Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-22T17:35:09Z",
+          "conclusion": "FAILURE",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942934459/job/89001088302",
+          "name": "lint",
+          "startedAt": "2026-07-22T17:34:46Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-07-22T17:35:29Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/bjohnson1279/ruby-crm/actions/runs/29942934459/job/89001088336",
+          "name": "test",
+          "startedAt": "2026-07-22T17:34:46Z",
+          "status": "COMPLETED",
+          "workflowName": "CI"
+        }
+      ],
+      "title": "Bump pagy from 43.5.6 to 43.6.1",
+      "url": "https://github.com/bjohnson1279/ruby-crm/pull/5",
+      "repository": "bjohnson1279/ruby-crm"
+    },
+    {
+      "baseRefName": "main",
+      "headRefName": "dependabot/npm_and_yarn/react-grid-layout/grid-layout/npm_and_yarn-e35d90b649",
+      "mergeable": "MERGEABLE",
+      "number": 4,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump the npm_and_yarn group across 1 directory with 3 updates",
+      "url": "https://github.com/bjohnson1279/css-practice/pull/4",
+      "repository": "bjohnson1279/css-practice"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/npm_and_yarn-58c3b0d4d3",
+      "mergeable": "MERGEABLE",
+      "number": 4,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump the npm_and_yarn group across 1 directory with 3 updates",
+      "url": "https://github.com/bjohnson1279/permit-tracker-frontend/pull/4",
+      "repository": "bjohnson1279/permit-tracker-frontend"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/multi-96c788614a",
+      "mergeable": "MERGEABLE",
+      "number": 1,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump on-headers and compression",
+      "url": "https://github.com/bjohnson1279/permit-tracker-frontend/pull/1",
+      "repository": "bjohnson1279/permit-tracker-frontend"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/21---Geolocation/ua-parser-js-0.7.33",
+      "mergeable": "MERGEABLE",
+      "number": 32,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump ua-parser-js from 0.7.28 to 0.7.33 in /21 - Geolocation",
+      "url": "https://github.com/bjohnson1279/js30/pull/32",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/20---Speech-Detection/ua-parser-js-0.7.33",
+      "mergeable": "MERGEABLE",
+      "number": 31,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump ua-parser-js from 0.7.28 to 0.7.33 in /20 - Speech Detection",
+      "url": "https://github.com/bjohnson1279/js30/pull/31",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/19---Webcam-Fun/ua-parser-js-0.7.33",
+      "mergeable": "MERGEABLE",
+      "number": 30,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump ua-parser-js from 0.7.28 to 0.7.33 in /19 - Webcam Fun",
+      "url": "https://github.com/bjohnson1279/js30/pull/30",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/21---Geolocation/qs-6.11.0",
+      "mergeable": "MERGEABLE",
+      "number": 28,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump qs from 6.2.3 to 6.11.0 in /21 - Geolocation",
+      "url": "https://github.com/bjohnson1279/js30/pull/28",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/19---Webcam-Fun/qs-6.11.0",
+      "mergeable": "MERGEABLE",
+      "number": 29,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump qs from 6.2.3 to 6.11.0 in /19 - Webcam Fun",
+      "url": "https://github.com/bjohnson1279/js30/pull/29",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/20---Speech-Detection/qs-6.11.0",
+      "mergeable": "MERGEABLE",
+      "number": 27,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump qs from 6.2.3 to 6.11.0 in /20 - Speech Detection",
+      "url": "https://github.com/bjohnson1279/js30/pull/27",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/21---Geolocation/engine.io-6.2.1",
+      "mergeable": "MERGEABLE",
+      "number": 26,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump engine.io from 3.5.0 to 6.2.1 in /21 - Geolocation",
+      "url": "https://github.com/bjohnson1279/js30/pull/26",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/20---Speech-Detection/engine.io-6.2.1",
+      "mergeable": "MERGEABLE",
+      "number": 25,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump engine.io from 3.5.0 to 6.2.1 in /20 - Speech Detection",
+      "url": "https://github.com/bjohnson1279/js30/pull/25",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/19---Webcam-Fun/engine.io-6.2.1",
+      "mergeable": "MERGEABLE",
+      "number": 24,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump engine.io from 3.5.0 to 6.2.1 in /19 - Webcam Fun",
+      "url": "https://github.com/bjohnson1279/js30/pull/24",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/21---Geolocation/socket.io-parser-3.3.3",
+      "mergeable": "MERGEABLE",
+      "number": 23,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump socket.io-parser from 3.3.2 to 3.3.3 in /21 - Geolocation",
+      "url": "https://github.com/bjohnson1279/js30/pull/23",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/20---Speech-Detection/socket.io-parser-3.3.3",
+      "mergeable": "MERGEABLE",
+      "number": 22,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump socket.io-parser from 3.3.2 to 3.3.3 in /20 - Speech Detection",
+      "url": "https://github.com/bjohnson1279/js30/pull/22",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/19---Webcam-Fun/socket.io-parser-3.3.3",
+      "mergeable": "MERGEABLE",
+      "number": 21,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump socket.io-parser from 3.3.2 to 3.3.3 in /19 - Webcam Fun",
+      "url": "https://github.com/bjohnson1279/js30/pull/21",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/21---Geolocation/minimatch-3.1.2",
+      "mergeable": "MERGEABLE",
+      "number": 20,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump minimatch from 3.0.4 to 3.1.2 in /21 - Geolocation",
+      "url": "https://github.com/bjohnson1279/js30/pull/20",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/21---Geolocation/follow-redirects-1.14.8",
+      "mergeable": "MERGEABLE",
+      "number": 19,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump follow-redirects from 1.13.3 to 1.14.8 in /21 - Geolocation",
+      "url": "https://github.com/bjohnson1279/js30/pull/19",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/20---Speech-Detection/follow-redirects-1.14.8",
+      "mergeable": "MERGEABLE",
+      "number": 18,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump follow-redirects from 1.14.1 to 1.14.8 in /20 - Speech Detection",
+      "url": "https://github.com/bjohnson1279/js30/pull/18",
+      "repository": "bjohnson1279/js30"
+    },
+    {
+      "baseRefName": "master",
+      "headRefName": "dependabot/npm_and_yarn/19---Webcam-Fun/follow-redirects-1.14.8",
+      "mergeable": "MERGEABLE",
+      "number": 17,
+      "state": "OPEN",
+      "statusCheckRollup": [],
+      "title": "Bump follow-redirects from 1.13.3 to 1.14.8 in /19 - Webcam Fun",
+      "url": "https://github.com/bjohnson1279/js30/pull/17",
+      "repository": "bjohnson1279/js30"
+    }
+  ]
+}

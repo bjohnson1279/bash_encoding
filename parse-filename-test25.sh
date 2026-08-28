@@ -5,7 +5,7 @@
 FILE="The Big Bang Theory - S05E12 - The Shiny Trinket Maneuver.ts"
 
 # parseFilename function from encode-all.sh
-source <(sed -n '/^parseFilename() {/,/^}/p' encode-all.sh)
+source <(sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFilename() {/,/^}/p' encode-all.sh)
 
 echo "Benchmarking parseFilename from encode-all.sh..."
 time for i in {1..1000}; do

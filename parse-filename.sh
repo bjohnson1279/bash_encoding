@@ -28,7 +28,7 @@ cleanup_name() {
     if [ -n "$out_ref_name" ]; then
         case "$out_ref_name" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -55,7 +55,7 @@ json_escape() {
     if [ -n "$out_ref_name" ]; then
         case "$out_ref_name" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -68,7 +68,7 @@ json_escape() {
 
 parse_filename() {
     if [ -z "$1" ]; then
-        echo "Usage: parse_filename \"<filename>\""
+        printf '%s\n' "Usage: parse_filename \"<filename>\""
         return 1
     fi
 
@@ -81,7 +81,6 @@ parse_filename() {
     # This avoids spawning a subshell and a `sed` process, and eliminates the need to join/split strings,
     # performing significantly faster natively.
     if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
-        show_name="${BASH_REMATCH[1]}"
     # ⚡ Bolt Optimization: Replace `sed` capture groups and string splitting with native Bash regex matching.
     # Eliminates process forking and subshell overhead.
     local show_raw season_raw episode_raw title_raw
@@ -96,7 +95,6 @@ parse_filename() {
         episode_raw="${BASH_REMATCH[3]}"
         title_raw="${BASH_REMATCH[4]}"
     elif [[ "$base_name" =~ ^(.*)[._\ -]([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2})(.*)$ ]]; then
-        show_name="${BASH_REMATCH[1]}"
         show_raw="${BASH_REMATCH[1]}"
         season_raw="${BASH_REMATCH[2]}"
         episode_raw="${BASH_REMATCH[3]}"
@@ -123,12 +121,8 @@ parse_filename() {
     # shellcheck disable=SC2034
     PARSED_EPISODE_NUM="$episode_num"
 
-    cleanup_name "$show_name" show_name
     cleanup_name "$title_raw" PARSED_EPISODE_TITLE
     episode_title="$PARSED_EPISODE_TITLE"
-    cleanup_name "$show_raw" PARSED_SHOW_NAME
-    show_name="$PARSED_SHOW_NAME"
-
     cleanup_name "$show_raw" PARSED_SHOW_NAME
     show_name="$PARSED_SHOW_NAME"
 

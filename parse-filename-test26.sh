@@ -2,7 +2,7 @@
 
 FILE="The Big Bang Theory - S05E12 - The Shiny Trinket Maneuver.ts"
 
-source <(sed -n '/^parseFilename() {/,/^}/p' encode-all.sh)
+source <(sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFilename() {/,/^}/p' encode-all.sh)
 
 echo "Benchmarking with regex..."
 time for i in {1..5000}; do

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 FILE="Another Show - S02E10 - A New Day (2022).ts"
-source <(sed -n '/^parseFilename() {/,/^}/p' encode-all.sh)
+source <(sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFilename() {/,/^}/p' encode-all.sh)
 
 echo "Benchmarking with regex extraction:"
 time for j in {1..20000}; do

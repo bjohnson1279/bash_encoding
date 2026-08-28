@@ -32,11 +32,13 @@ getDuration() {
     # This halves process spawning overhead for files missing format duration (or returning N/A).
     output=$(ffprobe -v error -select_streams v:0 -show_entries format=duration:stream=duration -of flat -i "${1}" 2>/dev/null || true)
 
-    if [[ "$output" =~ format\.duration=\"([^\"]+)\" ]]; then
-        format_dur="${BASH_REMATCH[1]}"
+    if [[ "$output" == *format.duration=\"* ]]; then
+        format_dur="${output#*format.duration=\"}"
+        format_dur="${format_dur%%\"*}"
     fi
-    if [[ "$output" =~ streams\.stream\.0\.duration=\"([^\"]+)\" ]]; then
-        stream_dur="${BASH_REMATCH[1]}"
+    if [[ "$output" == *streams.stream.0.duration=\"* ]]; then
+        stream_dur="${output#*streams.stream.0.duration=\"}"
+        stream_dur="${stream_dur%%\"*}"
     fi
 
     if [ -n "$format_dur" ] && [ "$format_dur" != "N/A" ]; then
@@ -49,7 +51,7 @@ getDuration() {
     if [[ -n "$2" ]]; then
         case "$2" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -74,7 +76,7 @@ cleanup_name() {
     if [ -n "$out_ref_name" ]; then
         case "$out_ref_name" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -95,7 +97,7 @@ json_escape() {
     if [ -n "$out_ref_name" ]; then
         case "$out_ref_name" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -115,30 +117,23 @@ parseFilename() {
     local title_raw=""
     local year_raw=""
 
-    # 1. Try to match: Show Name (Year) - S01E02 - Title (Date Time)
-    if [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]+(.*)\ \([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
-        show_raw="${BASH_REMATCH[1]}"
-        year_raw="${BASH_REMATCH[2]}"
-        season_raw="${BASH_REMATCH[3]}"
-        episode_raw="${BASH_REMATCH[4]}"
-        title_raw="${BASH_REMATCH[5]}"
-    # 2. Try to match: Show Name (Year) S01E02 Title (Date Time)
-    elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]+(.*)\ \([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
-        show_raw="${BASH_REMATCH[1]}"
-        year_raw="${BASH_REMATCH[2]}"
-        season_raw="${BASH_REMATCH[3]}"
-        episode_raw="${BASH_REMATCH[4]}"
-        title_raw="${BASH_REMATCH[5]}"
-    # 3. Try to match: Show Name (Year) S01E02 Title...
-    elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
+    # ⚡ Bolt Optimization: Consolidate overlapping regex evaluations into a single branch.
+    # Evaluating complex regular expressions in bash is a significant bottleneck.
+    # The previous logic had two near-identical regex branches for "Show Name (Year) S01E02..."
+    # which we've combined. We handle stripping the trailing date manually below.
+    # 1. Try to match: Show Name (Year) S01E02 Title...
+    if [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
         show_raw="${BASH_REMATCH[1]}"
         year_raw="${BASH_REMATCH[2]}"
         season_raw="${BASH_REMATCH[3]}"
         episode_raw="${BASH_REMATCH[4]}"
         title_raw="${BASH_REMATCH[5]}"
         # Strip trailing date if present
-        if [[ "$title_raw" =~ ^(.*)\ \([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
+        if [[ "$title_raw" =~ ^(.*)[._\ -]+\([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
             title_raw="${BASH_REMATCH[1]}"
+        elif [[ "$title_raw" =~ ^\([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
+            # The title was just the date, effectively no title
+            title_raw=""
         fi
     # 4. Try to match: Movie Name (Year)
     elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)$ ]]; then
@@ -201,7 +196,7 @@ parseFilename() {
         if [ "$2" = "--no-json" ]; then return 0; fi
         case "$2" in
             *[!a-zA-Z0-9_]*|[0-9]*|"")
-                echo "Error: Invalid output variable name." >&2
+                printf '%s\n' "Error: Invalid output variable name." >&2
                 return 1
                 ;;
         esac
@@ -213,7 +208,7 @@ parseFilename() {
 }
 
 if [ ! -d "$DESTINATION_PATH" ]; then
-    echo "Error: Destination path '$DESTINATION_PATH' not found." >&2
+    printf '%s\n' "Error: Destination path '$DESTINATION_PATH' not found." >&2
     exit 1
 fi
 
@@ -221,8 +216,7 @@ fi
 # than nested loops and `cd`.
 shopt -s globstar nullglob
 for ts_file in "$RECORDING_PATH"/**/*.ts; do
-    shopt -u globstar nullglob
-    echo "--------------------------------------------------"
+    printf '%s\n' "--------------------------------------------------"
     printf 'Processing file: %s\n' "$ts_file"
 
     # Parse filename to get metadata
@@ -230,7 +224,7 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
     # It returns a status code and sets PARSED_* variables.
     # ⚡ Bolt Optimization: Pass --no-json to prevent expensive JSON escaping/formatting since we only read PARSED_* variables
     if ! parseFilename "$ts_file" --no-json; then
-        echo "Warning: Could not parse metadata from '$ts_file'. Skipping."
+        printf '%s\n' "Warning: Could not parse metadata from '$ts_file'. Skipping."
         continue
     fi
 
@@ -260,7 +254,7 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
     fi
 
     # --- Pre-flight check on the source file ---
-    echo "Verifying source file integrity with ffprobe..."
+    printf '%s\n' "Verifying source file integrity with ffprobe..."
     # ⚡ Bolt Optimization: Combine pre-flight integrity check and duration fetch into one call.
     # ffprobe will return empty/no duration for corrupt files.
     getDuration "$ts_file" src_duration
@@ -288,13 +282,13 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
     )
 
     # Execute the command
-    echo "Encoding..."
+    printf '%s\n' "Encoding..."
     # We redirect stderr (2) to stdout (1), then pipe it to `tee`.
     # `tee` will print to the console and also write to the log file.
     # We use `pipefail` to ensure the exit status of the `if` statement
     # is from ffmpeg, not from tee.
     set -o pipefail
-    if ! ffmpeg "${ffmpeg_args[@]}" "$new_file_full" 2>&1 | tee "${new_file_full}.log"; then
+    if ! ffmpeg "${ffmpeg_args[@]}" "$new_file_full" 2>&1 | tee -- "${new_file_full}.log"; then
         printf "Error: Encoding failed. See log for details: %s.log\n" "${new_file_full}"
         set +o pipefail # Unset pipefail
         continue # Move to the next file
@@ -307,10 +301,16 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
         getDuration "$new_file_full" dest_duration
 
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
+<<<<<<< HEAD
             echo "Warning: Duration could not be reliably determined. Original file kept."
         elif ! is_valid_duration "$src_duration" || ! is_valid_duration "$dest_duration"; then
+=======
+            printf '%s\n' "Warning: Duration could not be reliably determined. Original file kept."
+        elif case "$src_duration" in ''|*[!0-9.]*|*.*.*|.*|*.) true ;; *) false ;; esac || \
+             case "$dest_duration" in ''|*[!0-9.]*|*.*.*|.*|*.) true ;; *) false ;; esac; then
+>>>>>>> origin/master
             # 🛡️ Sentinel: Validate duration formats to prevent arithmetic expression injection during calculation
-            echo "Warning: Duration formats are invalid. Expected numeric formats. Original file kept."
+            printf '%s\n' "Warning: Duration formats are invalid. Expected numeric formats. Original file kept."
         else
             # ⚡ Bolt Optimization: Replace subshells spawning `bc` with native bash fixed-point math.
             # This avoids expensive process forks, significantly speeding up the duration matching logic.
@@ -341,13 +341,13 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
 
             # Compare difference (< 1000000 is < 1.0)
             if [ "$duration_diff" -lt 1000000 ]; then
-                echo "Encoding successful. Durations match."
+                printf '%s\n' "Encoding successful. Durations match."
                 if [ "$DEL_ORIG" -eq 1 ]; then
                     printf "Deleting original file: %s\n" "$ts_file"
                     rm -- "$ts_file"
                 fi
             else
-                echo "Warning: Duration mismatch. Source: ${src_duration}s, Dest: ${dest_duration}s. Original file kept."
+                printf '%s\n' "Warning: Duration mismatch. Source: ${src_duration}s, Dest: ${dest_duration}s. Original file kept."
             fi
         fi
     else
@@ -355,6 +355,7 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
         printf "Error: Encoding failed. Output file not found. See log for details: %s.log\n" "${new_file_full}"
     fi
 done
+shopt -u globstar nullglob
 
-echo "--------------------------------------------------"
-echo "All processing complete."
+printf '%s\n' "--------------------------------------------------"
+printf '%s\n' "All processing complete."
