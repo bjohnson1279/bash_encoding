@@ -128,13 +128,22 @@ parseFilename() {
         season_raw="${BASH_REMATCH[3]}"
         episode_raw="${BASH_REMATCH[4]}"
         title_raw="${BASH_REMATCH[5]}"
-        # Strip trailing date if present
-        if [[ "$title_raw" =~ ^(.*)[._\ -]+\([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
-            title_raw="${BASH_REMATCH[1]}"
-        elif [[ "$title_raw" =~ ^\([0-9]{4}-[0-9]{2}-[0-9]{2}.*\)$ ]]; then
-            # The title was just the date, effectively no title
-            title_raw=""
-        fi
+        # ⚡ Bolt Optimization: Replace slow bash regex engine with native case statement globbing.
+        # This executes significantly faster in busy loops and natively handles trailing date removal.
+        case "$title_raw" in
+            \([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*\))
+                # The title was just the date, effectively no title
+                title_raw=""
+                ;;
+            *\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*\))
+                # Parameter expansion to remove the date
+                title_raw="${title_raw%\(*}"
+                # Strip trailing separators
+                while case "$title_raw" in *[._\ -]) true;; *) false;; esac; do
+                    title_raw="${title_raw%?}"
+                done
+                ;;
+        esac
     # 4. Try to match: Movie Name (Year)
     elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)$ ]]; then
         show_raw="${BASH_REMATCH[1]}"
