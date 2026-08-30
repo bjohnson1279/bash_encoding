@@ -2,8 +2,9 @@
 
 # Extract parseFilename function from encode-all.sh to avoid executing its main block
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TMP_FILE="$(mktemp -t tmp_parseFilename.XXXXXX.sh)"
-trap 'rm -f "$TMP_FILE"' EXIT
+TMP_DIR="$(mktemp -d)"
+TMP_FILE="$TMP_DIR/tmp_parseFilename.sh"
+trap 'rm -rf "$TMP_DIR"' EXIT
 sed -n '/^cleanup_name() {/,/^}/p; /^json_escape() {/,/^}/p; /^parseFilename() {/,/^}/p' "$SCRIPT_DIR/encode-all.sh" > "$TMP_FILE"
 source "$TMP_FILE"
 
