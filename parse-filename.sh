@@ -80,21 +80,17 @@ parse_filename() {
     # ⚡ Bolt Optimization: Replace `sed` capture groups and IFS string parsing with native Bash regex matching.
     # This avoids spawning a subshell and a `sed` process, and eliminates the need to join/split strings,
     # performing significantly faster natively.
-    if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
-    # ⚡ Bolt Optimization: Replace `sed` capture groups and string splitting with native Bash regex matching.
-    # Eliminates process forking and subshell overhead.
     local show_raw season_raw episode_raw title_raw
 
-    # ⚡ Bolt Optimization: Replace subshell sed operations and IFS splitting with native bash regex.
+    # ⚡ Bolt Optimization: Replace `sed` capture groups and string splitting with native Bash regex matching.
+    # Eliminates process forking and subshell overhead.
     # The pattern looks for "S<season>E<episode>" and captures the parts around it.
     # It handles variations in separators (., _, -, space).
     # Spaces inside character classes must be escaped (e.g. `[._\ -]`) to avoid syntax errors.
     # If standard pattern fails, fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
-        show_raw="${BASH_REMATCH[1]}"
-        season_raw="${BASH_REMATCH[2]}"
-        episode_raw="${BASH_REMATCH[3]}"
-        title_raw="${BASH_REMATCH[4]}"
-    elif [[ "$base_name" =~ ^(.*)[._\ -]([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2})(.*)$ ]]; then
+    # ⚡ Bolt Optimization: Consolidate identical overlapping regex branches.
+    if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]] || \
+       [[ "$base_name" =~ ^(.*)[._\ -]([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2})(.*)$ ]]; then
         show_raw="${BASH_REMATCH[1]}"
         season_raw="${BASH_REMATCH[2]}"
         episode_raw="${BASH_REMATCH[3]}"
