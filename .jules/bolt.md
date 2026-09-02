@@ -140,3 +140,6 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2026-08-31 - Consolidate identical overlapping bash regex evaluations
 **Learning:** Evaluating complex regular expressions in bash (`[[ ... =~ ... ]]`) is a measurable bottleneck in tight loops. Having near-identical overlapping regex branches (e.g., matching trailing string A vs trailing string B where the core is the same) forces the engine to redundantly evaluate the long shared pattern multiple times when the first branch fails.
 **Action:** Consolidate redundant regex branches into a single evaluation block using an optional/combined capture, or by offloading trailing component identification (like dates or specific suffixes) to native bash parameter expansion or case statement globbing *after* the initial core pattern matches.
+## 2026-08-31 - Replace Regex with Case Statement Globbing for Trailing String Stripping
+**Learning:** In Bash, using a `while case` loop character-by-character to strip a trailing separator string (e.g. `._ -`) is slow inside a busy loop.
+**Action:** When stripping trailing components from a string, avoid `while case` where possible. Use native bash parameter expansions to manipulate the string, for example `title_raw="${title_raw%"${title_raw##*[!._ -]}"}"` to strip trailing separators.
