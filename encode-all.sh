@@ -149,9 +149,8 @@ parseFilename() {
                 # Parameter expansion to remove the date
                 title_raw="${title_raw%\(*}"
                 # Strip trailing separators
-                while case "$title_raw" in *[._\ -]) true;; *) false;; esac; do
-                    title_raw="${title_raw%?}"
-                done
+                # ⚡ Bolt Optimization: Replace loop with native parameter expansion for stripping trailing characters
+                title_raw="${title_raw%"${title_raw##*[!._ -]}"}"
                 ;;
         esac
     # 4. Try to match: Movie Name (Year)
@@ -312,14 +311,9 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
         getDuration "$new_file_full" dest_duration
 
         if [ -z "$src_duration" ] || [ "$src_duration" = "N/A" ] || [ -z "$dest_duration" ] || [ "$dest_duration" = "N/A" ]; then
-<<<<<<< HEAD
-            echo "Warning: Duration could not be reliably determined. Original file kept."
-        elif ! is_valid_duration "$src_duration" || ! is_valid_duration "$dest_duration"; then
-=======
             printf '%s\n' "Warning: Duration could not be reliably determined. Original file kept."
         elif case "$src_duration" in ''|*[!0-9.]*|*.*.*|.*|*.) true ;; *) false ;; esac || \
              case "$dest_duration" in ''|*[!0-9.]*|*.*.*|.*|*.) true ;; *) false ;; esac; then
->>>>>>> origin/master
             # 🛡️ Sentinel: Validate duration formats to prevent arithmetic expression injection during calculation
             printf '%s\n' "Warning: Duration formats are invalid. Expected numeric formats. Original file kept."
         else
