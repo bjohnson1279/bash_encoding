@@ -122,12 +122,22 @@ parseFilename() {
     # The previous logic had two near-identical regex branches for "Show Name (Year) S01E02..."
     # which we've combined. We handle stripping the trailing date manually below.
     # 1. Try to match: Show Name (Year) S01E02 Title...
-    if [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)[._\ -]+[Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
+    if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
         show_raw="${BASH_REMATCH[1]}"
-        year_raw="${BASH_REMATCH[2]}"
-        season_raw="${BASH_REMATCH[3]}"
-        episode_raw="${BASH_REMATCH[4]}"
-        title_raw="${BASH_REMATCH[5]}"
+        season_raw="${BASH_REMATCH[2]}"
+        episode_raw="${BASH_REMATCH[3]}"
+        title_raw="${BASH_REMATCH[4]}"
+
+        case "$show_raw" in
+            *\([0-9][0-9][0-9][0-9]\)*)
+                year_raw="${show_raw##*\(}"
+                year_raw="${year_raw%%\)*}"
+                show_raw="${show_raw%\ (*}"
+                ;;
+            *)
+                year_raw=""
+                ;;
+        esac
         # ⚡ Bolt Optimization: Replace slow bash regex engine with native case statement globbing.
         # This executes significantly faster in busy loops and natively handles trailing date removal.
         case "$title_raw" in
@@ -148,14 +158,6 @@ parseFilename() {
     elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)$ ]]; then
         show_raw="${BASH_REMATCH[1]}"
         year_raw="${BASH_REMATCH[2]}"
-    else
-        # Fallback basic matching
-        if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})(.*)$ ]]; then
-            show_raw="${BASH_REMATCH[1]}"
-            season_raw="${BASH_REMATCH[2]}"
-            episode_raw="${BASH_REMATCH[3]}"
-            title_raw="${BASH_REMATCH[4]}"
-        fi
     fi
 
     # Formatting season / episode
