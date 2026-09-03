@@ -66,13 +66,13 @@ run_test() {
     output=$(parse_filename "$filename")
     local exit_code=$?
 
-    if [ $exit_code -ne $expected_exit_code ]; then
+    if [ "$exit_code" -ne "$expected_exit_code" ]; then
         printf '%b\n' "${RED}  FAIL: Expected exit code $expected_exit_code, got $exit_code${NC}"
         ((FAILED_TESTS++))
         return
     fi
 
-    if [ $expected_exit_code -ne 0 ]; then
+    if [ "$expected_exit_code" -ne 0 ]; then
         printf '%b\n' "${GREEN}  PASS (Failed as expected)${NC}"
         return
     fi
@@ -108,7 +108,7 @@ run_test() {
         test_failed=1
     fi
 
-    if [ $test_failed -eq 0 ]; then
+    if [ "$test_failed" -eq 0 ]; then
         printf '%b\n' "${GREEN}  PASS${NC}"
     else
         ((FAILED_TESTS++))
@@ -176,7 +176,7 @@ run_test "" "" "" "" "" 1
 printf '%s\n' "Testing: missing argument"
 output=$(parse_filename 2>&1)
 exit_code=$?
-if [ $exit_code -ne 1 ]; then
+if [ "$exit_code" -ne 1 ]; then
     printf '%b\n' "${RED}  FAIL: Expected exit code 1 for missing argument, got $exit_code${NC}"
     ((FAILED_TESTS++))
 elif [ "$output" != "Usage: parse_filename \"<filename>\"" ]; then
@@ -200,7 +200,7 @@ printf '%s\n' "Total: $TOTAL_TESTS"
 printf '%s\n' "Failed: $FAILED_TESTS"
 printf '%b\n' "Passed: $((TOTAL_TESTS - FAILED_TESTS))"
 
-if [ $FAILED_TESTS -ne 0 ]; then
+if [ "$FAILED_TESTS" -ne 0 ]; then
     exit 1
 else
     exit 0

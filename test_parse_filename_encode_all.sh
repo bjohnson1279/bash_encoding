@@ -185,7 +185,7 @@ assert_equal '' "$(printf "%s\n" "$actual" | jq -r '.show')" "Empty input - Show
 assert_equal '' "$(printf "%s\n" "$actual" | jq -r '.season')" "Empty input - Season"
 assert_equal '' "$(printf "%s\n" "$actual" | jq -r '.episode')" "Empty input - Episode"
 
-if [ $FAILED -gt 0 ]; then
+if [ "$FAILED" -gt 0 ]; then
     printf "Summary: %s tests failed.\n" "$FAILED"
     exit 1
 else

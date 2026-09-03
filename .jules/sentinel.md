@@ -133,3 +133,13 @@ Ensure `case` statement branches always terminate properly with `;;` when they d
 **Vulnerability:** Command Line Option Injection
 **Learning:** `grep` usages like `grep "$var"` or `grep "file.mkv"` are technically vulnerable if the provided string begins with a hyphen, which could cause `grep` to interpret it as an option (e.g. `-e`) instead of a search string.
 **Prevention:** Always explicitly use the `-e` flag for the pattern (e.g. `grep -e "$pattern"`) to ensure the pattern is treated as a pattern and not a flag, and `--` to signify the end of options.
+
+## 2024-05-21 - [MEDIUM] Prevent Logic Bypass in Bash Conditionals
+**Vulnerability:** Bypass of logic (fail-open or fail-closed) driven by unquoted variable expansion syntax errors.
+**Learning:** `test_parse_filename.sh` and `test_parse_filename_encode_all.sh` used unquoted variables within test conditionals (e.g., `if [ $exit_code -ne 1 ]; then` and `if [ $FAILED -gt 0 ]; then`). If these variables were empty or unset, the shell threw a `unary operator expected` syntax error. Bash treats syntax errors in conditionals as a `false` evaluation, which can inadvertently bypass critical logic checks or security constraints.
+**Prevention:** Always quote variables within test conditionals (e.g., `[ "$VAR" == 1 ]` or `[ -n "$VAR" ]`) to ensure safe expansion and prevent syntax-error driven logic bypassing.
+
+## 2024-08-26 - [MEDIUM] Prevent Option Injection in text search commands like grep
+**Vulnerability:** Command Line Option Injection
+**Learning:** `grep` usages like `grep -c -e "^ffmpeg" "${TEST_TEMP_DIR}/ffmpeg_calls.log"` in `test_encode-mkv.bats` are technically vulnerable if the provided file path string begins with a hyphen, which could cause `grep` to interpret it as an option instead of a file path.
+**Prevention:** Always use `--` to signify the end of options before providing the file path argument to commands like `grep` (e.g. `grep -e "$pattern" -- "$filepath"`).
