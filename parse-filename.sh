@@ -124,8 +124,15 @@ parse_filename() {
 
     # ⚡ Bolt Optimization: Skip expensive JSON escaping and formatting if --no-json is passed.
     if [ "$2" != "--no-json" ]; then
-        json_escape "$show_name" show_name_esc
-        json_escape "$episode_title" episode_title_esc
+        # ⚡ Bolt Optimization: Replace json_escape function calls with inline native parameter expansion.
+        # Avoids significant process spawning and function evaluation overhead inside loops.
+        local show_name_esc="${show_name//\\/\\\\}"
+        show_name_esc="${show_name_esc//\"/\\\"}"
+        show_name_esc="${show_name_esc//$'\n'/\\n}"
+
+        local episode_title_esc="${episode_title//\\/\\\\}"
+        episode_title_esc="${episode_title_esc//\"/\\\"}"
+        episode_title_esc="${episode_title_esc//$'\n'/\\n}"
 
         # Output JSON
         # shellcheck disable=SC2154
