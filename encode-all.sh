@@ -185,6 +185,7 @@ parseFilename() {
 
     local json_str=""
     if [ "$2" != "--no-json" ]; then
+<<<<<<< HEAD
         local esc_show esc_season esc_episode esc_title esc_premiered esc_date
         json_escape "$show_name" esc_show
         esc_season="$season_num"
@@ -192,6 +193,31 @@ parseFilename() {
         json_escape "$episode_title" esc_title
         esc_premiered="$year_raw"
         esc_date="" # We leave date empty for compatibility or further parsing if needed
+=======
+        # ⚡ Bolt Optimization: Replace json_escape function calls with inline native parameter expansion.
+        # Avoids significant process spawning and function evaluation overhead inside loops.
+        local esc_show="${show_name//\\/\\\\}"
+        esc_show="${esc_show//\"/\\\"}"
+        esc_show="${esc_show//$'\n'/\\n}"
+
+        local esc_season="${season_num//\\/\\\\}"
+        esc_season="${esc_season//\"/\\\"}"
+        esc_season="${esc_season//$'\n'/\\n}"
+
+        local esc_episode="${episode_num//\\/\\\\}"
+        esc_episode="${esc_episode//\"/\\\"}"
+        esc_episode="${esc_episode//$'\n'/\\n}"
+
+        local esc_title="${episode_title//\\/\\\\}"
+        esc_title="${esc_title//\"/\\\"}"
+        esc_title="${esc_title//$'\n'/\\n}"
+
+        local esc_premiered="${year_raw//\\/\\\\}"
+        esc_premiered="${esc_premiered//\"/\\\"}"
+        esc_premiered="${esc_premiered//$'\n'/\\n}"
+
+        local esc_date="" # We leave date empty for compatibility or further parsing if needed
+>>>>>>> origin/master
 
         printf -v json_str '{"show":"%s","season":"%s","episode":"%s","title":"%s","premiered":"%s","date":"%s"}' \
             "$esc_show" \
