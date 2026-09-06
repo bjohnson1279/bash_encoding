@@ -146,3 +146,15 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2024-11-26 - JSON Construction in Bash Loops
 **Learning:** Calling functions (even simple ones like `json_escape`) iteratively to process multiple fields inside a loop introduces substantial overhead. Bypassing the function call entirely by using native parameter expansion (e.g., `${var//\\/\\\\}`) inline for JSON generation can significantly reduce process and subshell overhead. However, be mindful that using `local -n` (nameref) to bypass `printf -v` subshell overhead inside the escaping function is slightly less performant and introduces safety risks if the caller uses a conflicting variable name (like `ref`).
 **Action:** When constructing simple JSON outputs from variables in hot paths, prefer inlining the native parameter expansions (escaping backslashes first, then quotes, then newlines) directly over repeatedly invoking a dedicated escaping subroutine. Also, always ensure to properly quote substitutions involving ANSI-C quotes (like `$'\\n'`) because double-quoting them (e.g. `"${var//$'\\n'/\\n}"`) turns them into literal strings.
+
+## Prevention Directives for Automated Refactoring
+- **Never Overwrite Complete Files**: Always use range-scoped replacement chunks (`StartLine`/`EndLine`) for edits to `schema.prisma`, `index.ts`, `public/index.php`, or DDL SQL scripts.
+- **Do Not Remove Core Declarations**: Do not delete existing route registrations or database DDL tables.
+- **Environment Isolation Compatibility**: When replacing fallback secrets, preserve test environment execution via `!getenv('APP_ENV')` or `getenv('APP_ENV') === 'testing'`.
+- **No Scratch Files**: Never stage or commit `test_*.ts`, `test_*.js`, `test.cjs`, `fix_*.php`, or `test.js` files to git.
+- **No Unresolved Conflict Markers**: Never stage or commit files containing Git merge conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`, `|||||||`). Always resolve conflicts cleanly before committing.
+
+## Hallucinatory Task & Empty PR Directives
+- **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
+- **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
+
