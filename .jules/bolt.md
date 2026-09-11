@@ -150,3 +150,14 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2026-08-31 - Redundant variable assignments across functions
 **Learning:** In `parse-filename.sh`, the variables `episode_title` and `show_name` were assigned from identically-named uppercase variables `PARSED_EPISODE_TITLE` and `PARSED_SHOW_NAME` immediately after those were assigned by a function call that supports namerefs. This adds redundant subshell/assignment execution overhead in a hot path.
 **Action:** When a function supports returning values via output variables (like `cleanup_name "$var" out_var`), eliminate intermediate variables by passing the final target variable name directly to the function (e.g., `cleanup_name "$var" episode_title`).
+
+## Prevention Directives for Automated Refactoring
+- **Never Overwrite Complete Files**: Always use range-scoped replacement chunks (`StartLine`/`EndLine`) for edits to `schema.prisma`, `index.ts`, `public/index.php`, or DDL SQL scripts.
+- **Do Not Remove Core Declarations**: Do not delete existing route registrations or database DDL tables.
+- **Environment Isolation Compatibility**: When replacing fallback secrets, preserve test environment execution via `!getenv('APP_ENV')` or `getenv('APP_ENV') === 'testing'`.
+- **No Scratch Files**: Never stage or commit `test_*.ts`, `test_*.js`, `test.cjs`, `fix_*.php`, or `test.js` files to git.
+- **No Unresolved Conflict Markers**: Never stage or commit files containing Git merge conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`, `|||||||`). Always resolve conflicts cleanly before committing.
+
+## Hallucinatory Task & Empty PR Directives
+- **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
+- **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.

@@ -1,1 +1,16 @@
 .vs/
+
+# PR Triage, Audit & Evaluation Artifacts
+*open_prs*.json
+*audited_prs*.json
+*evaluation*.json
+*evaluation*.md
+*triage_report*.md
+*triage_groups*.json
+*pr_workspace_map*.json
+*sample_prs*.json
+*audited_sample*.json
+*pr_eval*.json
+*prs_to_*.json
+*all_open_prs*.json
+*all_audited_prs*.json
