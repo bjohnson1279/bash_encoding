@@ -8,19 +8,19 @@ jobs:
   audit-bot-pr:
     name: Audit Bot PR Diff & Guardrails
     runs-on: ubuntu-latest
-    if: contains(github.actor, 'jules') || contains(github.actor, 'sentinel') || contains(github.head_ref, 'sentinel') || contains(github.head_ref, 'jules') || contains(github.head_ref, 'bolt') || contains(github.head_ref, 'palette')
+    if: contains(github.actor, 'jules') || contains(github.actor, 'sentinel') || contains(github.actor, 'dependabot') || contains(github.head_ref, 'sentinel') || contains(github.head_ref, 'jules') || contains(github.head_ref, 'bolt') || contains(github.head_ref, 'palette')
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Inspect Diff for Bot Regressions, Zero-Diffs & Conflict Markers
+      - name: Inspect Diff Statistics for Destructive Changes & Zero-Diff
         run: |
           echo "=== Auditing PR Diff for Bot Regressions, Hallucinations & Conflict Markers ==="
 
           # 1. Reject Unresolved Git Merge Conflict Markers
-          CONFLICTS=$(git diff origin/${{ github.base_ref }}...HEAD | grep -E '^\+\s*(\<{7}|\={7}|\>{7}|\|{7})' || true)
+          CONFLICTS=$(git diff origin/${{ github.base_ref }}...HEAD | grep -E '^\+\s*(\<\<\<\<\<\<\<|\=\=\=\=\=\=\=|\>\>\>\>\>\>\>|\|\|\|\|\|\|\|)' || true)
           if [ -n "$CONFLICTS" ]; then
             echo "❌ ERROR: PR adds unresolved Git merge conflict markers (<<<<<<<, =======, >>>>>>>). Auto-failing."
             echo "$CONFLICTS"
@@ -28,14 +28,14 @@ jobs:
           fi
 
           # 2. Reject Zero-Diff / Hallucinatory Acknowledgment PRs
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -v '^\.jules/' | grep -v '^\.Jules/' | grep -v 'package.*json' | grep -v 'composer\.lock' | grep -v 'pnpm-lock\.yaml' | grep -v 'mix\.lock' || true)
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -v '^\.jules/' | grep -v '^\.Jules/' | grep -v 'package.*json' | grep -v 'composer\.lock' | grep -v 'Gemfile\.lock' | grep -v 'pnpm-lock\.yaml' | grep -v 'mix\.lock' | grep -v 'Cargo\.lock' || true)
           if [ -z "$CHANGED_FILES" ]; then
             echo "❌ ERROR: PR contains 0 non-metadata code changes (hallucinatory task acknowledgment). Auto-failing."
             exit 1
           fi
 
           # 3. Reject Forbidden Scratch Verification Files
-          SCRATCH_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '^test(_.*)?\.(ts|js|cjs|mjs|py|php)$|^fix_.*\.(php|cjs|js|ts)$|^update_.*\.(php|cjs|js|ts)$|^scratch_.*|.*\.scratch$' || true)
+          SCRATCH_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '(^|/)test(_.*)?\.(ts|js|cjs|mjs|py|php)$|(^|/)fix_.*\.(php|cjs|js|ts)$|(^|/)update_.*\.(php|cjs|js|ts)$|(^|/)scratch_.*|.*\.scratch$' || true)
           if [ -n "$SCRATCH_FILES" ]; then
             echo "❌ ERROR: PR contains forbidden scratch verification files:"
             echo "$SCRATCH_FILES"
@@ -43,7 +43,7 @@ jobs:
           fi
 
           # 4. Reject Destructive Line Deletions in Critical Entrypoints & Schemas
-          DELETED_LINES=$(git diff --stat origin/${{ github.base_ref }}...HEAD | grep -E 'schema\.prisma|src/index\.ts|public/index\.php|docker/postgres/init/|routes/|routes\.php' | awk '{print $5}' | grep '-' || true)
+          DELETED_LINES=$(git diff --stat origin/${{ github.base_ref }}...HEAD | grep -E 'schema\.prisma|src/index\.ts|public/index\.php|docker/postgres/init/|db/schema\.rb|routes/|routes\.php' | awk '{print $5}' | grep '-' || true)
           for count in $DELETED_LINES; do
             num=$(echo "$count" | tr -d '-')
             if [ "$num" -gt 15 ]; then
@@ -52,4 +52,59 @@ jobs:
             fi
           done
 
-          echo "✅ Bot Guardrail Passed: Diff is safe, functional, and clean."
+          echo "✅ Basic Bot Diff Guardrail Passed."
+
+      - name: Syntax & Script Verification Gate
+        run: |
+          echo "=== Checking Modified Files for Syntax Errors ==="
+          MODIFIED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          for f in $MODIFIED_FILES; do
+            if [ -f "$f" ]; then
+              if [[ "$f" == *.sh ]]; then
+                echo "Validating Bash syntax: $f"
+                bash -n "$f"
+              elif [[ "$f" == *.py ]]; then
+                echo "Validating Python syntax: $f"
+                python3 -m py_compile "$f"
+              elif [[ "$f" == *.php ]] && command -v php &> /dev/null; then
+                echo "Validating PHP syntax: $f"
+                php -l "$f"
+              fi
+            fi
+          done
+
+          echo "✅ Syntax Verification Gate Passed."
+
+      - name: Dependency Security Audit Gate
+        run: |
+          echo "=== Auditing Dependency Manifests for Known Vulnerabilities ==="
+          MODIFIED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          # Node.js audit
+          if echo "$MODIFIED_FILES" | grep -E '(package\.json|package-lock\.json)'; then
+            if [ -f "package-lock.json" ]; then
+              echo "Running npm audit..."
+              npm audit --audit-level=high || true
+            fi
+          fi
+
+          # Ruby bundler-audit
+          if echo "$MODIFIED_FILES" | grep -E '(Gemfile|Gemfile\.lock)'; then
+            if [ -f "Gemfile.lock" ]; then
+              echo "Checking Ruby gems for known advisories..."
+              if command -v bundle-audit &> /dev/null; then
+                bundle-audit check --update || true
+              fi
+            fi
+          fi
+
+          # PHP composer audit
+          if echo "$MODIFIED_FILES" | grep -E '(composer\.json|composer\.lock)'; then
+            if [ -f "composer.lock" ] && command -v composer &> /dev/null; then
+              echo "Running composer audit..."
+              composer audit || true
+            fi
+          fi
+
+          echo "✅ Security Audit Gate Completed."
