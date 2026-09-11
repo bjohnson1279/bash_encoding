@@ -117,10 +117,11 @@ parse_filename() {
     # shellcheck disable=SC2034
     PARSED_EPISODE_NUM="$episode_num"
 
-    cleanup_name "$title_raw" PARSED_EPISODE_TITLE
-    episode_title="$PARSED_EPISODE_TITLE"
-    cleanup_name "$show_raw" PARSED_SHOW_NAME
-    show_name="$PARSED_SHOW_NAME"
+    local episode_title show_name
+    cleanup_name "$title_raw" episode_title
+    cleanup_name "$show_raw" show_name
+    PARSED_EPISODE_TITLE="$episode_title"
+    PARSED_SHOW_NAME="$show_name"
 
     # ⚡ Bolt Optimization: Skip expensive JSON escaping and formatting if --no-json is passed.
     if [ "$2" != "--no-json" ]; then

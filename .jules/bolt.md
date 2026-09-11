@@ -147,6 +147,10 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 **Learning:** Calling functions (even simple ones like `json_escape`) iteratively to process multiple fields inside a loop introduces substantial overhead. Bypassing the function call entirely by using native parameter expansion (e.g., `${var//\\/\\\\}`) inline for JSON generation can significantly reduce process and subshell overhead. However, be mindful that using `local -n` (nameref) to bypass `printf -v` subshell overhead inside the escaping function is slightly less performant and introduces safety risks if the caller uses a conflicting variable name (like `ref`).
 **Action:** When constructing simple JSON outputs from variables in hot paths, prefer inlining the native parameter expansions (escaping backslashes first, then quotes, then newlines) directly over repeatedly invoking a dedicated escaping subroutine. Also, always ensure to properly quote substitutions involving ANSI-C quotes (like `$'\\n'`) because double-quoting them (e.g. `"${var//$'\\n'/\\n}"`) turns them into literal strings.
 
+## 2026-08-31 - Redundant variable assignments across functions
+**Learning:** In `parse-filename.sh`, the variables `episode_title` and `show_name` were assigned from identically-named uppercase variables `PARSED_EPISODE_TITLE` and `PARSED_SHOW_NAME` immediately after those were assigned by a function call that supports namerefs. This adds redundant subshell/assignment execution overhead in a hot path.
+**Action:** When a function supports returning values via output variables (like `cleanup_name "$var" out_var`), eliminate intermediate variables by passing the final target variable name directly to the function (e.g., `cleanup_name "$var" episode_title`).
+
 ## Prevention Directives for Automated Refactoring
 - **Never Overwrite Complete Files**: Always use range-scoped replacement chunks (`StartLine`/`EndLine`) for edits to `schema.prisma`, `index.ts`, `public/index.php`, or DDL SQL scripts.
 - **Do Not Remove Core Declarations**: Do not delete existing route registrations or database DDL tables.
@@ -157,4 +161,3 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## Hallucinatory Task & Empty PR Directives
 - **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
 - **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
-
