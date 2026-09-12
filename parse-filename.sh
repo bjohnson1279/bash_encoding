@@ -102,36 +102,29 @@ parse_filename() {
 
     # ⚡ Bolt Optimization: Replace subshells and sed with native POSIX parameter expansion to remove leading zeros
     if [ -n "$season_raw" ]; then
-        printf -v season_num "%02d" "$(( 10#${season_raw:-0} ))"
+        printf -v PARSED_SEASON_NUM "%02d" "$(( 10#${season_raw:-0} ))"
     else
-        season_num=""
+        PARSED_SEASON_NUM=""
     fi
-    # shellcheck disable=SC2034
-    PARSED_SEASON_NUM="$season_num"
 
     if [ -n "$episode_raw" ]; then
-        printf -v episode_num "%02d" "$(( 10#${episode_raw:-0} ))"
+        printf -v PARSED_EPISODE_NUM "%02d" "$(( 10#${episode_raw:-0} ))"
     else
-        episode_num=""
+        PARSED_EPISODE_NUM=""
     fi
-    # shellcheck disable=SC2034
-    PARSED_EPISODE_NUM="$episode_num"
 
-    local episode_title show_name
-    cleanup_name "$title_raw" episode_title
-    cleanup_name "$show_raw" show_name
-    PARSED_EPISODE_TITLE="$episode_title"
-    PARSED_SHOW_NAME="$show_name"
+    cleanup_name "$title_raw" PARSED_EPISODE_TITLE
+    cleanup_name "$show_raw" PARSED_SHOW_NAME
 
     # ⚡ Bolt Optimization: Skip expensive JSON escaping and formatting if --no-json is passed.
     if [ "$2" != "--no-json" ]; then
         # ⚡ Bolt Optimization: Replace json_escape function calls with inline native parameter expansion.
         # Avoids significant process spawning and function evaluation overhead inside loops.
-        local show_name_esc="${show_name//\\/\\\\}"
+        local show_name_esc="${PARSED_SHOW_NAME//\\/\\\\}"
         show_name_esc="${show_name_esc//\"/\\\"}"
         show_name_esc="${show_name_esc//$'\n'/\\n}"
 
-        local episode_title_esc="${episode_title//\\/\\\\}"
+        local episode_title_esc="${PARSED_EPISODE_TITLE//\\/\\\\}"
         episode_title_esc="${episode_title_esc//\"/\\\"}"
         episode_title_esc="${episode_title_esc//$'\n'/\\n}"
 
@@ -139,8 +132,8 @@ parse_filename() {
         # shellcheck disable=SC2154
         printf '{\n  "show_name": "%s",\n  "season": "%s",\n  "episode": "%s",\n  "title": "%s"\n}\n' \
             "$show_name_esc" \
-            "$season_num" \
-            "$episode_num" \
+            "$PARSED_SEASON_NUM" \
+            "$PARSED_EPISODE_NUM" \
             "$episode_title_esc"
     fi
 

@@ -161,46 +161,39 @@ parseFilename() {
     fi
 
     # Formatting season / episode
-    local season_num=""
-    local episode_num=""
+    PARSED_SEASON_NUM=""
+    PARSED_EPISODE_NUM=""
 
     if [ -n "$season_raw" ]; then
         # ⚡ Bolt Optimization: Replace POSIX padding with faster printf and native base-10 math
-        printf -v season_num "%02d" "$(( 10#${season_raw:-0} ))"
+        printf -v PARSED_SEASON_NUM "%02d" "$(( 10#${season_raw:-0} ))"
     fi
 
     if [ -n "$episode_raw" ]; then
-        printf -v episode_num "%02d" "$(( 10#${episode_raw:-0} ))"
+        printf -v PARSED_EPISODE_NUM "%02d" "$(( 10#${episode_raw:-0} ))"
     fi
 
-    local show_name episode_title
-    cleanup_name "$show_raw" show_name
-    cleanup_name "$title_raw" episode_title
-
-    # ⚡ Bolt Optimization: Set PARSED_* variables for use with --no-json
-    PARSED_SHOW_NAME="$show_name"
-    PARSED_SEASON_NUM="$season_num"
-    PARSED_EPISODE_NUM="$episode_num"
-    PARSED_EPISODE_TITLE="$episode_title"
+    cleanup_name "$show_raw" PARSED_SHOW_NAME
+    cleanup_name "$title_raw" PARSED_EPISODE_TITLE
 
 
     local json_str=""
     if [ "$2" != "--no-json" ]; then
         # ⚡ Bolt Optimization: Replace json_escape function calls with inline native parameter expansion.
         # Avoids significant process spawning and function evaluation overhead inside loops.
-        local esc_show="${show_name//\\/\\\\}"
+        local esc_show="${PARSED_SHOW_NAME//\\/\\\\}"
         esc_show="${esc_show//\"/\\\"}"
         esc_show="${esc_show//$'\n'/\\n}"
 
-        local esc_season="${season_num//\\/\\\\}"
+        local esc_season="${PARSED_SEASON_NUM//\\/\\\\}"
         esc_season="${esc_season//\"/\\\"}"
         esc_season="${esc_season//$'\n'/\\n}"
 
-        local esc_episode="${episode_num//\\/\\\\}"
+        local esc_episode="${PARSED_EPISODE_NUM//\\/\\\\}"
         esc_episode="${esc_episode//\"/\\\"}"
         esc_episode="${esc_episode//$'\n'/\\n}"
 
-        local esc_title="${episode_title//\\/\\\\}"
+        local esc_title="${PARSED_EPISODE_TITLE//\\/\\\\}"
         esc_title="${esc_title//\"/\\\"}"
         esc_title="${esc_title//$'\n'/\\n}"
 
@@ -255,23 +248,18 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
         continue
     fi
 
-    show_name="$PARSED_SHOW_NAME"
-    season="$PARSED_SEASON_NUM"
-    episode="$PARSED_EPISODE_NUM"
-    title="$PARSED_EPISODE_TITLE"
-
     # Create a clean, organized filename
     # ⚡ Bolt Optimization: Replace subshell `$(printf...)` with native bash `printf -v` to avoid process spawning in busy loops
-    printf -v new_filename "%s - S%02dE%02d - %s.mp4" "$show_name" "$season" "$episode" "$title"
+    printf -v new_filename "%s - S%02dE%02d - %s.mp4" "$PARSED_SHOW_NAME" "$PARSED_SEASON_NUM" "$PARSED_EPISODE_NUM" "$PARSED_EPISODE_TITLE"
     # ⚡ Bolt Optimization: Replace subshell and sed with native bash parameter expansion
     # This avoids spawning a new process for each file, improving speed in busy loops
     # Remove any invalid characters for filenames
     new_filename="${new_filename//[\/\\\\?%*:|\"<>]/_}"
     new_file_full="$DESTINATION_PATH/$new_filename"
 
-    printf '  Show: %s\n' "$show_name"
-    printf '  Season: %s, Episode: %s\n' "$season" "$episode"
-    printf '  Title: %s\n' "$title"
+    printf '  Show: %s\n' "$PARSED_SHOW_NAME"
+    printf '  Season: %s, Episode: %s\n' "$PARSED_SEASON_NUM" "$PARSED_EPISODE_NUM"
+    printf '  Title: %s\n' "$PARSED_EPISODE_TITLE"
     printf '  Output file: %s\n' "$new_file_full"
 
     # Skip if the encoded file already exists
@@ -302,10 +290,10 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
     fi
     ffmpeg_args+=(
         -preset "$PRESET" -crf "$QUALITY"
-        -metadata "show=$show_name"
-        -metadata "season_number=$season"
-        -metadata "episode_sort=$episode"
-        -metadata "title=$title"
+        -metadata "show=$PARSED_SHOW_NAME"
+        -metadata "season_number=$PARSED_SEASON_NUM"
+        -metadata "episode_sort=$PARSED_EPISODE_NUM"
+        -metadata "title=$PARSED_EPISODE_TITLE"
     )
 
     # Execute the command
