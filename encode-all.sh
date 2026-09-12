@@ -109,7 +109,8 @@ json_escape() {
 
 parseFilename() {
     # $1 => File Name
-    local base_name="${1%.ts}"
+    local base_name="${1##*/}"
+    base_name="${base_name%.ts}"
     
     local show_raw=""
     local season_raw=""
