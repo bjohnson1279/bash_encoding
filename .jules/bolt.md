@@ -164,3 +164,6 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2026-09-12 - Regex evaluations on full file paths
 **Learning:** In bash, regex evaluation (`[[ $str =~ pattern ]]`) on long strings like full absolute paths when you only care about the filename adds minor but measurable overhead. Benchmarks showed matching against a string containing just the filename is ~10% faster than matching against the full path string in our parse logic. Furthermore, matching the full path with a greedy operator `^(.*)` causes the engine to backtrack the entire path structure and inappropriately capture directory names into the match groups, causing subtle bugs and dirty parsed data.
 **Action:** Always extract the basename first (using `${var##*/}`) before applying regex pattern matching designed to parse components out of a filename.
+## 2024-11-26 - Direct Variable Assignment for Output References
+**Learning:** In bash, when assigning output to global reference variables (like `PARSED_SHOW_NAME`), passing them as output variables to helper functions (e.g., `cleanup_name "$raw" PARSED_SHOW_NAME`) avoids the process forking and subshell overhead of intermediate variables.
+**Action:** Assign directly to target reference variables whenever possible to avoid duplicate allocations and intermediate assignments in hot loops.
