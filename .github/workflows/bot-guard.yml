@@ -20,7 +20,7 @@ jobs:
           echo "=== Auditing PR Diff for Bot Regressions, Hallucinations & Conflict Markers ==="
 
           # 1. Reject Unresolved Git Merge Conflict Markers
-          CONFLICTS=$(git diff origin/${{ github.base_ref }}...HEAD | grep -E '^\+\s*(\<\<\<\<\<\<\<|\=\=\=\=\=\=\=|\>\>\>\>\>\>\>|\|\|\|\|\|\|\|)' || true)
+          CONFLICTS=$(git diff origin/${{ github.base_ref }}...HEAD | grep -E '^\+([<]{7}( .*|$)|[=]{7}\r?$|[>]{7}( .*|$)|[|]{7}( .*|$))' || true)
           if [ -n "$CONFLICTS" ]; then
             echo "❌ ERROR: PR adds unresolved Git merge conflict markers (<<<<<<<, =======, >>>>>>>). Auto-failing."
             echo "$CONFLICTS"
@@ -28,10 +28,12 @@ jobs:
           fi
 
           # 2. Reject Zero-Diff / Hallucinatory Acknowledgment PRs
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -v '^\.jules/' | grep -v '^\.Jules/' | grep -v 'package.*json' | grep -v 'composer\.lock' | grep -v 'Gemfile\.lock' | grep -v 'pnpm-lock\.yaml' | grep -v 'mix\.lock' | grep -v 'Cargo\.lock' || true)
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "❌ ERROR: PR contains 0 non-metadata code changes (hallucinatory task acknowledgment). Auto-failing."
-            exit 1
+          if [ "${{ github.actor }}" != "dependabot" ] && [ "${{ github.actor }}" != "dependabot[bot]" ]; then
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -v '^\.jules/' | grep -v '^\.Jules/' | grep -v 'package.*json' | grep -v 'composer\.lock' | grep -v 'Gemfile\.lock' | grep -v 'pnpm-lock\.yaml' | grep -v 'mix\.lock' | grep -v 'Cargo\.lock' || true)
+            if [ -z "$CHANGED_FILES" ]; then
+              echo "❌ ERROR: PR contains 0 non-metadata code changes (hallucinatory task acknowledgment). Auto-failing."
+              exit 1
+            fi
           fi
 
           # 3. Reject Forbidden Scratch Verification Files
