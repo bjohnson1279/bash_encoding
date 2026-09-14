@@ -56,11 +56,8 @@ get_avail_mb() {
 
     # df -P -> POSIX standard, reliable output
     # ⚡ Bolt Optimization: Replace awk process with native shell `read` and arithmetic
-    # Uses process substitution to avoid pipe subshell, allowing direct variable assignment.
-    {
-        read -r _
-        read -r _ _ _ avail _
-    } < <(df -P -- "$target_dir")
+    # Uses POSIX command substitution with a grouped read block to avoid pipe subshell variable scope loss, allowing direct variable assignment and maintaining POSIX sh compatibility.
+    avail=$(df -P -- "$target_dir" | { read -r _; read -r _ _ _ val _; echo "$val"; })
 
     # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
     case "${avail#-}" in
@@ -95,9 +92,8 @@ get_folder_size_mb() {
     local size
 
     # du -sk -> POSIX standard, size in 1K-blocks
-    {
-        read -r size _
-    } < <(du -sk -- "$folder_path")
+    # Uses POSIX command substitution with a grouped read block
+    size=$(du -sk -- "$folder_path" | { read -r val _; echo "$val"; })
 
     case "${size#-}" in
         ''|*[!0-9]*)
