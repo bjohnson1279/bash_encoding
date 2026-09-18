@@ -18,6 +18,11 @@ for i in **/*.m4v; do
     # Construct the output filename
     new_file="${i%.*}.mp4"
 
+    if [ -f "./$new_file" ]; then
+        printf "Skipping '%s': Destination file '%s' already exists.\n" "$i" "$new_file"
+        continue
+    fi
+
     printf "Encoding '%s' to '%s'...\n" "$i" "$new_file"
 
     # Construct and execute the ffmpeg command
