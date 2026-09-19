@@ -16,7 +16,7 @@ if [ -z "${BATS_VERSION:-}" ]; then
     clear
 
     # Dependency check
-    for cmd in rsync awk df du mount.cifs; do
+    for cmd in rsync df du mount.cifs; do
         # For mount.cifs, it might not be in the standard PATH for non-root users, so check /sbin explicitly
         if ! command -v "$cmd" >/dev/null 2>&1 && [ ! -x "/sbin/$cmd" ] && [ ! -x "/usr/sbin/$cmd" ]; then
             printf '%s\n' "Error: Required command '$cmd' is not installed." >&2
@@ -56,11 +56,8 @@ get_avail_mb() {
 
     # df -P -> POSIX standard, reliable output
     # ⚡ Bolt Optimization: Replace awk process with native shell `read` and arithmetic
-    # Uses process substitution to avoid pipe subshell, allowing direct variable assignment.
-    {
-        read -r _
-        read -r _ _ _ avail _
-    } < <(df -P -- "$target_dir")
+    # Uses a pipe to a block, avoiding awk and process substitution (< <) to maintain strict POSIX sh compliance
+    avail=$(df -P -- "$target_dir" | { read -r _; read -r _ _ _ a _; echo "$a"; })
 
     # 🛡️ Sentinel: Validate numeric input to prevent arithmetic expression injection
     case "${avail#-}" in
@@ -95,9 +92,7 @@ get_folder_size_mb() {
     local size
 
     # du -sk -> POSIX standard, size in 1K-blocks
-    {
-        read -r size _
-    } < <(du -sk -- "$folder_path")
+    size=$(du -sk -- "$folder_path" | { read -r s _; echo "$s"; })
 
     case "${size#-}" in
         ''|*[!0-9]*)
