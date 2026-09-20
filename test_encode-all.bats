@@ -10,7 +10,7 @@ setup() {
 }
 
 teardown() {
-    rm -rf "$TEST_TEMP_DIR"
+    rm -rf -- "$TEST_TEMP_DIR"
 }
 
 @test "getDuration parses typical ffmpeg format duration correctly" {

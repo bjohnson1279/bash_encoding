@@ -172,3 +172,7 @@ Ensure `case` statement branches always terminate properly with `;;` when they d
 ## Hallucinatory Task & Empty PR Directives
 - **Zero-Diff Task Termination**: If the requested optimization, refactor, or fix is ALREADY natively present in the target branch, DO NOT create an empty pull request or commit an acknowledgment PR. Exit the task cleanly without opening a PR.
 - **Stale Suggestion Guard**: Always verify the current code on `main`/`master` before planning changes. If no actionable diff is required, cancel task execution immediately.
+## 2024-05-18 - [MEDIUM] Prevent Option Injection in rm command
+**Vulnerability:** Option Injection via unescaped variable in `rm` command
+**Learning:** In various `.sh` and `.bats` test files, `rm` was used directly with variables or paths (e.g., `rm -rf "$TEST_TEMP_DIR/mock_dir"`). If the path variable evaluated to something starting with a hyphen, it would be interpreted as an option to `rm` instead of a file path, potentially leading to command failure or unexpected behavior.
+**Prevention:** Always use `--` to terminate option parsing before passing dynamic or untrusted variables as file paths to standard utilities like `rm` (e.g., `rm -rf -- "$file"`).

@@ -21,7 +21,7 @@ echo ""
 echo "Test 5 (with real file creation):"
 touch "Test.Show.Name.S01E02.Pilot.mkv"
 ./parse-filename.sh "Test.Show.Name.S01E02.Pilot.mkv"
-rm "Test.Show.Name.S01E02.Pilot.mkv"
+rm -- "Test.Show.Name.S01E02.Pilot.mkv"
 echo ""
 
 echo "Test 6:"

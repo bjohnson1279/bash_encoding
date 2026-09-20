@@ -7,7 +7,7 @@ setup() {
 
 teardown() {
     # Clean up temporary test directory
-    rm -rf "$TEST_TEMP_DIR"
+    rm -rf -- "$TEST_TEMP_DIR"
 }
 
 @test "encode-mkv.sh encodes multiple .mkv files correctly" {
