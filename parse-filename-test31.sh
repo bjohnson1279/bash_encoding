@@ -25,4 +25,4 @@ time for j in {1..5}; do
     shopt -u nullglob
 done
 
-rm -rf dummy_dir
+rm -rf -- dummy_dir

@@ -14,7 +14,7 @@ setup() {
 }
 
 teardown() {
-    rm -rf "$TEST_TEMP_DIR"
+    rm -rf -- "$TEST_TEMP_DIR"
 }
 
 @test "get_avail_mb returns 1 for invalid directory" {
@@ -39,7 +39,7 @@ teardown() {
     [ "$result" -eq 2 ]
 
     # Cleanup
-    rm -rf "$TEST_TEMP_DIR/mock_dir"
+    rm -rf -- "$TEST_TEMP_DIR/mock_dir"
 }
 
 @test "get_folder_size_mb calculates standard MB correctly" {
@@ -114,7 +114,7 @@ teardown() {
     run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
     [[ "${lines[1]}" == "Insufficient disk space to start copy from '$TEST_TEMP_DIR/mock_src_dir'." ]]
 
-    rm -rf "$TEST_TEMP_DIR/mock_src_dir"
+    rm -rf -- "$TEST_TEMP_DIR/mock_src_dir"
 }
 
 @test "folder_sync returns 1 when source folder size is greater than available space" {
@@ -135,7 +135,7 @@ teardown() {
     run folder_sync "$TEST_TEMP_DIR/mock_src_dir" 1000
     [[ "${lines[1]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]] || [[ "${lines[2]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]] || [[ "${lines[3]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]] || [[ "${lines[4]}" == "Insufficient disk space to copy '$TEST_TEMP_DIR/mock_src_dir'." ]]
 
-    rm -rf "$TEST_TEMP_DIR/mock_src_dir"
+    rm -rf -- "$TEST_TEMP_DIR/mock_src_dir"
 }
 
 @test "folder_sync successfully runs rsync when there is enough space" {
@@ -181,7 +181,7 @@ teardown() {
     [ "$has_mock_rsync" -eq 1 ]
     [ "$has_copy_complete" -eq 1 ]
 
-    rm -rf "$TEST_TEMP_DIR/mock_src_dir"
+    rm -rf -- "$TEST_TEMP_DIR/mock_src_dir"
 }
 
 @test "get_avail_mb fails safely on non-numeric injection" {
@@ -190,14 +190,14 @@ teardown() {
         echo "/dev/sda1          1000000 500000      a[\$(echo 1 > $TEST_TEMP_DIR/hacked)]      50% /mock/path"
     }
     export -f df
-    rm -f "$TEST_TEMP_DIR/hacked"
+    rm -f -- "$TEST_TEMP_DIR/hacked"
     mkdir -p "$TEST_TEMP_DIR/mock_dir"
 
     run get_avail_mb "$TEST_TEMP_DIR/mock_dir"
 
     [ ! -f "$TEST_TEMP_DIR/hacked" ]
 
-    rm -rf "$TEST_TEMP_DIR/mock_dir"
+    rm -rf -- "$TEST_TEMP_DIR/mock_dir"
 }
 
 @test "get_folder_size_mb fails safely on non-numeric injection" {
@@ -205,12 +205,12 @@ teardown() {
         echo "a[\$(echo 1 > $TEST_TEMP_DIR/hacked)]	/mock/path"
     }
     export -f du
-    rm -f "$TEST_TEMP_DIR/hacked"
+    rm -f -- "$TEST_TEMP_DIR/hacked"
     mkdir -p "$TEST_TEMP_DIR/mock_dir"
 
     run get_folder_size_mb "$TEST_TEMP_DIR/mock_dir"
 
     [ ! -f "$TEST_TEMP_DIR/hacked" ]
 
-    rm -rf "$TEST_TEMP_DIR/mock_dir"
+    rm -rf -- "$TEST_TEMP_DIR/mock_dir"
 }
