@@ -3,42 +3,6 @@
 # Bash script to parse TV show filenames.
 # Handles patterns like "Show.Name.S01E02.Episode.Title.mkv"
 
-# Cleans up a string by replacing dots and underscores with spaces,
-# and trimming leading/trailing whitespace.
-# ⚡ Bolt Optimization: Use `tr` and parameter expansion instead of multiple sed operations.
-# Using parameter expansion for stripping whitespaces is POSIX compliant (`${var#"${var%%[! ]*}"}`).
-# Using `tr` avoids multiple process forks compared to `sed`.
-cleanup_name() {
-    # Replace dots and underscores with spaces
-    # shellcheck disable=SC3043 # local is supported in environments where this script is executed
-    # ⚡ Bolt Optimization: Replace IFS string splitting with native bash parameter expansion.
-    # This avoids process forking and makes the cleanup significantly faster.
-    local val="${1//[._]/ }"
-    local out_ref_name="$2"
-
-    # Strip leading whitespace
-    val="${val#"${val%%[! ]*}"}"
-    # Strip trailing whitespace
-    val="${val%"${val##*[! ]}"}"
-    # Strip trailing " -" if present
-    val="${val%" -"}"
-    # Strip trailing whitespace again
-    val="${val%"${val##*[! ]}"}"
-
-    if [ -n "$out_ref_name" ]; then
-        case "$out_ref_name" in
-            *[!a-zA-Z0-9_]*|[0-9]*|"")
-                printf '%s\n' "Error: Invalid output variable name." >&2
-                return 1
-                ;;
-        esac
-        # ⚡ Bolt Optimization: Use printf -v instead of eval to prevent command injection and subshell overhead
-        printf -v "$out_ref_name" "%s" "$val"
-    else
-        printf '%s\n' "$val"
-    fi
-}
-
 # Escapes a string for use in JSON.
 json_escape() {
     # ⚡ Bolt Optimization: Replace slow sequential block-matching while loops with native bash parameter expansion.
@@ -118,8 +82,18 @@ parse_filename() {
         PARSED_EPISODE_NUM=""
     fi
 
-    cleanup_name "$title_raw" PARSED_EPISODE_TITLE
-    cleanup_name "$show_raw" PARSED_SHOW_NAME
+    PARSED_EPISODE_TITLE="${title_raw//[._]/ }"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE#"${PARSED_EPISODE_TITLE%%[! ]*}"}"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[! ]}"}"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%" -"}"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[! ]}"}"
+
+    PARSED_SHOW_NAME="${show_raw//[._]/ }"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME#"${PARSED_SHOW_NAME%%[! ]*}"}"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[! ]}"}"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%" -"}"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[! ]}"}"
+
 
     # ⚡ Bolt Optimization: Skip expensive JSON escaping and formatting if --no-json is passed.
     if [ "$2" != "--no-json" ]; then
