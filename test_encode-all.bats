@@ -15,7 +15,7 @@ teardown() {
 
 @test "getDuration parses typical ffmpeg format duration correctly" {
     ffprobe() {
-        echo 'format.duration="05:43.50"'
+        printf '%s\n' 'format.duration="05:43.50"'
     }
     source <(sed "s|DESTINATION_PATH=\"/path/to/encoded\"|DESTINATION_PATH=\"$TEST_TEMP_DIR/dummy_dest\"|" encode-all.sh) || true
     result=$(getDuration "dummy.ts")
@@ -24,7 +24,7 @@ teardown() {
 
 @test "getDuration parses typical ffmpeg stream duration correctly" {
     ffprobe() {
-        echo 'streams.stream.0.duration="01:05:43.50"'
+        printf '%s\n' 'streams.stream.0.duration="01:05:43.50"'
     }
     source <(sed "s|DESTINATION_PATH=\"/path/to/encoded\"|DESTINATION_PATH=\"$TEST_TEMP_DIR/dummy_dest\"|" encode-all.sh) || true
     result=$(getDuration "dummy.ts")
@@ -33,7 +33,7 @@ teardown() {
 
 @test "getDuration handles empty output when no duration is found" {
     ffprobe() {
-        echo ""
+        printf '%s\n' ""
     }
     source <(sed "s|DESTINATION_PATH=\"/path/to/encoded\"|DESTINATION_PATH=\"$TEST_TEMP_DIR/dummy_dest\"|" encode-all.sh) || true
     result=$(getDuration "dummy.ts")
@@ -42,8 +42,8 @@ teardown() {
 
 @test "getDuration parses format duration without leading zero hours correctly over stream" {
     ffprobe() {
-        echo 'streams.stream.0.duration="02:30:16.00"'
-        echo 'format.duration="02:30:15.00"'
+        printf '%s\n' 'streams.stream.0.duration="02:30:16.00"'
+        printf '%s\n' 'format.duration="02:30:15.00"'
     }
     source <(sed "s|DESTINATION_PATH=\"/path/to/encoded\"|DESTINATION_PATH=\"$TEST_TEMP_DIR/dummy_dest\"|" encode-all.sh) || true
     result=$(getDuration "dummy.ts")
