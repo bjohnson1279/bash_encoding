@@ -135,7 +135,7 @@ folder_sync() {
     fi
 
     local avail_mb
-    get_avail_mb "." "avail_mb"
+    get_avail_mb "$RECORDING_PATH" "avail_mb"
     printf '%s\n' "Available disk space: ${avail_mb}MB"
 
     if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
@@ -165,8 +165,9 @@ folder_sync() {
 
 if [ -z "${BATS_VERSION:-}" ]; then
     # Check initial disk space
+    mkdir -p -- "$RECORDING_PATH"
     avail_mb=""
-    get_avail_mb "." "avail_mb"
+    get_avail_mb "$RECORDING_PATH" "avail_mb"
     if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
         printf '%s\n' "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
         exit 1
