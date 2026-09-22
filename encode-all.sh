@@ -16,14 +16,6 @@ QUALITY=21
 # Delete original file after encoding? (1 for YES, 0 for NO)
 DEL_ORIG=1
 
-# Validates duration strings using fast case statement globbing instead of regex
-is_valid_duration() {
-    case "$1" in
-        "" | *[!0-9.]* | *.*.* | .* | *. ) return 1 ;;
-        *) return 0 ;;
-    esac
-}
-
 # Function to obtain length of video
 getDuration() {
     local dur format_dur stream_dur output
@@ -64,28 +56,6 @@ getDuration() {
 
 # Extract Part of File Name Into JSON String To Use As Metadata
 # Utility functions for parsing
-cleanup_name() {
-    local val="${1//[._]/ }"
-    local out_ref_name="$2"
-
-    val="${val#"${val%%[! ]*}"}"
-    val="${val%"${val##*[! ]}"}"
-    val="${val%" -"}"
-    val="${val%"${val##*[! ]}"}"
-
-    if [ -n "$out_ref_name" ]; then
-        case "$out_ref_name" in
-            *[!a-zA-Z0-9_]*|[0-9]*|"")
-                printf '%s\n' "Error: Invalid output variable name." >&2
-                return 1
-                ;;
-        esac
-        printf -v "$out_ref_name" "%s" "$val"
-    else
-        printf '%s\n' "$val"
-    fi
-}
-
 json_escape() {
     local val="$1"
     local out_ref_name="$2"
@@ -173,8 +143,18 @@ parseFilename() {
         printf -v PARSED_EPISODE_NUM "%02d" "$(( 10#${episode_raw:-0} ))"
     fi
 
-    cleanup_name "$show_raw" PARSED_SHOW_NAME
-    cleanup_name "$title_raw" PARSED_EPISODE_TITLE
+    PARSED_SHOW_NAME="${show_raw//[._]/ }"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME#"${PARSED_SHOW_NAME%%[! ]*}"}"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[! ]}"}"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%" -"}"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[! ]}"}"
+
+    PARSED_EPISODE_TITLE="${title_raw//[._]/ }"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE#"${PARSED_EPISODE_TITLE%%[! ]*}"}"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[! ]}"}"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%" -"}"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[! ]}"}"
+
 
 
     local json_str=""

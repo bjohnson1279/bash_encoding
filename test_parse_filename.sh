@@ -29,24 +29,6 @@ NC='\033[0m' # No Color
 FAILED_TESTS=0
 TOTAL_TESTS=0
 
-# Helper function to test cleanup_name
-run_cleanup_test() {
-    local input="$1"
-    local expected="$2"
-
-    ((TOTAL_TESTS++))
-
-    printf "Testing cleanup_name: '%s'\n" "$input"
-    local output
-    output=$(cleanup_name "$input")
-
-    if [ "$output" != "$expected" ]; then
-        printf '%b\n' "${RED}  FAIL: Expected '$expected', got '$output'${NC}"
-        ((FAILED_TESTS++))
-    else
-        printf '%b\n' "${GREEN}  PASS${NC}"
-    fi
-}
 
 # Helper function to run a test and assert JSON output
 run_test() {
@@ -139,15 +121,6 @@ run_json_escape_test() {
 printf '%s\n' "Running tests for parse-filename.sh..."
 printf '%s\n' "----------------------------------------"
 
-printf '%s\n' "Testing cleanup_name function..."
-run_cleanup_test "My.Awesome.Show" "My Awesome Show"
-run_cleanup_test "Another_Show" "Another Show"
-run_cleanup_test "  Leading and trailing  " "Leading and trailing"
-run_cleanup_test "Multiple...Dots" "Multiple   Dots"
-run_cleanup_test ".Hidden.File" "Hidden File"
-run_cleanup_test "Show.Name_With.Both" "Show Name With Both"
-run_cleanup_test "  Leading_Trailing  " "Leading Trailing"
-run_cleanup_test "" ""
 printf '%s\n' "----------------------------------------"
 
 # run_test "filename" "expected_show" "expected_season" "expected_episode" "expected_title" "expected_exit_code"
