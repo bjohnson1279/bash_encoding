@@ -47,8 +47,9 @@ getDuration() {
                 return 1
                 ;;
         esac
-        local -n out_var="$2"
-        out_var="${dur}"
+        # ⚡ Bolt Optimization: Replaced local -n with printf -v for faster dynamic variable assignment.
+        # This eliminates nameref interpretation overhead and enhances security by avoiding array index injection vulnerabilities.
+        printf -v "$2" "%s" "${dur}"
     else
         printf '%s\n' "${dur}"
     fi
@@ -200,8 +201,9 @@ parseFilename() {
                 return 1
                 ;;
         esac
-        local -n out_var="$2"
-        out_var="$json_str"
+        # ⚡ Bolt Optimization: Replaced local -n with printf -v for faster dynamic variable assignment.
+        # This eliminates nameref interpretation overhead and enhances security by avoiding array index injection vulnerabilities.
+        printf -v "$2" "%s" "$json_str"
     else
         printf '%s\n' "$json_str"
     fi
