@@ -53,7 +53,8 @@ parse_filename() {
     # Spaces inside character classes must be escaped (e.g. `[._\ -]`) to avoid syntax errors.
     # If standard pattern fails, fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
     # ⚡ Bolt Optimization: Consolidate identical overlapping regex branches.
-    if [[ "$base_name" =~ ^(.*)[._\ -]([Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})|([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2}))(.*)$ ]]; then
+    # ⚡ Bolt Optimization: Pre-filter strings using native case globbing before executing the slow regex engine
+    if [[ "$base_name" == *[._\ -][Ss]*[Ee]* || "$base_name" == *[._\ -][0-9][0-9][0-9][0-9][._\ -][0-9]*[._\ -][0-9]* ]] && [[ "$base_name" =~ ^(.*)[._\ -]([Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})|([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2}))(.*)$ ]]; then
         show_raw="${BASH_REMATCH[1]}"
         if [ -n "${BASH_REMATCH[5]}" ]; then
             season_raw="${BASH_REMATCH[5]}"
