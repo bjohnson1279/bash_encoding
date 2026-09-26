@@ -53,21 +53,30 @@ parse_filename() {
     # Spaces inside character classes must be escaped (e.g. `[._\ -]`) to avoid syntax errors.
     # If standard pattern fails, fallback for filenames with the date as episode "Show.Name.2023.10.27.mkv"
     # ⚡ Bolt Optimization: Consolidate identical overlapping regex branches.
-    if [[ "$base_name" =~ ^(.*)[._\ -]([Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})|([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2}))(.*)$ ]]; then
-        show_raw="${BASH_REMATCH[1]}"
-        if [ -n "${BASH_REMATCH[5]}" ]; then
-            season_raw="${BASH_REMATCH[5]}"
-            episode_raw="${BASH_REMATCH[6]}"
-            title_raw="${BASH_REMATCH[7]}"
-        else
-            season_raw="${BASH_REMATCH[3]}"
-            episode_raw="${BASH_REMATCH[4]}"
-            title_raw="${BASH_REMATCH[8]}"
-        fi
-    else
-        printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
-        return 1
-    fi
+    # ⚡ Bolt Optimization: Pre-filter with a fast native case statement glob to prevent expensive regex engine evaluation on non-matching strings.
+    case "$base_name" in
+        *[._\ -][Ss]*[Ee]* | *[._\ -][0-9][0-9][0-9][0-9][._\ -][0-9]*[._\ -][0-9]*)
+            if [[ "$base_name" =~ ^(.*)[._\ -]([Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})|([0-9]{4})[._\ -]([0-9]{1,2})[._\ -]([0-9]{1,2}))(.*)$ ]]; then
+                show_raw="${BASH_REMATCH[1]}"
+                if [ -n "${BASH_REMATCH[5]}" ]; then
+                    season_raw="${BASH_REMATCH[5]}"
+                    episode_raw="${BASH_REMATCH[6]}"
+                    title_raw="${BASH_REMATCH[7]}"
+                else
+                    season_raw="${BASH_REMATCH[3]}"
+                    episode_raw="${BASH_REMATCH[4]}"
+                    title_raw="${BASH_REMATCH[8]}"
+                fi
+            else
+                printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
+                return 1
+            fi
+            ;;
+        *)
+            printf "Error: Could not parse season/episode from '%s'.\n" "$base_name" >&2
+            return 1
+            ;;
+    esac
 
     # ⚡ Bolt Optimization: Replace subshells and sed with native POSIX parameter expansion to remove leading zeros
     if [ -n "$season_raw" ]; then
