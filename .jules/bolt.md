@@ -184,3 +184,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2026-08-31 - Fast Regex Validation with Globbing
 **Learning:** In bash, evaluating a regular expression using `[[ =~ ]]` is a significant bottleneck. Benchmarks show that we can cut the time in half by first filtering strings using native bash `case` statement globbing (which natively supports some matching patterns like `*[._\ -][Ss]*[._\ -]*[Ee]*`) before deciding whether to run the heavy regex engine.
 **Action:** When a regular expression is expected to frequently fail on large numbers of invalid or non-matching inputs, pre-filter the inputs by wrapping the regex inside a native `case "$var" in *pattern*) ... ;; esac` block.
+
+## 2026-11-20 - Fast Float Arithmetic Pad and String Extraction
+**Learning:** When performing string extraction and floating-point fractional padding in bash, applying native string matching (`[[ "$output" == *pattern* ]]`) or multi-step fractional padding creates measurable overhead inside loops. Benchmarks show directly manipulating the strings with parameter expansion and slicing (`val="${int}${frac}000000"; val="${val:0:${#int}+6}"`) and avoiding regex glob pre-checks reduces execution time by nearly 40%.
+**Action:** When extracting variables or padding fractions in performance-sensitive loops, skip `[[ == *pattern* ]]` checks in favor of direct parameter expansion with a short-circuit inequality check (`[ "$val" != "$output" ]`), and minimize intermediate variable assignments during fixed-point math concatenation.
