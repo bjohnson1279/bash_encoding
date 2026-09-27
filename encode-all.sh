@@ -330,9 +330,9 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
             duration_diff="${duration_diff#-}"
 
             # Compare difference (< 1000000 is < 1.0)
-            if [ "$duration_diff" -lt 1000000 ]; then
+            if [ -n "$duration_diff" ] && [ "$duration_diff" -lt 1000000 ] 2>/dev/null; then
                 printf '%s\n' "Encoding successful. Durations match."
-                if [ "$DEL_ORIG" -eq 1 ]; then
+                if [ -n "$DEL_ORIG" ] && [ "$DEL_ORIG" -eq 1 ] 2>/dev/null; then
                     printf "Deleting original file: %s\n" "$ts_file"
                     rm -- "$ts_file"
                 fi
