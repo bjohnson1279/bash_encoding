@@ -24,14 +24,13 @@ getDuration() {
     # This halves process spawning overhead for files missing format duration (or returning N/A).
     output=$(ffprobe -v error -select_streams v:0 -show_entries format=duration:stream=duration -of flat -i "${1}" 2>/dev/null || true)
 
-    if [[ "$output" == *format.duration=\"* ]]; then
-        format_dur="${output#*format.duration=\"}"
-        format_dur="${format_dur%%\"*}"
-    fi
-    if [[ "$output" == *streams.stream.0.duration=\"* ]]; then
-        stream_dur="${output#*streams.stream.0.duration=\"}"
-        stream_dur="${stream_dur%%\"*}"
-    fi
+    # ⚡ Bolt Optimization: Consolidate parameter expansion for ffprobe duration extraction
+    format_dur="${output#*format.duration=\"}"
+    [ "$format_dur" != "$output" ] && format_dur="${format_dur%%\"*}" || format_dur=""
+
+    stream_dur="${output#*streams.stream.0.duration=\"}"
+    [ "$stream_dur" != "$output" ] && stream_dur="${stream_dur%%\"*}" || stream_dur=""
+
 
     if [ -n "$format_dur" ] && [ "$format_dur" != "N/A" ]; then
         dur="$format_dur"
@@ -320,24 +319,16 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
             # ⚡ Bolt Optimization: Replace subshells spawning `bc` with native bash fixed-point math.
             # This avoids expensive process forks, significantly speeding up the duration matching logic.
 
-            # Extract fractional parts and pad to 6 decimal places
-            src_frac="${src_duration#*.}"
-            [ "$src_frac" = "$src_duration" ] && src_frac=""
-            src_frac="${src_frac}000000"
-            src_frac="${src_frac:0:6}"
-
-            dest_frac="${dest_duration#*.}"
-            [ "$dest_frac" = "$dest_duration" ] && dest_frac=""
-            dest_frac="${dest_frac}000000"
-            dest_frac="${dest_frac:0:6}"
-
-            # Extract integer parts
+            # Fast fractional padding to 6 decimal places and integer extraction inline
             src_int="${src_duration%.*}"
-            dest_int="${dest_duration%.*}"
+            src_val="${src_int}000000"
+            [ "${src_duration#*.}" != "$src_duration" ] && src_val="${src_int}${src_duration#*.}000000"
+            src_val="${src_val:0:${#src_int}+6}"
 
-            # Concatenate for fixed-point representation
-            src_val="$src_int$src_frac"
-            dest_val="$dest_int$dest_frac"
+            dest_int="${dest_duration%.*}"
+            dest_val="${dest_int}000000"
+            [ "${dest_duration#*.}" != "$dest_duration" ] && dest_val="${dest_int}${dest_duration#*.}000000"
+            dest_val="${dest_val:0:${#dest_int}+6}"
 
             # Calculate absolute difference
             # ⚡ Bolt Optimization: Use 10# to force base-10 instead of stripping leading zeros using string operations
