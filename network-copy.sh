@@ -138,7 +138,7 @@ folder_sync() {
     get_avail_mb "$RECORDING_PATH" "avail_mb"
     printf '%s\n' "Available disk space: ${avail_mb}MB"
 
-    if ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
+    if [ -z "$avail_mb" ] || [ -z "$required_space" ] || ! [ "$avail_mb" -ge "$required_space" ] 2>/dev/null; then
         printf "Insufficient disk space to start copy from '%s'.\n" "$src_folder"
         printf '%s\n' "Required: ${required_space}MB, Available: ${avail_mb:-Unknown}MB"
         return 1
@@ -149,7 +149,7 @@ folder_sync() {
     get_folder_size_mb "$src_folder" "folder_size_mb"
     printf '%s\n' "Source folder size: ${folder_size_mb}MB"
 
-    if ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
+    if [ -z "$avail_mb" ] || [ -z "$folder_size_mb" ] || ! [ "$avail_mb" -ge "$folder_size_mb" ] 2>/dev/null; then
         printf "Insufficient disk space to copy '%s'.\n" "$src_folder"
         printf '%s\n' "Required: ${folder_size_mb}MB, Available: ${avail_mb}MB"
         return 1
@@ -168,7 +168,7 @@ if [ -z "${BATS_VERSION:-}" ]; then
     mkdir -p -- "$RECORDING_PATH"
     avail_mb=""
     get_avail_mb "$RECORDING_PATH" "avail_mb"
-    if ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
+    if [ -z "$avail_mb" ] || [ -z "$REQUIRED_DISK_AMOUNT" ] || ! [ "$avail_mb" -ge "$REQUIRED_DISK_AMOUNT" ] 2>/dev/null; then
         printf '%s\n' "Insufficient disk space to copy recordings. Required: ${REQUIRED_DISK_AMOUNT}MB, Available: ${avail_mb:-Unknown}MB"
         exit 1
     fi
