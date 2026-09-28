@@ -92,42 +92,57 @@ parseFilename() {
     # Evaluating complex regular expressions in bash is a significant bottleneck.
     # The previous logic had two near-identical regex branches for "Show Name (Year) S01E02..."
     # which we've combined. We handle stripping the trailing date manually below.
+    # ⚡ Bolt Optimization: Pre-filter with native case statement globbing to bypass slow regex engine on non-matching strings.
     # 1. Try to match: Show Name (Year) S01E02 Title...
-    if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
-        show_raw="${BASH_REMATCH[1]}"
-        season_raw="${BASH_REMATCH[2]}"
-        episode_raw="${BASH_REMATCH[3]}"
-        title_raw="${BASH_REMATCH[4]}"
+    local matched=0
+    case "$base_name" in
+        *[._\ -][Ss]*[Ee]*)
+            if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
+                show_raw="${BASH_REMATCH[1]}"
+                season_raw="${BASH_REMATCH[2]}"
+                episode_raw="${BASH_REMATCH[3]}"
+                title_raw="${BASH_REMATCH[4]}"
+                matched=1
 
-        case "$show_raw" in
-            *\([0-9][0-9][0-9][0-9]\)*)
-                year_raw="${show_raw##*\(}"
-                year_raw="${year_raw%%\)*}"
-                show_raw="${show_raw%\ (*}"
-                ;;
-            *)
-                year_raw=""
+                case "$show_raw" in
+                    *\([0-9][0-9][0-9][0-9]\)*)
+                        year_raw="${show_raw##*\(}"
+                        year_raw="${year_raw%%\)*}"
+                        show_raw="${show_raw%\ (*}"
+                        ;;
+                    *)
+                        year_raw=""
+                        ;;
+                esac
+                # ⚡ Bolt Optimization: Replace slow bash regex engine with native case statement globbing.
+                # This executes significantly faster in busy loops and natively handles trailing date removal.
+                case "$title_raw" in
+                    \([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*\))
+                        # The title was just the date, effectively no title
+                        title_raw=""
+                        ;;
+                    *\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*\))
+                        # Parameter expansion to remove the date
+                        title_raw="${title_raw%\(*}"
+                        # Strip trailing separators
+                        # ⚡ Bolt Optimization: Replace loop with native parameter expansion for stripping trailing characters
+                        title_raw="${title_raw%"${title_raw##*[!._ -]}"}"
+                        ;;
+                esac
+            fi
+            ;;
+    esac
+
+    if [ "$matched" -eq 0 ]; then
+        # 4. Try to match: Movie Name (Year)
+        case "$base_name" in
+            *\ \([0-9][0-9][0-9][0-9]\))
+                if [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)$ ]]; then
+                    show_raw="${BASH_REMATCH[1]}"
+                    year_raw="${BASH_REMATCH[2]}"
+                fi
                 ;;
         esac
-        # ⚡ Bolt Optimization: Replace slow bash regex engine with native case statement globbing.
-        # This executes significantly faster in busy loops and natively handles trailing date removal.
-        case "$title_raw" in
-            \([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*\))
-                # The title was just the date, effectively no title
-                title_raw=""
-                ;;
-            *\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*\))
-                # Parameter expansion to remove the date
-                title_raw="${title_raw%\(*}"
-                # Strip trailing separators
-                # ⚡ Bolt Optimization: Replace loop with native parameter expansion for stripping trailing characters
-                title_raw="${title_raw%"${title_raw##*[!._ -]}"}"
-                ;;
-        esac
-    # 4. Try to match: Movie Name (Year)
-    elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)$ ]]; then
-        show_raw="${BASH_REMATCH[1]}"
-        year_raw="${BASH_REMATCH[2]}"
     fi
 
     # Formatting season / episode
