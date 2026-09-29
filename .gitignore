@@ -25,3 +25,7 @@ test.cjs
 fix_*.php
 update_*.php
 scratch_*
+
+fix_*.cjs
+patch_*.py
+patch_*.sh

@@ -27,17 +27,19 @@ jobs:
             exit 1
           fi
 
-          # 2. Reject Zero-Diff / Hallucinatory Acknowledgment PRs
+          # 2. Reject Zero-Diff / Hallucinatory Acknowledgment PRs & Journal-Only PRs
           if [ "${{ github.actor }}" != "dependabot" ] && [ "${{ github.actor }}" != "dependabot[bot]" ]; then
             CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -v '^\.jules/' | grep -v '^\.Jules/' | grep -v 'package.*json' | grep -v 'composer\.lock' | grep -v 'Gemfile\.lock' | grep -v 'pnpm-lock\.yaml' | grep -v 'mix\.lock' | grep -v 'Cargo\.lock' || true)
             if [ -z "$CHANGED_FILES" ]; then
-              echo "❌ ERROR: PR contains 0 non-metadata code changes (hallucinatory task acknowledgment). Auto-failing."
+              echo "❌ ERROR: PR contains 0 non-metadata code changes (hallucinatory task acknowledgment or journal notes only). Auto-failing."
               exit 1
             fi
           fi
 
           # 3. Reject Forbidden Scratch Verification Files
-          SCRATCH_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '(^|/)test(_.*)?\.(ts|js|cjs|mjs|py|php)$|(^|/)fix_.*\.(php|cjs|js|ts)$|(^|/)update_.*\.(php|cjs|js|ts)$|(^|/)scratch_.*|.*\.scratch$' || true)
+          # Filter out recognized test suite directories and only audit newly added non-test files
+          ADDED_FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD | grep -v -E '(^|/)(tests|__tests__|test)/' || true)
+          SCRATCH_FILES=$(echo "$ADDED_FILES" | grep -E '(^|/)test(_.*)?\.(ts|js|cjs|mjs|py|php|sh|bash)$|(^|/)fix_.*\.(php|cjs|js|ts|sh)$|(^|/)patch_.*\.(php|cjs|js|ts|py|sh|bash)$|(^|/)update_.*\.(php|cjs|js|ts|sh)$|(^|/)scratch_.*|.*\.scratch$|^plan\.md$' || true)
           if [ -n "$SCRATCH_FILES" ]; then
             echo "❌ ERROR: PR contains forbidden scratch verification files:"
             echo "$SCRATCH_FILES"
@@ -53,6 +55,14 @@ jobs:
               exit 1
             fi
           done
+
+          # 5. Reject Bot CI Workflow Tampering
+          CI_DIFF=$(git diff origin/${{ github.base_ref }}...HEAD -- .github/workflows/ | grep -E '\|\|\s*true|continue-on-error:\s*true' || true)
+          if [ -n "$CI_DIFF" ]; then
+            echo "❌ ERROR: Bot PR modifies .github/workflows to suppress errors ('|| true' or 'continue-on-error: true'). Auto-failing."
+            echo "$CI_DIFF"
+            exit 1
+          fi
 
           echo "✅ Basic Bot Diff Guardrail Passed."
 
