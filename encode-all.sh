@@ -157,17 +157,15 @@ parseFilename() {
         printf -v PARSED_EPISODE_NUM "%02d" "$(( 10#${episode_raw:-0} ))"
     fi
 
+    # ⚡ Bolt Optimization: Replace sequential space stripping with faster negated glob stripping
+    # Trims trailing space and hyphens in fewer native operations
     PARSED_SHOW_NAME="${show_raw//[._]/ }"
     PARSED_SHOW_NAME="${PARSED_SHOW_NAME#"${PARSED_SHOW_NAME%%[! ]*}"}"
-    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[! ]}"}"
-    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%" -"}"
-    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[! ]}"}"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[!._ -]}"}"
 
     PARSED_EPISODE_TITLE="${title_raw//[._]/ }"
     PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE#"${PARSED_EPISODE_TITLE%%[! ]*}"}"
-    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[! ]}"}"
-    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%" -"}"
-    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[! ]}"}"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[!._ -]}"}"
 
 
 

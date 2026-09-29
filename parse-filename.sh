@@ -93,15 +93,13 @@ parse_filename() {
 
     PARSED_EPISODE_TITLE="${title_raw//[._]/ }"
     PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE#"${PARSED_EPISODE_TITLE%%[! ]*}"}"
-    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[! ]}"}"
-    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%" -"}"
-    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[! ]}"}"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[!._ -]}"}"
 
+    # ⚡ Bolt Optimization: Replace sequential space stripping with faster negated glob stripping
+    # Trims trailing space and hyphens in fewer native operations
     PARSED_SHOW_NAME="${show_raw//[._]/ }"
     PARSED_SHOW_NAME="${PARSED_SHOW_NAME#"${PARSED_SHOW_NAME%%[! ]*}"}"
-    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[! ]}"}"
-    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%" -"}"
-    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[! ]}"}"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[!._ -]}"}"
 
 
     # ⚡ Bolt Optimization: Skip expensive JSON escaping and formatting if --no-json is passed.
