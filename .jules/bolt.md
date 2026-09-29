@@ -177,3 +177,7 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2026-08-31 - Safe Regex Branch Consolidation
 **Learning:** Evaluating complex regular expressions in bash (`[[ ... =~ ... ]]`) is a measurable bottleneck in tight loops. Having near-identical overlapping regex branches forces the engine to redundantly evaluate the long shared pattern multiple times. However, when consolidating branches, ensure you don't inadvertently introduce new patterns into files that didn't previously support them.
 **Action:** Consolidate redundant regex branches into a single evaluation block using an optional/combined capture (e.g. `([Ss]([0-9]{1,2}).*|([0-9]{4}).*)`), but only after carefully verifying the surrounding code context of the specific file handles the unified output properly.
+
+## 2024-11-27 - Guard expensive regex with string globbing
+**Learning:** Evaluating complex regular expressions in bash (`[[ ... =~ ... ]]`) is a measurable bottleneck in tight loops. If the regex looks for a digit (like a year or an episode number), we can drastically reduce processing time for non-matching files (like simple movie names) by first guarding the regex evaluation with a fast, native bash glob pattern (`[[ "$var" == *[0-9]* ]]`).
+**Action:** When auditing code for performance, actively look for and eliminate redundant regex engine overhead in hot paths by guarding them with simpler string globs if applicable.
