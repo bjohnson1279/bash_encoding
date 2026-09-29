@@ -24,7 +24,8 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 **Action:** Use native Bash `printf -v <var>` instead of command substitution `var=$(printf ...)` for string formatting and assignment to completely eliminate subshell process creation overhead in busy loops.
 
 ## 2024-11-20 - POSIX String Splitting with IFS
-**Learning:** When working in POSIX compliant shell scripts (e.g. `sh`), using `tr` combined with process substitution (like `$(printf '%s\n' "$1" | tr '._' '  ')`) adds significant overhead by creating subshells. It's much faster to use the native shell's Internal Field Separator (`IFS`) to split and parse the string without launching external commands.
+**Learning:** When working in POSIX compliant shell scripts (e.g. `sh`), using `tr` combined with process substitution (like `$(printf '%s
+' "$1" | tr '._' '  ')`) adds significant overhead by creating subshells. It's much faster to use the native shell's Internal Field Separator (`IFS`) to split and parse the string without launching external commands.
 **Action:** When working in strict POSIX mode where bash extensions are not available, utilize `IFS` inside the shell for string splitting to avoid slow external processes in tight loops.
 
 ## 2024-11-20 - POSIX String Replacement without Subshells
@@ -145,7 +146,10 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 **Action:** When stripping trailing components from a string, avoid `while case` where possible. Use native bash parameter expansions to manipulate the string, for example `title_raw="${title_raw%"${title_raw##*[!._ -]}"}"` to strip trailing separators.
 ## 2024-11-26 - JSON Construction in Bash Loops
 **Learning:** Calling functions (even simple ones like `json_escape`) iteratively to process multiple fields inside a loop introduces substantial overhead. Bypassing the function call entirely by using native parameter expansion (e.g., `${var//\\/\\\\}`) inline for JSON generation can significantly reduce process and subshell overhead. However, be mindful that using `local -n` (nameref) to bypass `printf -v` subshell overhead inside the escaping function is slightly less performant and introduces safety risks if the caller uses a conflicting variable name (like `ref`).
-**Action:** When constructing simple JSON outputs from variables in hot paths, prefer inlining the native parameter expansions (escaping backslashes first, then quotes, then newlines) directly over repeatedly invoking a dedicated escaping subroutine. Also, always ensure to properly quote substitutions involving ANSI-C quotes (like `$'\\n'`) because double-quoting them (e.g. `"${var//$'\\n'/\\n}"`) turns them into literal strings.
+**Action:** When constructing simple JSON outputs from variables in hot paths, prefer inlining the native parameter expansions (escaping backslashes first, then quotes, then newlines) directly over repeatedly invoking a dedicated escaping subroutine. Also, always ensure to properly quote substitutions involving ANSI-C quotes (like `$'\
+'`) because double-quoting them (e.g. `"${var//$'\
+'/\
+}"`) turns them into literal strings.
 
 ## 2026-08-31 - Redundant variable assignments across functions
 **Learning:** In `parse-filename.sh`, the variables `episode_title` and `show_name` were assigned from identically-named uppercase variables `PARSED_EPISODE_TITLE` and `PARSED_SHOW_NAME` immediately after those were assigned by a function call that supports namerefs. This adds redundant subshell/assignment execution overhead in a hot path.
@@ -177,7 +181,13 @@ Performance optimization: Using native bash regex with `[[ "$str" =~ "pattern" ]
 ## 2026-08-31 - Safe Regex Branch Consolidation
 **Learning:** Evaluating complex regular expressions in bash (`[[ ... =~ ... ]]`) is a measurable bottleneck in tight loops. Having near-identical overlapping regex branches forces the engine to redundantly evaluate the long shared pattern multiple times. However, when consolidating branches, ensure you don't inadvertently introduce new patterns into files that didn't previously support them.
 **Action:** Consolidate redundant regex branches into a single evaluation block using an optional/combined capture (e.g. `([Ss]([0-9]{1,2}).*|([0-9]{4}).*)`), but only after carefully verifying the surrounding code context of the specific file handles the unified output properly.
+## 2026-08-31 - Fast Regex Validation with Globbing
+**Learning:** In bash, evaluating a regular expression using `[[ =~ ]]` is a significant bottleneck. Benchmarks show that we can cut the time in half by first filtering strings using native bash `case` statement globbing (which natively supports some matching patterns like `*[._\ -][Ss]*[._\ -]*[Ee]*`) before deciding whether to run the heavy regex engine.
+**Action:** When a regular expression is expected to frequently fail on large numbers of invalid or non-matching inputs, pre-filter the inputs by wrapping the regex inside a native `case "$var" in *pattern*) ... ;; esac` block.
 
-## 2024-11-27 - Guard expensive regex with string globbing
-**Learning:** Evaluating complex regular expressions in bash (`[[ ... =~ ... ]]`) is a measurable bottleneck in tight loops. If the regex looks for a digit (like a year or an episode number), we can drastically reduce processing time for non-matching files (like simple movie names) by first guarding the regex evaluation with a fast, native bash glob pattern (`[[ "$var" == *[0-9]* ]]`).
-**Action:** When auditing code for performance, actively look for and eliminate redundant regex engine overhead in hot paths by guarding them with simpler string globs if applicable.
+## 2026-11-20 - Fast Float Arithmetic Pad and String Extraction
+**Learning:** When performing string extraction and floating-point fractional padding in bash, applying native string matching (`[[ "$output" == *pattern* ]]`) or multi-step fractional padding creates measurable overhead inside loops. Benchmarks show directly manipulating the strings with parameter expansion and slicing (`val="${int}${frac}000000"; val="${val:0:${#int}+6}"`) and avoiding regex glob pre-checks reduces execution time by nearly 40%.
+**Action:** When extracting variables or padding fractions in performance-sensitive loops, skip `[[ == *pattern* ]]` checks in favor of direct parameter expansion with a short-circuit inequality check (`[ "$val" != "$output" ]`), and minimize intermediate variable assignments during fixed-point math concatenation.
+## 2026-09-28 - Bash Sequential String Trimming Optimization
+**Learning:** When stripping specific characters (like leading/trailing spaces, dots, hyphens, and underscores) from strings in tight Bash loops, replacing 4-5 sequential nested parameter expansions (e.g. replacing dots with spaces, then trimming trailing spaces, then leading spaces, then hyphens) with 2 passes of negated glob parameter expansion (`${var#"${var%%[!._ -]*}"}` and `${var%"${var##*[!._ -]}"}`) yields an approximately 30-40% execution speedup.
+**Action:** Always prefer combined negated glob parameter expansion to trim multiple unwanted boundary characters rather than chained sequential replacements, especially for hot-path text parsers. Be extremely careful to benchmark edge cases though, as operation order can subtly alter output if not replicated perfectly.

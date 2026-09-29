@@ -24,14 +24,13 @@ getDuration() {
     # This halves process spawning overhead for files missing format duration (or returning N/A).
     output=$(ffprobe -v error -select_streams v:0 -show_entries format=duration:stream=duration -of flat -i "${1}" 2>/dev/null || true)
 
-    if [[ "$output" == *format.duration=\"* ]]; then
-        format_dur="${output#*format.duration=\"}"
-        format_dur="${format_dur%%\"*}"
-    fi
-    if [[ "$output" == *streams.stream.0.duration=\"* ]]; then
-        stream_dur="${output#*streams.stream.0.duration=\"}"
-        stream_dur="${stream_dur%%\"*}"
-    fi
+    # ⚡ Bolt Optimization: Consolidate parameter expansion for ffprobe duration extraction
+    format_dur="${output#*format.duration=\"}"
+    [ "$format_dur" != "$output" ] && format_dur="${format_dur%%\"*}" || format_dur=""
+
+    stream_dur="${output#*streams.stream.0.duration=\"}"
+    [ "$stream_dur" != "$output" ] && stream_dur="${stream_dur%%\"*}" || stream_dur=""
+
 
     if [ -n "$format_dur" ] && [ "$format_dur" != "N/A" ]; then
         dur="$format_dur"
@@ -93,43 +92,41 @@ parseFilename() {
     # The previous logic had two near-identical regex branches for "Show Name (Year) S01E02..."
     # which we've combined. We handle stripping the trailing date manually below.
     # 1. Try to match: Show Name (Year) S01E02 Title...
-    if [[ "$base_name" == *[0-9]* ]]; then
-        if [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
-            show_raw="${BASH_REMATCH[1]}"
-            season_raw="${BASH_REMATCH[2]}"
-            episode_raw="${BASH_REMATCH[3]}"
-            title_raw="${BASH_REMATCH[4]}"
+    if [[ "$base_name" == *[0-9]* ]] && [[ "$base_name" =~ ^(.*)[._\ -][Ss]([0-9]{1,2})[._\ -]*[Ee]([0-9]{1,2})[._\ -]*(.*)$ ]]; then
+        show_raw="${BASH_REMATCH[1]}"
+        season_raw="${BASH_REMATCH[2]}"
+        episode_raw="${BASH_REMATCH[3]}"
+        title_raw="${BASH_REMATCH[4]}"
 
-            case "$show_raw" in
-                *\([0-9][0-9][0-9][0-9]\)*)
-                    year_raw="${show_raw##*\(}"
-                    year_raw="${year_raw%%\)*}"
-                    show_raw="${show_raw%\ (*}"
-                    ;;
-                *)
-                    year_raw=""
-                    ;;
-            esac
-            # ⚡ Bolt Optimization: Replace slow bash regex engine with native case statement globbing.
-            # This executes significantly faster in busy loops and natively handles trailing date removal.
-            case "$title_raw" in
-                \([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*\))
-                    # The title was just the date, effectively no title
-                    title_raw=""
-                    ;;
-                *\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*\))
-                    # Parameter expansion to remove the date
-                    title_raw="${title_raw%\(*}"
-                    # Strip trailing separators
-                    # ⚡ Bolt Optimization: Replace loop with native parameter expansion for stripping trailing characters
-                    title_raw="${title_raw%"${title_raw##*[!._ -]}"}"
-                    ;;
-            esac
-        # 4. Try to match: Movie Name (Year)
-        elif [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)$ ]]; then
-            show_raw="${BASH_REMATCH[1]}"
-            year_raw="${BASH_REMATCH[2]}"
-        fi
+        case "$show_raw" in
+            *\([0-9][0-9][0-9][0-9]\)*)
+                year_raw="${show_raw##*\(}"
+                year_raw="${year_raw%%\)*}"
+                show_raw="${show_raw%\ (*}"
+                ;;
+            *)
+                year_raw=""
+                ;;
+        esac
+        # ⚡ Bolt Optimization: Replace slow bash regex engine with native case statement globbing.
+        # This executes significantly faster in busy loops and natively handles trailing date removal.
+        case "$title_raw" in
+            \([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*\))
+                # The title was just the date, effectively no title
+                title_raw=""
+                ;;
+            *\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*\))
+                # Parameter expansion to remove the date
+                title_raw="${title_raw%\(*}"
+                # Strip trailing separators
+                # ⚡ Bolt Optimization: Replace loop with native parameter expansion for stripping trailing characters
+                title_raw="${title_raw%"${title_raw##*[!._ -]}"}"
+                ;;
+        esac
+    # 4. Try to match: Movie Name (Year)
+    elif [[ "$base_name" == *[0-9]* ]] && [[ "$base_name" =~ ^(.*)\ \(([0-9]{4})\)$ ]]; then
+        show_raw="${BASH_REMATCH[1]}"
+        year_raw="${BASH_REMATCH[2]}"
     fi
 
     # Formatting season / episode
@@ -145,17 +142,15 @@ parseFilename() {
         printf -v PARSED_EPISODE_NUM "%02d" "$(( 10#${episode_raw:-0} ))"
     fi
 
+    # ⚡ Bolt Optimization: Replace sequential space stripping with faster negated glob stripping
+    # Trims trailing space and hyphens in fewer native operations
     PARSED_SHOW_NAME="${show_raw//[._]/ }"
     PARSED_SHOW_NAME="${PARSED_SHOW_NAME#"${PARSED_SHOW_NAME%%[! ]*}"}"
-    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[! ]}"}"
-    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%" -"}"
-    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[! ]}"}"
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[!._ -]}"}"
 
     PARSED_EPISODE_TITLE="${title_raw//[._]/ }"
     PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE#"${PARSED_EPISODE_TITLE%%[! ]*}"}"
-    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[! ]}"}"
-    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%" -"}"
-    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[! ]}"}"
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[!._ -]}"}"
 
 
 
@@ -307,24 +302,16 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
             # ⚡ Bolt Optimization: Replace subshells spawning `bc` with native bash fixed-point math.
             # This avoids expensive process forks, significantly speeding up the duration matching logic.
 
-            # Extract fractional parts and pad to 6 decimal places
-            src_frac="${src_duration#*.}"
-            [ "$src_frac" = "$src_duration" ] && src_frac=""
-            src_frac="${src_frac}000000"
-            src_frac="${src_frac:0:6}"
-
-            dest_frac="${dest_duration#*.}"
-            [ "$dest_frac" = "$dest_duration" ] && dest_frac=""
-            dest_frac="${dest_frac}000000"
-            dest_frac="${dest_frac:0:6}"
-
-            # Extract integer parts
+            # Fast fractional padding to 6 decimal places and integer extraction inline
             src_int="${src_duration%.*}"
-            dest_int="${dest_duration%.*}"
+            src_val="${src_int}000000"
+            [ "${src_duration#*.}" != "$src_duration" ] && src_val="${src_int}${src_duration#*.}000000"
+            src_val="${src_val:0:${#src_int}+6}"
 
-            # Concatenate for fixed-point representation
-            src_val="$src_int$src_frac"
-            dest_val="$dest_int$dest_frac"
+            dest_int="${dest_duration%.*}"
+            dest_val="${dest_int}000000"
+            [ "${dest_duration#*.}" != "$dest_duration" ] && dest_val="${dest_int}${dest_duration#*.}000000"
+            dest_val="${dest_val:0:${#dest_int}+6}"
 
             # Calculate absolute difference
             # ⚡ Bolt Optimization: Use 10# to force base-10 instead of stripping leading zeros using string operations
@@ -332,9 +319,9 @@ for ts_file in "$RECORDING_PATH"/**/*.ts; do
             duration_diff="${duration_diff#-}"
 
             # Compare difference (< 1000000 is < 1.0)
-            if [ "$duration_diff" -lt 1000000 ]; then
+            if [ -n "$duration_diff" ] && [ "$duration_diff" -lt 1000000 ] 2>/dev/null; then
                 printf '%s\n' "Encoding successful. Durations match."
-                if [ "$DEL_ORIG" -eq 1 ]; then
+                if [ -n "$DEL_ORIG" ] && [ "$DEL_ORIG" -eq 1 ] 2>/dev/null; then
                     printf "Deleting original file: %s\n" "$ts_file"
                     rm -- "$ts_file"
                 fi
