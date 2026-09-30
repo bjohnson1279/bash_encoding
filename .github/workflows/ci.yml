@@ -1,0 +1,53 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint & Bats Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for Merge Conflict Markers
+        run: |
+          echo "=== Checking for unresolved merge conflict markers ==="
+          CONFLICTS=$(git grep -I -E '^[<]{7}( .*|$)|^[=]{7}$|^[>]{7}( .*|$)' || true)
+          if [ -n "$CONFLICTS" ]; then
+            echo "❌ Unresolved merge conflict markers detected:"
+            echo "$CONFLICTS"
+            exit 1
+          fi
+          echo "✓ No merge conflict markers found."
+
+      - name: Install Test Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats jq ffmpeg
+
+      - name: Validate Bash Script Syntax
+        run: |
+          echo "=== Validating Bash Syntax ==="
+          for file in *.sh; do
+            [ -f "$file" ] || continue
+            bash -n "$file"
+          done
+          echo "✓ All bash scripts passed syntax validation."
+
+      - name: Run Parse Filename Test Harness
+        run: |
+          bash test_parse_filename.sh
+
+      - name: Run Bats Test Suites
+        run: |
+          bats test_*.bats
