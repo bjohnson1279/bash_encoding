@@ -16,7 +16,7 @@ if [ -z "${BATS_VERSION:-}" ]; then
     clear
 
     # Dependency check
-    for cmd in rsync awk df du mount.cifs; do
+    for cmd in rsync df du mount.cifs; do
         # For mount.cifs, it might not be in the standard PATH for non-root users, so check /sbin explicitly
         if ! command -v "$cmd" >/dev/null 2>&1 && [ ! -x "/sbin/$cmd" ] && [ ! -x "/usr/sbin/$cmd" ]; then
             printf '%s\n' "Error: Required command '$cmd' is not installed." >&2
@@ -157,7 +157,10 @@ folder_sync() {
 
     printf "Starting copy from '%s' to '%s'...\n" "$src_folder" "$RECORDING_PATH"
     # 🛡️ Sentinel: Avoid -a (archive) flag to prevent preserving malicious device files (-D) or suid bits (-p) from network shares
-    rsync -rltvzh --progress -- "$src_folder/" "$RECORDING_PATH"
+    # ⚡ Bolt Optimization: Removed -z (compression) from rsync.
+    # Video files are already highly compressed, and network speeds usually outpace CPU compression.
+    # Zipping incompressible video files creates a severe CPU bottleneck, slowing down transfer rates significantly.
+    rsync -rltvh --progress -- "$src_folder/" "$RECORDING_PATH"
     printf '%s\n' "Copy complete."
 }
 
