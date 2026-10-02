@@ -157,7 +157,8 @@ folder_sync() {
 
     printf "Starting copy from '%s' to '%s'...\n" "$src_folder" "$RECORDING_PATH"
     # 🛡️ Sentinel: Avoid -a (archive) flag to prevent preserving malicious device files (-D) or suid bits (-p) from network shares
-    rsync -rltvzh --progress -- "$src_folder/" "$RECORDING_PATH"
+    # ⚡ Bolt Optimization: Removed -z (compression) flag to eliminate massive CPU bottleneck when transferring already-compressed media files over local networks
+    rsync -rltvh --progress -- "$src_folder/" "$RECORDING_PATH"
     printf '%s\n' "Copy complete."
 }
 
