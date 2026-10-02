@@ -1,0 +1,5 @@
+# Enforce LF line endings for all text files and especially shell scripts
+* text=auto eol=lf
+*.sh text eol=lf
+*.bats text eol=lf
+*.md text eol=lf

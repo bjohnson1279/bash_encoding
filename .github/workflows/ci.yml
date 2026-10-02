@@ -40,6 +40,7 @@ jobs:
           echo "=== Validating Bash Syntax ==="
           for file in *.sh; do
             [ -f "$file" ] || continue
+            sed -i 's/\r$//' "$file"
             bash -n "$file"
           done
           echo "✓ All bash scripts passed syntax validation."
