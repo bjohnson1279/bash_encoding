@@ -205,3 +205,7 @@ Ensure `case` statement branches always terminate properly with `;;` when they d
 ## 2026-09-29 - Non-Destructive Security Patching & CI Protection
 **Learning:** Security patches must never weaken CI workflow files (`.github/workflows/**`) by appending `|| true` or `continue-on-error: true` to suppress test/build failures. Furthermore, when adding defensive type assertions or input validators in TypeScript, omitting explicit types can introduce `TS7006: Parameter implicitly has an 'any' type`.
 **Action:** Never modify CI workflow definitions to bypass test failures; resolve the underlying issue in source code or test fixtures. Always provide explicit types on newly introduced parameters and helper functions. Ensure zero scratch scripts (`fix_*.php`, `test_*.js`) are committed.
+## 2026-11-05 - Sanitize Control Characters to Prevent JSON Injection (CWE-74)
+**Vulnerability:** Raw file paths containing unescaped ASCII control characters (such as newlines or carriage returns) could corrupt JSON serialization in encode-all.sh and parse-filename.sh, leading to malformed JSON payloads and potential injection vulnerabilities.
+**Learning:** Shell-based string interpolations into JSON templates require strict stripping of control characters or comprehensive escape sequences.
+**Action:** Use native bash parameter expansions `${VAR//[[:cntrl:]]/}` on parsed show and episode names before embedding them in JSON output payloads.

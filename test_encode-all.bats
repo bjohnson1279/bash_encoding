@@ -133,9 +133,9 @@ teardown() {
     episode=$(printf '%s\n' "$result" | jq -r '.episode')
     title=$(printf '%s\n' "$result" | jq -r '.title')
     premiered=$(printf '%s\n' "$result" | jq -r '.premiered')
-    [ "$show" = $'Show With Newline' ]
+    [ "$show" = 'Show With Newline' ]
     [ "$season" = "01" ]
     [ "$episode" = "02" ]
-    [ "$title" = $'Title\nNewline' ]
+    [ "$title" = 'TitleNewline' ]
     [ "$premiered" = "2023" ]
 }
