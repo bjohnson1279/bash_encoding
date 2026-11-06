@@ -162,10 +162,14 @@ parseFilename() {
     PARSED_SHOW_NAME="${show_raw//[._]/ }"
     PARSED_SHOW_NAME="${PARSED_SHOW_NAME#"${PARSED_SHOW_NAME%%[! ]*}"}"
     PARSED_SHOW_NAME="${PARSED_SHOW_NAME%"${PARSED_SHOW_NAME##*[!._ -]}"}"
+    # 🛡️ Sentinel: Sanitize control characters to prevent JSON corruption and injection
+    PARSED_SHOW_NAME="${PARSED_SHOW_NAME//[[:cntrl:]]/}"
 
     PARSED_EPISODE_TITLE="${title_raw//[._]/ }"
     PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE#"${PARSED_EPISODE_TITLE%%[! ]*}"}"
     PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE%"${PARSED_EPISODE_TITLE##*[!._ -]}"}"
+    # 🛡️ Sentinel: Sanitize control characters to prevent JSON corruption and injection
+    PARSED_EPISODE_TITLE="${PARSED_EPISODE_TITLE//[[:cntrl:]]/}"
 
 
 
